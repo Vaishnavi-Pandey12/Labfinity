@@ -1,0 +1,252 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glass-beaker {
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 20%,
+      rgba(255, 255, 255, 0.05) 80%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    box-shadow: 
+      inset 0 0 20px rgba(255, 255, 255, 0.1),
+      0 0 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .glass-rim {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(255, 255, 255, 0.2) 100%
+    );
+  }
+
+  .liquid-surface {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.4) 0%,
+      transparent 100%
+    );
+  }
+}
+
+/* Labfinity Design System - Scientific Virtual Lab Theme */
+
+@layer base {
+  :root {
+    --background: 210 25% 97%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 217 91% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 173 58% 39%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 20% 93%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 263 70% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 50%;
+
+    --radius: 0.75rem;
+
+    /* Labfinity Custom Tokens */
+    --lab-gradient: linear-gradient(135deg, hsl(217 91% 50%) 0%, hsl(263 70% 50%) 50%, hsl(173 58% 39%) 100%);
+    --lab-gradient-subtle: linear-gradient(135deg, hsl(217 91% 50% / 0.1) 0%, hsl(263 70% 50% / 0.1) 50%, hsl(173 58% 39% / 0.1) 100%);
+    --glass-bg: hsl(0 0% 100% / 0.8);
+    --glass-border: hsl(0 0% 100% / 0.5);
+    --shadow-glow: 0 0 60px hsl(217 91% 50% / 0.15);
+    --shadow-card: 0 4px 24px hsl(217 91% 50% / 0.08);
+    --shadow-elevated: 0 8px 40px hsl(217 91% 50% / 0.12);
+
+    /* Chemistry-specific colors */
+    --chem-blue: 217 91% 50%;
+    --chem-purple: 263 70% 50%;
+    --chem-teal: 173 58% 39%;
+    --chem-orange: 25 95% 53%;
+    --chem-pink: 330 80% 60%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 217 91% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 91% 50%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 91% 60%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 173 58% 45%;
+    --secondary-foreground: 222 47% 6%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 263 70% 60%;
+    --accent-foreground: 222 47% 6%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
+
+    --glass-bg: hsl(222 47% 8% / 0.8);
+    --glass-border: hsl(0 0% 100% / 0.1);
+    --shadow-glow: 0 0 60px hsl(217 91% 60% / 0.2);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 8px 40px hsl(0 0% 0% / 0.4);
+
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .lab-gradient-bg {
+    background: var(--lab-gradient);
+  }
+
+  .lab-gradient-text {
+    background: var(--lab-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Animated background particles */
+  .particles-bg {
+    background-image: 
+      radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(var(--accent) / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, hsl(var(--secondary) / 0.08) 0%, transparent 40%);
+  }
+
+  /* Lab equipment glow */
+  .equipment-glow {
+    filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.4));
+  }
+
+  /* Liquid animation */
+  @keyframes liquid-wave {
+    0%, 100% {
+      transform: translateX(0) translateY(0);
+    }
+    50% {
+      transform: translateX(-5px) translateY(-3px);
+    }
+  }
+
+  .animate-liquid {
+    animation: liquid-wave 3s ease-in-out infinite;
+  }
+
+  /* Light beam animation */
+  @keyframes light-pulse {
+    0%, 100% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .animate-light-pulse {
+    animation: light-pulse 2s ease-in-out infinite;
+  }
+
+  /* Bubbles animation */
+  @keyframes bubble-rise {
+    0% {
+      transform: translateY(100%) scale(0.5);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-20%) scale(1);
+      opacity: 0;
+    }
+  }
+
+  .animate-bubble {
+    animation: bubble-rise 4s ease-out infinite;
+  }
+}
