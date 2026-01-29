@@ -4,9 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+<<<<<<< HEAD
 import {
   Play,
   RotateCcw,
+=======
+import { 
+  Play, 
+  RotateCcw, 
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
   Lock,
   Unlock,
   Lightbulb,
@@ -27,6 +33,7 @@ interface WavelengthDataPoint {
   absorbance: number;
 }
 
+<<<<<<< HEAD
 // Keep metadata for UI, remove calculation constants (lambdaMax, epsilon) if not needed for display
 // But display needs lambdaMax. We can keep it or fetch it. Keeping for simplicity/display.
 const solutionData: Record<Solution, { lambdaMax: number; color: string; name: string }> = {
@@ -38,6 +45,43 @@ const solutionData: Record<Solution, { lambdaMax: number; color: string; name: s
 };
 
 import { useQuery } from "@tanstack/react-query";
+=======
+// Molar absorptivity and λmax for different solutions
+const solutionData: Record<Solution, { lambdaMax: number; epsilon: number; color: string; name: string }> = {
+  KMnO4: { lambdaMax: 525, epsilon: 2400, color: "#9b2d9b", name: "Potassium Permanganate" },
+  CuSO4: { lambdaMax: 800, epsilon: 12, color: "#2196F3", name: "Copper Sulfate" },
+  NiSO4: { lambdaMax: 394, epsilon: 5, color: "#4CAF50", name: "Nickel Sulfate" },
+  CrystalViolet: { lambdaMax: 590, epsilon: 87000, color: "#7B1FA2", name: "Crystal Violet" },
+  MethyleneBlue: { lambdaMax: 664, epsilon: 95000, color: "#0D47A1", name: "Methylene Blue" },
+};
+
+// Generate absorption spectrum for a solution
+const generateSpectrum = (solution: Solution, concentration: number): WavelengthDataPoint[] => {
+  const { lambdaMax, epsilon } = solutionData[solution];
+  const pathLength = 1; // 1 cm
+  const points: WavelengthDataPoint[] = [];
+  
+  for (let wavelength = 400; wavelength <= 700; wavelength += 10) {
+    // Gaussian distribution around λmax
+    const sigma = 40;
+    const absorbanceMax = epsilon * pathLength * concentration * 0.001;
+    const absorbance = absorbanceMax * Math.exp(-Math.pow(wavelength - lambdaMax, 2) / (2 * sigma * sigma));
+    points.push({ wavelength, absorbance: Math.min(absorbance, 2.5) });
+  }
+  
+  return points;
+};
+
+// Calculate absorbance using Beer-Lambert Law
+const calculateAbsorbance = (solution: Solution, concentration: number, wavelength: number): number => {
+  const { lambdaMax, epsilon } = solutionData[solution];
+  const pathLength = 1; // 1 cm
+  const sigma = 40;
+  const absorbanceMax = epsilon * pathLength * concentration * 0.001;
+  const absorbance = absorbanceMax * Math.exp(-Math.pow(wavelength - lambdaMax, 2) / (2 * sigma * sigma));
+  return Math.min(absorbance, 2.5);
+};
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
 
 const ColorimetrySimulator = () => {
   const [solution, setSolution] = useState<Solution>("KMnO4");
@@ -46,10 +90,15 @@ const ColorimetrySimulator = () => {
   const [isWavelengthLocked, setIsWavelengthLocked] = useState(false);
   const [isLightOn, setIsLightOn] = useState(false);
   const [absorbance, setAbsorbance] = useState(0);
+<<<<<<< HEAD
+=======
+  const [spectrumData, setSpectrumData] = useState<WavelengthDataPoint[]>([]);
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
   const [calibrationData, setCalibrationData] = useState<DataPoint[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [step, setStep] = useState(1);
 
+<<<<<<< HEAD
   // Fetch Spectrum
   const { data: spectrumData = [] } = useQuery({
     queryKey: ['spectrum', solution, concentration],
@@ -93,6 +142,22 @@ const ColorimetrySimulator = () => {
       setAbsorbance(0);
     }
   }, [absorbanceData, isLightOn]);
+=======
+  // Update spectrum when solution changes
+  useEffect(() => {
+    setSpectrumData(generateSpectrum(solution, concentration));
+    setWavelength(solutionData[solution].lambdaMax);
+  }, [solution]);
+
+  // Calculate absorbance when parameters change
+  useEffect(() => {
+    if (isLightOn) {
+      const newAbsorbance = calculateAbsorbance(solution, concentration, wavelength);
+      setAbsorbance(newAbsorbance);
+      setSpectrumData(generateSpectrum(solution, concentration));
+    }
+  }, [wavelength, concentration, solution, isLightOn]);
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
 
   const startMeasurement = useCallback(() => {
     setIsLightOn(true);
@@ -106,7 +171,11 @@ const ColorimetrySimulator = () => {
     }
     const newPoint: DataPoint = {
       concentration,
+<<<<<<< HEAD
       absorbance: absorbance, // Use calculated state from API
+=======
+      absorbance: calculateAbsorbance(solution, concentration, wavelength),
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
     };
     setCalibrationData(prev => [...prev, newPoint].sort((a, b) => a.concentration - b.concentration));
   }, [concentration, solution, wavelength, isWavelengthLocked]);
@@ -158,8 +227,13 @@ const ColorimetrySimulator = () => {
             {/* Solution Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Select Solution</label>
+<<<<<<< HEAD
               <Select
                 value={solution}
+=======
+              <Select 
+                value={solution} 
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
                 onValueChange={(v) => setSolution(v as Solution)}
                 disabled={isWavelengthLocked}
               >
@@ -170,8 +244,13 @@ const ColorimetrySimulator = () => {
                   {Object.entries(solutionData).map(([key, data]) => (
                     <SelectItem key={key} value={key}>
                       <div className="flex items-center gap-2">
+<<<<<<< HEAD
                         <div
                           className="w-4 h-4 rounded-full"
+=======
+                        <div 
+                          className="w-4 h-4 rounded-full" 
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
                           style={{ backgroundColor: data.color }}
                         />
                         {data.name}
@@ -204,13 +283,21 @@ const ColorimetrySimulator = () => {
                   </Button>
                 </div>
               </div>
+<<<<<<< HEAD
               <div
+=======
+              <div 
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
                 className="h-3 rounded-full relative overflow-hidden"
                 style={{
                   background: 'linear-gradient(to right, #8B00FF, #0000FF, #00FFFF, #00FF00, #FFFF00, #FF7F00, #FF0000)',
                 }}
               >
+<<<<<<< HEAD
                 <div
+=======
+                <div 
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
                   className="absolute top-0 h-full w-1 bg-foreground rounded"
                   style={{ left: `${((wavelength - 400) / 300) * 100}%` }}
                 />

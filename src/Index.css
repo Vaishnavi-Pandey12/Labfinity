@@ -6,6 +6,7 @@
 @tailwind components;
 @tailwind utilities;
 
+<<<<<<< HEAD
 @layer utilities {
   .glass-beaker {
     background: linear-gradient(
@@ -37,6 +38,8 @@
   }
 }
 
+=======
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
 /* Labfinity Design System - Scientific Virtual Lab Theme */
 
 @layer base {

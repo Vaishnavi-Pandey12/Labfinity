@@ -3,9 +3,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+<<<<<<< HEAD
 import {
   Play,
   RotateCcw,
+=======
+import { 
+  Play, 
+  RotateCcw, 
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
   Zap,
   Battery
 } from "lucide-react";
@@ -17,12 +23,22 @@ interface DataPoint {
 }
 
 // Calculate EMF using Nernst equation
+<<<<<<< HEAD
 import { useQuery } from "@tanstack/react-query";
 
 interface DataPoint {
   logRatio: number;
   emf: number;
 }
+=======
+const calculateEMF = (znConc: number, cuConc: number): number => {
+  const E0 = 1.10; // Standard EMF for Daniell cell
+  const n = 2; // Number of electrons transferred
+  const ratio = znConc / cuConc;
+  const emf = E0 - (0.0591 / n) * Math.log10(ratio);
+  return Math.max(0, Math.min(1.5, emf));
+};
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
 
 const ElectrochemistrySimulator = () => {
   const [znConcentration, setZnConcentration] = useState(1.0);
@@ -33,6 +49,7 @@ const ElectrochemistrySimulator = () => {
   const [showResult, setShowResult] = useState(false);
   const [electronFlow, setElectronFlow] = useState(false);
 
+<<<<<<< HEAD
   const { data: emfData } = useQuery({
     queryKey: ['emf', znConcentration, cuConcentration],
     queryFn: async () => {
@@ -53,6 +70,14 @@ const ElectrochemistrySimulator = () => {
       setEmf(emfData.emf);
     }
   }, [emfData, isConnected]);
+=======
+  useEffect(() => {
+    if (isConnected) {
+      const newEmf = calculateEMF(znConcentration, cuConcentration);
+      setEmf(newEmf);
+    }
+  }, [znConcentration, cuConcentration, isConnected]);
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
 
   const connectCell = useCallback(() => {
     setIsConnected(true);
@@ -60,6 +85,7 @@ const ElectrochemistrySimulator = () => {
     setElectronFlow(true);
   }, []);
 
+<<<<<<< HEAD
   const addDataPoint = useCallback(async () => {
     // We already have the EMF from the query, but for consistency in the data point
     // we could fetch again or just use current state. Using current state for UI responsiveness.
@@ -72,6 +98,11 @@ const ElectrochemistrySimulator = () => {
     // Using the current EMF state which comes from the API
     const currentEmf = emf;
 
+=======
+  const addDataPoint = useCallback(() => {
+    const logRatio = Math.log10(znConcentration / cuConcentration);
+    const currentEmf = calculateEMF(znConcentration, cuConcentration);
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
     const newPoint: DataPoint = { logRatio, emf: currentEmf };
     setDataPoints(prev => [...prev, newPoint].sort((a, b) => a.logRatio - b.logRatio));
   }, [znConcentration, cuConcentration]);
@@ -185,6 +216,7 @@ const ElectrochemistrySimulator = () => {
         </Card>
 
         {/* Cell Visualization */}
+<<<<<<< HEAD
         {/* Daniell Cell Visualization - High Fidelity */}
         <div className="relative h-[380px] w-full max-w-[500px] mx-auto mt-8">
 
@@ -342,6 +374,125 @@ const ElectrochemistrySimulator = () => {
           </div>
 
         </div>
+=======
+        <Card className="glass-card border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 font-display">
+              <Battery className="w-5 h-5 text-primary" />
+              Daniell Cell
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative h-80 bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden">
+              {/* Voltmeter */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-14 bg-card border-2 border-border rounded-lg flex flex-col items-center justify-center">
+                <span className="text-xs text-muted-foreground">Voltmeter</span>
+                <span className="text-lg font-mono font-bold text-primary">
+                  {isConnected ? `${emf.toFixed(2)} V` : "0.00 V"}
+                </span>
+              </div>
+
+              {/* Wires */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                {/* Left wire (Zn) */}
+                <path
+                  d="M 80 220 L 80 80 L 145 80 L 145 50"
+                  fill="none"
+                  stroke={isConnected ? "#ef4444" : "#666"}
+                  strokeWidth="3"
+                />
+                {/* Right wire (Cu) */}
+                <path
+                  d="M 280 220 L 280 80 L 215 80 L 215 50"
+                  fill="none"
+                  stroke={isConnected ? "#3b82f6" : "#666"}
+                  strokeWidth="3"
+                />
+                
+                {/* Electron flow animation */}
+                {electronFlow && (
+                  <>
+                    <circle r="4" fill="#fbbf24">
+                      <animateMotion
+                        dur="2s"
+                        repeatCount="indefinite"
+                        path="M 80 220 L 80 80 L 145 80 L 145 50"
+                      />
+                    </circle>
+                    <circle r="4" fill="#fbbf24">
+                      <animateMotion
+                        dur="2s"
+                        repeatCount="indefinite"
+                        path="M 215 50 L 215 80 L 280 80 L 280 220"
+                      />
+                    </circle>
+                  </>
+                )}
+              </svg>
+
+              {/* Zinc Half-Cell */}
+              <div className="absolute left-4 bottom-4 w-32">
+                <div className="relative">
+                  {/* Beaker */}
+                  <div 
+                    className="w-full h-40 rounded-b-2xl border-4 border-t-0 border-gray-400 overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(156, 163, 175, 0.3) 20%)' }}
+                  >
+                    {/* Solution */}
+                    <motion.div
+                      className="absolute bottom-0 left-0 right-0 bg-gray-300/50"
+                      style={{ height: '75%' }}
+                      animate={isConnected ? { opacity: [0.5, 0.7, 0.5] } : {}}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    
+                    {/* Zinc electrode */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-28 bg-gradient-to-b from-gray-500 to-gray-400 rounded-b" />
+                  </div>
+                  <p className="text-center text-sm mt-2 font-medium">Zn | ZnSO₄</p>
+                  <p className="text-center text-xs text-muted-foreground">{znConcentration.toFixed(2)} M</p>
+                  <p className="text-center text-xs text-red-500 font-semibold">Anode (-)</p>
+                </div>
+              </div>
+
+              {/* Salt Bridge */}
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-24">
+                <motion.div
+                  className="w-24 h-8 bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 rounded-full border-2 border-amber-300"
+                  animate={isConnected ? { scale: [1, 1.02, 1] } : {}}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+                <p className="text-center text-xs text-muted-foreground mt-1">Salt Bridge</p>
+              </div>
+
+              {/* Copper Half-Cell */}
+              <div className="absolute right-4 bottom-4 w-32">
+                <div className="relative">
+                  {/* Beaker */}
+                  <div 
+                    className="w-full h-40 rounded-b-2xl border-4 border-t-0 border-gray-400 overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(59, 130, 246, 0.2) 20%)' }}
+                  >
+                    {/* Solution */}
+                    <motion.div
+                      className="absolute bottom-0 left-0 right-0 bg-blue-400/40"
+                      style={{ height: '75%' }}
+                      animate={isConnected ? { opacity: [0.4, 0.6, 0.4] } : {}}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    
+                    {/* Copper electrode */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-28 bg-gradient-to-b from-orange-600 to-orange-500 rounded-b" />
+                  </div>
+                  <p className="text-center text-sm mt-2 font-medium">CuSO₄ | Cu</p>
+                  <p className="text-center text-xs text-muted-foreground">{cuConcentration.toFixed(2)} M</p>
+                  <p className="text-center text-xs text-blue-500 font-semibold">Cathode (+)</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
       </div>
 
       {/* EMF vs log([Zn2+]/[Cu2+]) Graph */}
