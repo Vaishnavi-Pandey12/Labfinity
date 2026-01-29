@@ -119,3 +119,7 @@ const Experiment2 = () => {
 };
 
 export default Experiment2;
+<<<<<<< HEAD
+
+=======
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6

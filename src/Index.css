@@ -6,6 +6,40 @@
 @tailwind components;
 @tailwind utilities;
 
+<<<<<<< HEAD
+@layer utilities {
+  .glass-beaker {
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 20%,
+      rgba(255, 255, 255, 0.05) 80%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    box-shadow: 
+      inset 0 0 20px rgba(255, 255, 255, 0.1),
+      0 0 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .glass-rim {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(255, 255, 255, 0.2) 100%
+    );
+  }
+
+  .liquid-surface {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.4) 0%,
+      transparent 100%
+    );
+  }
+}
+
+=======
+>>>>>>> b199b312ad07d7bdf065820936c52dafd40f76d6
 /* Labfinity Design System - Scientific Virtual Lab Theme */
 
 @layer base {
