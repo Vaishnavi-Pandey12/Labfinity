@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { 
-  Play, 
-  RotateCcw, 
+import {
+  Play,
+  RotateCcw,
   Zap,
   Battery
 } from "lucide-react";
@@ -162,6 +162,7 @@ const ElectrochemistrySimulator = () => {
           </CardContent>
         </Card>
 
+        {/* SVG Based Visualization for Perfect Alignment */}
         {/* Cell Visualization */}
         <Card className="glass-card border-0">
           <CardHeader>
@@ -171,112 +172,234 @@ const ElectrochemistrySimulator = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative h-80 bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden">
-              {/* Voltmeter */}
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-14 bg-card border-2 border-border rounded-lg flex flex-col items-center justify-center">
-                <span className="text-xs text-muted-foreground">Voltmeter</span>
-                <span className="text-lg font-mono font-bold text-primary">
-                  {isConnected ? `${emf.toFixed(2)} V` : "0.00 V"}
-                </span>
-              </div>
+            <div className="relative w-full aspect-[16/10] bg-white rounded-xl overflow-hidden border border-slate-200">
+              <svg
+                viewBox="0 0 800 500"
+                className="w-full h-full"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <defs>
+                  {/* Glass Gradients */}
+                  <linearGradient id="glass-surface" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="white" stopOpacity="0.1" />
+                    <stop offset="20%" stopColor="white" stopOpacity="0.4" />
+                    <stop offset="50%" stopColor="white" stopOpacity="0.1" />
+                    <stop offset="80%" stopColor="white" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="white" stopOpacity="0.1" />
+                  </linearGradient>
 
-              {/* Wires */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                {/* Left wire (Zn) */}
-                <path
-                  d="M 80 220 L 80 80 L 145 80 L 145 50"
-                  fill="none"
-                  stroke={isConnected ? "#ef4444" : "#666"}
-                  strokeWidth="3"
-                />
-                {/* Right wire (Cu) */}
-                <path
-                  d="M 280 220 L 280 80 L 215 80 L 215 50"
-                  fill="none"
-                  stroke={isConnected ? "#3b82f6" : "#666"}
-                  strokeWidth="3"
-                />
-                
-                {/* Electron flow animation */}
-                {electronFlow && (
-                  <>
-                    <circle r="4" fill="#fbbf24">
+                  {/* Liquid Gradients - Dynamic Opacity */}
+                  <linearGradient id="zn-liquid" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#f1f5f9" stopOpacity={0.4 + (znConcentration * 0.1)} />
+                    <stop offset="100%" stopColor="#e2e8f0" stopOpacity={0.7 + (znConcentration * 0.1)} />
+                  </linearGradient>
+
+                  <linearGradient id="cu-liquid" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.3 + (cuConcentration * 0.2)} />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.6 + (cuConcentration * 0.2)} />
+                  </linearGradient>
+
+                  {/* Electrode Gradients */}
+                  <linearGradient id="zn-metal" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#374151" />
+                    <stop offset="50%" stopColor="#4b5563" />
+                    <stop offset="100%" stopColor="#1f2937" />
+                  </linearGradient>
+
+                  <linearGradient id="cu-metal" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#ea580c" />
+                    <stop offset="50%" stopColor="#f97316" />
+                    <stop offset="100%" stopColor="#c2410c" />
+                  </linearGradient>
+
+                  {/* Salt Bridge Gradient */}
+                  <linearGradient id="salt-bridge-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#fef3c7" />
+                    <stop offset="100%" stopColor="#fde68a" />
+                  </linearGradient>
+
+                  <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                    <feOffset dx="1" dy="2" result="offsetblur" />
+                    <feComponentTransfer>
+                      <feFuncA type="linear" slope="0.3" />
+                    </feComponentTransfer>
+                    <feMerge>
+                      <feMergeNode />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+
+                  <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#475569" />
+                  </marker>
+
+                  <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
+                  </marker>
+
+                  <marker id="arrowhead-yellow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#facc15" />
+                  </marker>
+
+                  {/* Beaker Clip Path for Liquid Containment */}
+                  <clipPath id="beaker-clip">
+                    <path d="M 0 20 L 0 180 Q 75 200 150 180 L 150 20" />
+                  </clipPath>
+                </defs>
+
+                {/* --- Main Cell Structure --- */}
+
+                {/* --- Left Beaker (Zinc) --- */}
+                <g transform="translate(150, 200)">
+                  {/* Beaker Back Outline */}
+                  <path d="M 0 -20 L 0 180 Q 75 200 150 180 L 150 -20" fill="none" stroke="#94a3b8" strokeWidth="2" opacity="0.3" />
+                  <ellipse cx="75" cy="-20" rx="75" ry="10" fill="none" stroke="#94a3b8" strokeWidth="2" opacity="0.3" />
+
+                  {/* Liquid (Clipped and Nested) */}
+                  <g clipPath="url(#beaker-clip)">
+                    <rect x="0" y="20" width="150" height="180" fill="url(#zn-liquid)" />
+                    <ellipse cx="75" cy="20" rx="75" ry="10" fill="#f8fafc" opacity={0.5 + (znConcentration * 0.1)} />
+                  </g>
+
+                  {/* Zinc Electrode (Immersed) */}
+                  <rect x="55" y="-60" width="40" height="200" rx="4" fill="url(#zn-metal)" filter="url(#shadow)" />
+
+                  {/* Beaker Front Outline (Glass effect) */}
+                  <path d="M 0 -20 L 0 180 Q 75 200 150 180 L 150 -20" fill="url(#glass-surface)" stroke="#cbd5e1" strokeWidth="1" opacity="0.4" />
+
+                  {/* Label Group */}
+                  <g transform="translate(75, 230)">
+                    <text textAnchor="middle" className="font-display font-bold text-lg fill-slate-900">Zn | ZnSO₄</text>
+                    <text y="20" textAnchor="middle" className="font-sans text-sm fill-slate-500">{znConcentration.toFixed(2)} M</text>
+                    <text y="40" textAnchor="middle" className="font-sans font-bold text-sm fill-red-500">Anode (-)</text>
+                  </g>
+                </g>
+
+                {/* --- Right Beaker (Copper) --- */}
+                <g transform="translate(500, 200)">
+                  {/* Beaker Back Outline */}
+                  <path d="M 0 -20 L 0 180 Q 75 200 150 180 L 150 -20" fill="none" stroke="#94a3b8" strokeWidth="2" opacity="0.3" />
+                  <ellipse cx="75" cy="-20" rx="75" ry="10" fill="none" stroke="#94a3b8" strokeWidth="2" opacity="0.3" />
+
+                  {/* Liquid (Clipped and Nested) */}
+                  <g clipPath="url(#beaker-clip)">
+                    <rect x="0" y="20" width="150" height="180" fill="url(#cu-liquid)" />
+                    <ellipse cx="75" cy="20" rx="75" ry="10" fill="#bfdbfe" opacity={0.4 + (cuConcentration * 0.2)} />
+                  </g>
+
+                  {/* Copper Electrode (Immersed) */}
+                  <rect x="55" y="-60" width="40" height="200" rx="4" fill="url(#cu-metal)" filter="url(#shadow)" />
+
+                  {/* Beaker Front Outline */}
+                  <path d="M 0 -20 L 0 180 Q 75 200 150 180 L 150 -20" fill="url(#glass-surface)" stroke="#cbd5e1" strokeWidth="1" opacity="0.4" />
+
+                  {/* Label Group */}
+                  <g transform="translate(75, 230)">
+                    <text textAnchor="middle" className="font-display font-bold text-lg fill-slate-900">CuSO₄ | Cu</text>
+                    <text y="20" textAnchor="middle" className="font-sans text-sm fill-slate-500">{cuConcentration.toFixed(2)} M</text>
+                    <text y="40" textAnchor="middle" className="font-sans font-bold text-sm fill-blue-600">Cathode (+)</text>
+                  </g>
+                </g>
+
+                {/* --- Salt Bridge --- */}
+                <g transform="translate(265, 120)"> {/* Adjusted height */}
+                  {/* Bridge Body - Deep Legs */}
+                  <path d="M 0 120 L 0 20 Q 0 0 20 0 L 250 0 Q 270 0 270 20 L 270 120"
+                    fill="none" stroke="#fde68a" strokeWidth="40" strokeLinecap="round" />
+                  <path d="M 0 120 L 0 20 Q 0 0 20 0 L 250 0 Q 270 0 270 20 L 270 120"
+                    fill="none" stroke="#fef3c7" strokeWidth="30" strokeLinecap="round" opacity="0.6" />
+
+                  {/* Outline */}
+                  <path d="M -20 120 L -20 20 Q -20 -20 20 -20 L 250 -20 Q 290 -20 290 20 L 290 120"
+                    fill="none" stroke="#d4d4d8" strokeWidth="1" />
+                  <path d="M 20 120 L 20 20 Q 20 20 20 20 L 250 20 Q 250 20 250 20 L 250 120"
+                    fill="none" stroke="#d4d4d8" strokeWidth="1" />
+
+                  {/* Label */}
+                  <text x="135" y="10" textAnchor="middle" className="font-sans text-sm fill-slate-700 font-medium">Salt Bridge</text>
+
+                  {/* Ion Flow */}
+                  <g transform="translate(135, 100)">
+                    <line x1="-20" y1="0" x2="-80" y2="0" stroke="#475569" strokeWidth="2" markerEnd="url(#arrowhead)" />
+                    <text x="-50" y="-10" textAnchor="middle" className="font-sans font-bold text-xs fill-slate-600">SO₄²⁻</text>
+                    <line x1="20" y1="0" x2="80" y2="0" stroke="#475569" strokeWidth="2" markerEnd="url(#arrowhead)" />
+                    <text x="50" y="-10" textAnchor="middle" className="font-sans font-bold text-xs fill-slate-600">K⁺/Na⁺</text>
+                  </g>
+                </g>
+
+                {/* --- Wires & Voltmeter --- */}
+
+                {/* --- Connection Points & Wires --- */}
+
+                {/* Wires connecting to specific points */}
+                {/* Wires connecting to specific points */}
+                <g fill="none" stroke="#334155" strokeWidth="3" strokeLinecap="round">
+                  {/* Left (Zn) Wire: From Electrode Top to Voltmeter Terminals (y=60) */}
+                  <path id="wire-left" d="M 225 140 C 225 80, 280 60, 350 60" />
+
+                  {/* Right (Cu) Wire: From Electrode Top to Voltmeter Terminals (y=60) */}
+                  <path id="wire-right" d="M 575 140 C 575 80, 520 60, 450 60" />
+                </g>
+
+                {/* Electrode Connection Terminals */}
+                <circle cx="225" cy="140" r="4" fill="#1f2937" />
+                <circle cx="575" cy="140" r="4" fill="#1f2937" />
+
+                {/* --- Electron Flow Animation --- */}
+                {isConnected && electronFlow && (
+                  <g>
+                    {/* Electrons moving from Anode (Left) to Voltmeter */}
+                    <circle r="4" fill="#fbbf24" filter="url(#shadow)">
                       <animateMotion
                         dur="2s"
                         repeatCount="indefinite"
-                        path="M 80 220 L 80 80 L 145 80 L 145 50"
-                      />
+                        keyPoints="0;1"
+                        keyTimes="0;1"
+                        calcMode="linear"
+                      >
+                        <mpath href="#wire-left" />
+                      </animateMotion>
                     </circle>
-                    <circle r="4" fill="#fbbf24">
+
+                    {/* Electrons moving from Voltmeter to Cathode (Right) - Explicit Path Direction Fix */}
+                    <circle r="4" fill="#fbbf24" filter="url(#shadow)">
                       <animateMotion
                         dur="2s"
                         repeatCount="indefinite"
-                        path="M 215 50 L 215 80 L 280 80 L 280 220"
-                      />
+                        keyPoints="1;0"
+                        keyTimes="0;1"
+                        calcMode="linear"
+                        rotate="auto"
+                      >
+                        <mpath href="#wire-right" />
+                      </animateMotion>
                     </circle>
-                  </>
+
+                    {/* e- Labels */}
+                    <text x="260" y="70" className="font-sans font-bold text-lg fill-slate-700">e⁻</text>
+                    <path d="M 260 60 Q 280 50 300 60" fill="none" stroke="#334155" strokeWidth="1.5" markerEnd="url(#arrowhead)" />
+
+                    <text x="520" y="70" className="font-sans font-bold text-lg fill-slate-700">e⁻</text>
+                    {/* Fixed Arrow Direction: Pointing towards the Electrode (Down/Right) */}
+                    <path d="M 520 60 Q 540 70 560 60" fill="none" stroke="#334155" strokeWidth="1.5" markerStart="url(#arrowhead)" transform="rotate(180 540 60)" />
+                  </g>
                 )}
+
+
+                {/* Voltmeter (Moved UP to avoid overlap) */}
+                <g transform="translate(350, 20)">
+                  <rect x="0" y="0" width="100" height="60" rx="8" fill="white" stroke="#cbd5e1" strokeWidth="2" filter="url(#shadow)" />
+                  <text x="50" y="20" textAnchor="middle" className="font-sans text-xs fill-slate-500 uppercase">Voltmeter</text>
+                  <text x="50" y="45" textAnchor="middle" className="font-display font-bold text-2xl fill-blue-600">
+                    {isConnected ? emf.toFixed(2) + " V" : "1.10 V"}
+                  </text>
+                  {/* Terminals on Voltmeter */}
+                  <circle cx="0" cy="40" r="3" fill="#1e293b" />
+                  <circle cx="100" cy="40" r="3" fill="#1e293b" />
+                </g>
+
               </svg>
-
-              {/* Zinc Half-Cell */}
-              <div className="absolute left-4 bottom-4 w-32">
-                <div className="relative">
-                  {/* Beaker */}
-                  <div 
-                    className="w-full h-40 rounded-b-2xl border-4 border-t-0 border-gray-400 overflow-hidden"
-                    style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(156, 163, 175, 0.3) 20%)' }}
-                  >
-                    {/* Solution */}
-                    <motion.div
-                      className="absolute bottom-0 left-0 right-0 bg-gray-300/50"
-                      style={{ height: '75%' }}
-                      animate={isConnected ? { opacity: [0.5, 0.7, 0.5] } : {}}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                    
-                    {/* Zinc electrode */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-28 bg-gradient-to-b from-gray-500 to-gray-400 rounded-b" />
-                  </div>
-                  <p className="text-center text-sm mt-2 font-medium">Zn | ZnSO₄</p>
-                  <p className="text-center text-xs text-muted-foreground">{znConcentration.toFixed(2)} M</p>
-                  <p className="text-center text-xs text-red-500 font-semibold">Anode (-)</p>
-                </div>
-              </div>
-
-              {/* Salt Bridge */}
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-24">
-                <motion.div
-                  className="w-24 h-8 bg-gradient-to-r from-amber-200 via-amber-100 to-amber-200 rounded-full border-2 border-amber-300"
-                  animate={isConnected ? { scale: [1, 1.02, 1] } : {}}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
-                <p className="text-center text-xs text-muted-foreground mt-1">Salt Bridge</p>
-              </div>
-
-              {/* Copper Half-Cell */}
-              <div className="absolute right-4 bottom-4 w-32">
-                <div className="relative">
-                  {/* Beaker */}
-                  <div 
-                    className="w-full h-40 rounded-b-2xl border-4 border-t-0 border-gray-400 overflow-hidden"
-                    style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(59, 130, 246, 0.2) 20%)' }}
-                  >
-                    {/* Solution */}
-                    <motion.div
-                      className="absolute bottom-0 left-0 right-0 bg-blue-400/40"
-                      style={{ height: '75%' }}
-                      animate={isConnected ? { opacity: [0.4, 0.6, 0.4] } : {}}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                    
-                    {/* Copper electrode */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-28 bg-gradient-to-b from-orange-600 to-orange-500 rounded-b" />
-                  </div>
-                  <p className="text-center text-sm mt-2 font-medium">CuSO₄ | Cu</p>
-                  <p className="text-center text-xs text-muted-foreground">{cuConcentration.toFixed(2)} M</p>
-                  <p className="text-center text-xs text-blue-500 font-semibold">Cathode (+)</p>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
