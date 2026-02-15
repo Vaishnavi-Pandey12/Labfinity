@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { 
-  Play, 
-  RotateCcw, 
+import {
+  Play,
+  RotateCcw,
   Droplets,
   Beaker
 } from "lucide-react";
@@ -40,11 +40,12 @@ const calculatePH = (volumeNaOH: number, initialHClVolume: number, hclConc: numb
 };
 
 const PotentiometrySimulator = () => {
+  console.log("PotentiometrySimulator MOUNTED - VERSION 2");
   const [volumeAdded, setVolumeAdded] = useState(0);
   const [dataPoints, setDataPoints] = useState<DataPoint[]>([]);
   const [isStirring, setIsStirring] = useState(false);
   const [currentPH, setCurrentPH] = useState(1);
-  
+
   const hclConc = 0.1; // M
   const naohConc = 0.1; // M
   const initialHClVolume = 20; // mL
@@ -56,7 +57,7 @@ const PotentiometrySimulator = () => {
     const pH = calculatePH(newVolume, initialHClVolume, hclConc, naohConc);
     setCurrentPH(pH);
     setIsStirring(true);
-    setTimeout(() => setIsStirring(false), 500);
+    setTimeout(() => setIsStirring(false), 800);
   }, [volumeAdded]);
 
   const recordReading = useCallback(() => {
@@ -75,20 +76,28 @@ const PotentiometrySimulator = () => {
     setIsStirring(false);
   }, []);
 
-  // Get solution color based on pH
+  // Smooth color transition based on pH
+  // Red (Acid) -> Orange -> Yellow -> Green (Neutral) -> Blue -> Purple (Base)
   const getSolutionColor = (pH: number): string => {
-    if (pH < 4) return "rgba(239, 68, 68, 0.4)"; // Red - acidic
-    if (pH < 6) return "rgba(249, 115, 22, 0.4)"; // Orange
-    if (pH < 8) return "rgba(34, 197, 94, 0.3)"; // Green - neutral
-    if (pH < 10) return "rgba(59, 130, 246, 0.4)"; // Blue
-    return "rgba(139, 92, 246, 0.4)"; // Purple - basic
+    if (pH < 2) return "rgba(239, 68, 68, 0.6)"; // Red
+    if (pH < 4) return "rgba(249, 115, 22, 0.5)"; // Orange
+    if (pH < 6) return "rgba(234, 179, 8, 0.5)"; // Yellow/Orange
+    if (pH < 8) return "rgba(34, 197, 94, 0.4)"; // Green
+    if (pH < 10) return "rgba(59, 130, 246, 0.5)"; // Blue
+    if (pH < 12) return "rgba(99, 102, 241, 0.5)"; // Indigo
+    return "rgba(168, 85, 247, 0.6)"; // Purple
+  };
+
+  const solutionStyle = {
+    backgroundColor: getSolutionColor(currentPH),
+    transition: "background-color 1s ease-in-out"
   };
 
   return (
     <div className="space-y-6">
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Controls Panel */}
-        <Card className="glass-card border-0">
+        <Card className="glass-card border-0 order-2 lg:order-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 font-display">
               <Droplets className="w-5 h-5 text-primary" />
@@ -162,14 +171,14 @@ const PotentiometrySimulator = () => {
                 <p className="text-4xl font-display font-bold text-primary">
                   {currentPH.toFixed(2)}
                 </p>
-                <div 
+                <div
                   className="w-full h-3 rounded-full mt-3"
                   style={{
                     background: 'linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6)',
                   }}
                 >
-                  <div 
-                    className="w-3 h-3 bg-foreground rounded-full relative"
+                  <div
+                    className="w-3 h-3 bg-foreground rounded-full relative transition-all duration-300"
                     style={{ left: `${(currentPH / 14) * 100}%`, transform: 'translateX(-50%)' }}
                   />
                 </div>
@@ -184,7 +193,7 @@ const PotentiometrySimulator = () => {
         </Card>
 
         {/* Apparatus Visualization */}
-        <Card className="glass-card border-0">
+        <Card className="glass-card border-0 order-1 lg:order-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 font-display">
               <Beaker className="w-5 h-5 text-primary" />
@@ -192,74 +201,112 @@ const PotentiometrySimulator = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative h-80 bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden">
-              {/* Burette */}
-              <div className="absolute left-1/2 -translate-x-1/2 top-2">
-                <div className="w-6 h-32 bg-gradient-to-b from-gray-200 to-gray-100 border-2 border-gray-300 rounded-t-sm relative">
-                  {/* NaOH level */}
-                  <motion.div
-                    className="absolute bottom-0 left-0 right-0 bg-blue-300/60 rounded-b"
-                    animate={{ height: `${Math.max(0, 100 - (volumeAdded / 40) * 100)}%` }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <div className="absolute -left-8 top-0 text-xs text-muted-foreground">0 mL</div>
-                  <div className="absolute -left-10 bottom-0 text-xs text-muted-foreground">40 mL</div>
-                </div>
-                <div className="w-1 h-6 bg-gray-400 mx-auto" />
-                
-                {/* Dripping animation */}
-                <AnimatePresence>
-                  {isStirring && (
-                    <motion.div
-                      initial={{ y: 0, opacity: 1 }}
-                      animate={{ y: 60, opacity: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="w-2 h-2 bg-blue-400 rounded-full mx-auto"
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
+            <div className="relative h-[500px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner w-full">
 
-              {/* Beaker */}
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-40">
-                <div className="relative">
-                  <div 
-                    className="w-full h-36 rounded-b-2xl border-4 border-t-0 border-gray-400 overflow-hidden"
-                  >
-                    {/* Solution */}
-                    <motion.div
-                      className="absolute bottom-0 left-0 right-0"
-                      style={{ 
-                        height: '70%',
-                        backgroundColor: getSolutionColor(currentPH)
-                      }}
-                      animate={isStirring ? { rotate: [0, 2, -2, 0] } : {}}
-                      transition={{ duration: 0.3 }}
-                    />
-                    
-                    {/* pH Electrode */}
-                    <div className="absolute top-2 left-8 w-3 h-24 bg-gradient-to-b from-gray-600 to-gray-500 rounded-b">
-                      <div className="absolute bottom-0 w-3 h-4 bg-gray-300 rounded-b" />
+              {/* --- Background Elements --- */}
+              {/* Table Surface */}
+              <div className="absolute bottom-0 left-0 right-0 h-4 bg-black/5 dark:bg-white/5 border-t border-border/10" />
+
+              {/* Apparatus Positioning Container - Using absolute positioning */}
+              <div className="absolute inset-0">
+
+
+                {/* Stand - Left side with base */}
+                <div className="absolute left-24 bottom-4 w-32 h-[470px]">
+                  {/* Base */}
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-36 h-3 bg-slate-700 rounded-sm shadow-md" />
+                  {/* Vertical Rod */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-2 h-[460px] bg-gradient-to-r from-slate-500 to-slate-400 rounded-t-sm shadow-md" />
+
+                  {/* Clamp at top */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-10 bg-slate-600 rounded-sm shadow" />
+                  {/* Horizontal Clamp Arm */}
+                  <div className="absolute top-2 left-1/2 w-24 h-2.5 bg-slate-600 rounded-r-sm shadow-md" />
+                </div>
+
+                {/* Burette - Hanging from clamp */}
+                <div className="absolute left-[168px] top-12">
+                  <div className="flex flex-col items-center">
+                    {/* Burette Tube */}
+                    <div className="w-8 h-80 bg-slate-100/20 backdrop-blur-sm border-2 border-slate-400/50 rounded-b-md relative overflow-hidden shadow-xl">
+                      {/* Graduations */}
+                      {[...Array(10)].map((_, i) => (
+                        <div key={i} className="absolute right-0 w-2.5 h-[1px] bg-slate-500/60" style={{ top: `${(i + 1) * 9}%` }} />
+                      ))}
+
+                      {/* Volume label at top */}
+                      <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-600">0 mL</div>
+
+                      {/* Liquid inside Burette */}
+                      <motion.div
+                        className="absolute bottom-0 left-0 right-0 bg-blue-500/40 backdrop-blur-sm"
+                        animate={{ height: `${Math.max(0, 100 - (volumeAdded / 40) * 100)}%` }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                      />
                     </div>
-                    
-                    {/* Stirrer */}
-                    <motion.div
-                      className="absolute bottom-4 left-1/2 -translate-x-1/2 w-8 h-2 bg-white rounded"
-                      animate={isStirring ? { rotate: 360 } : {}}
-                      transition={{ duration: 0.5, ease: "linear" }}
-                    />
-                  </div>
-                  
-                  <p className="text-center text-sm mt-2 font-medium">HCl + NaOH</p>
-                </div>
-              </div>
 
-              {/* pH Meter Display */}
-              <div className="absolute top-4 right-4 w-24 bg-card border-2 border-border rounded-lg p-2">
-                <p className="text-xs text-muted-foreground text-center">pH Meter</p>
-                <p className="text-xl font-mono font-bold text-center text-primary">
-                  {currentPH.toFixed(2)}
-                </p>
+                    {/* Stopcock */}
+                    <div className="relative -mt-0.5">
+                      <div className="w-2 h-2 bg-slate-400 mx-auto" />
+                      <div
+                        className={`w-7 h-2 bg-slate-700 rounded-full mx-auto transition-transform duration-300 shadow ${isStirring ? 'rotate-90' : 'rotate-0'}`}
+                      />
+                      <div className="w-2 h-6 bg-slate-400 mx-auto rounded-b-sm" /> {/* Tip */}
+                    </div>
+
+                    {/* Drip Animation */}
+                    <AnimatePresence>
+                      {isStirring && (
+                        <motion.div
+                          initial={{ y: 0, opacity: 1, scale: 1 }}
+                          animate={{ y: 60, opacity: 0, scale: 0.5 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                          className="absolute top-[100%] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-blue-400/80 rounded-full"
+                        />
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                {/* Beaker - Centered below burette */}
+                <div className="absolute left-[148px] bottom-16 w-36 h-44 bg-white/10 backdrop-blur-sm border-2 border-slate-300/60 border-t-0 rounded-b-2xl overflow-visible shadow-lg">
+                  {/* Beaker rim */}
+                  <div className="absolute -top-0.5 left-0 right-0 h-1 bg-slate-300/40 rounded-full" />
+
+                  {/* Solution */}
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 w-full transition-colors duration-1000 rounded-b-2xl"
+                    style={{
+                      ...solutionStyle,
+                      height: `${45 + (volumeAdded * 1.2)}%`
+                    }}
+                  >
+                    {/* Surface reflection */}
+                    <div className="absolute top-0 w-full h-1.5 bg-white/30 blur-[1px]" />
+                  </motion.div>
+
+                  {/* Magnetic Stirrer Pill */}
+                  <motion.div
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-6 h-2 bg-white/90 rounded-full shadow-md"
+                    animate={isStirring ? { rotate: 360 } : {}}
+                    transition={{ duration: 0.25, repeat: Infinity, ease: "linear" }}
+                  />
+
+                  {/* Electrode Probe extending into beaker */}
+                  <div className="absolute -top-6 right-6 w-3.5 h-52 bg-gradient-to-b from-slate-300 to-slate-200 border border-slate-400/70 rounded-full shadow-xl flex flex-col items-center justify-end overflow-hidden z-30">
+                    {/* Glass bulb at bottom */}
+                    <div className="w-full h-5 bg-blue-100/80 border-t border-slate-400/50 rounded-b-full shadow-inner" />
+                  </div>
+
+                  {/* Label below beaker */}
+                  <div className="absolute -bottom-6 left-0 right-0 text-center text-xs font-medium text-muted-foreground">
+                    HCl + NaOH
+                  </div>
+                </div>
+
+
+
               </div>
             </div>
           </CardContent>
@@ -298,7 +345,7 @@ const PotentiometrySimulator = () => {
                 <tbody>
                   {dataPoints.map((point, index) => {
                     const prevPoint = dataPoints[index - 1];
-                    const derivative = prevPoint 
+                    const derivative = prevPoint
                       ? (point.pH - prevPoint.pH) / (point.volume - prevPoint.volume || 1)
                       : 0;
                     return (
