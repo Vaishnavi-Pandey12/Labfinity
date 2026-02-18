@@ -9,14 +9,34 @@ import {
   ChevronLeft,
   BookOpen,
   Sparkles,
-  Play
+  Play,
+  CheckCircle
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 import ElectrochemistryTheory from "@/components/experiment/ElectrochemistryTheory";
 import ElectrochemistrySimulator from "@/components/experiment/ElectrochemistrySimulator";
+import ElectrochemistryProcedure from "@/components/experiment/ElectrochemistryProcedure";
+import GraphUpload from "../components/experiment/GraphUpload";
+import { Upload } from "lucide-react"; // add icon
+
+
 
 const Experiment1 = () => {
   const [activeTab, setActiveTab] = useState("theory");
+  const [completed, setCompleted] = useState({
+    theory: false,
+    procedure: false,
+    simulator: false,
+    upload: false,
+  });
+
+  const markCompleted = (section: string) => {
+    setCompleted((prev) => ({
+      ...prev,
+      [section]: true,
+    }));
+  };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,29 +109,54 @@ const Experiment1 = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="glass-card p-1 mb-6">
-            <TabsTrigger
-              value="theory"
-              className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
+            <TabsTrigger value="theory" className="gap-2">
               <BookOpen className="w-4 h-4" />
               Theory
+              {completed.theory && (
+                <CheckCircle className="w-4 h-4 text-green-500 ml-1" />
+              )}
             </TabsTrigger>
-            <TabsTrigger
-              value="simulator"
-              className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
+
+            <TabsTrigger value="procedure" className="gap-2">
+              <FlaskConical className="w-4 h-4" />
+              Procedure
+              {completed.procedure && (
+                <CheckCircle className="w-4 h-4 text-green-500 ml-1" />
+              )}
+            </TabsTrigger>
+
+            <TabsTrigger value="simulator" className="gap-2">
               <Play className="w-4 h-4" />
               Virtual Lab Simulator
+              {completed.simulator && (
+                <CheckCircle className="w-4 h-4 text-green-500 ml-1" />
+              )}
             </TabsTrigger>
+
+            <TabsTrigger value="upload" className="gap-2">
+              <Upload className="w-4 h-4" />
+              Upload Graph
+              {completed.upload && (
+                <CheckCircle className="w-4 h-4 text-green-500 ml-1" />
+              )}
+            </TabsTrigger>
+
+
           </TabsList>
 
           <TabsContent value="theory" className="mt-0">
             <ElectrochemistryTheory />
           </TabsContent>
-
+          <TabsContent value="procedure">
+            <ElectrochemistryProcedure />
+          </TabsContent>
           <TabsContent value="simulator" className="mt-0">
             <ElectrochemistrySimulator />
           </TabsContent>
+          <TabsContent value="upload" className="mt-0">
+            <GraphUpload onUploadSuccess={() => markCompleted("upload")} />
+          </TabsContent>
+
         </Tabs>
       </main>
     </div>
