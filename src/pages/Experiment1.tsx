@@ -154,7 +154,7 @@ const Experiment1 = () => {
             <ElectrochemistrySimulator />
           </TabsContent>
           <TabsContent value="upload" className="mt-0">
-            <GraphUpload onUploadSuccess={() => markCompleted("upload")} />
+            <GraphUpload studentId="student-1" experimentId="experiment-1" onUploadSuccess={() => markCompleted("upload")} />
           </TabsContent>
 
         </Tabs>
