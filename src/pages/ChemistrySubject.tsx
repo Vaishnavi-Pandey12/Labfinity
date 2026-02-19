@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  FlaskConical, 
-  ChevronRight, 
+import {
+  FlaskConical,
+  ChevronRight,
   ChevronLeft,
   Beaker,
   Sparkles,
@@ -20,8 +20,7 @@ const experiments = [
     topic: "Electrochemistry",
     description: "Measure EMF of electrochemical cells using Daniell cell, verify Nernst equation",
     icon: Sparkles,
-    difficulty: "Intermediate",
-    duration: "45 min",
+
   },
   {
     id: 2,
@@ -29,9 +28,7 @@ const experiments = [
     topic: "Colorimetry",
     description: "Verify Beer-Lambert law by measuring absorbance at different concentrations",
     icon: TestTube2,
-    difficulty: "Beginner",
-    duration: "30 min",
-    featured: true,
+
   },
   {
     id: 3,
@@ -39,8 +36,7 @@ const experiments = [
     topic: "Potentiometry",
     description: "Perform acid-base, redox, and precipitation titrations",
     icon: Beaker,
-    difficulty: "Advanced",
-    duration: "60 min",
+
   },
   {
     id: 4,
@@ -48,8 +44,6 @@ const experiments = [
     topic: "Spectroscopy",
     description: "Study electronic transitions and absorption spectra of compounds",
     icon: Lightbulb,
-    difficulty: "Intermediate",
-    duration: "40 min",
   },
 ];
 
@@ -140,7 +134,7 @@ const ChemistrySubject = () => {
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-display font-bold mb-6">Select Experiment</h2>
-          
+
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -150,12 +144,7 @@ const ChemistrySubject = () => {
             {experiments.map((exp) => (
               <motion.div key={exp.id} variants={itemVariants}>
                 <Link to={`/subjects/chemistry/experiments/${exp.id}`}>
-                  <Card className={`group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative ${exp.featured ? 'ring-2 ring-primary' : ''}`}>
-                    {exp.featured && (
-                      <div className="absolute top-4 right-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-                        Featured
-                      </div>
-                    )}
+                  <Card className="group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative">
                     <CardHeader className="pb-4">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shrink-0">
@@ -177,10 +166,6 @@ const ChemistrySubject = () => {
                     <CardContent className="pt-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span className="px-2 py-1 rounded-md bg-muted">
-                            {exp.difficulty}
-                          </span>
-                          <span>{exp.duration}</span>
                         </div>
                         <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
