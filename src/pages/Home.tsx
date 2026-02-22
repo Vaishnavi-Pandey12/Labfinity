@@ -2,17 +2,18 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  FlaskConical, 
-  Atom, 
-  Microscope, 
+import {
+  FlaskConical,
+  Atom,
+  Microscope,
   Calculator,
   Cpu,
   Bot,
   ChevronRight,
   GraduationCap,
   Users,
-  BookOpen
+  BookOpen,
+  LogIn
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 
@@ -119,51 +120,15 @@ const Home = () => {
               alt="VITAP University"
               className="h-10 object-contain"
             />
+            <Link to="/login">
+              <Button className="lab-gradient-bg text-primary-foreground font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+                <LogIn className="w-4 h-4" />
+                Login
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
-
-      {/* Hero Section */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
-              Reimagining Labs for{" "}
-              <span className="lab-gradient-text">the Future</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Explore STEM through interactive simulations—anytime, anywhere. 
-              Experience realistic experiments without physical constraints.
-            </p>
-
-            {/* Stats */}
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="flex flex-wrap justify-center gap-8 mb-12"
-            >
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="flex items-center gap-3 glass-card px-6 py-3 rounded-full"
-                >
-                  <stat.icon className="w-5 h-5 text-primary" />
-                  <span className="font-display font-bold text-xl">{stat.value}</span>
-                  <span className="text-muted-foreground">{stat.label}</span>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Subjects Grid */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
@@ -218,30 +183,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto text-center glass-card rounded-3xl p-12 glow-effect"
-          >
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Ready to Start Experimenting?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Dive into Chemistry Experiment 2 - Beer-Lambert Law Colorimetry
-            </p>
-            <Link to="/subjects/chemistry/experiments/2">
-              <Button className="lab-gradient-bg text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl hover:opacity-90 transition-opacity">
-                Launch Virtual Lab
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+
 
       {/* Footer */}
       <footer className="py-8 border-t border-border/50">

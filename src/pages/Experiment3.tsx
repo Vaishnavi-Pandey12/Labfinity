@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { 
-  FlaskConical, 
-  ChevronRight, 
+import {
+  FlaskConical,
+  ChevronRight,
   ChevronLeft,
   BookOpen,
   Beaker,
@@ -72,7 +72,7 @@ const Experiment3 = () => {
               Back to Chemistry
             </Button>
           </Link>
-          
+
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center">
               <Beaker className="w-8 h-8 text-white" />
@@ -80,7 +80,7 @@ const Experiment3 = () => {
             <div>
               <p className="text-sm text-primary font-medium">Experiment 3 • Potentiometry</p>
               <h1 className="text-2xl md:text-3xl font-display font-bold">
-                Potentiometric Titration
+                Potentiometric Titration 
               </h1>
             </div>
           </div>
@@ -89,14 +89,14 @@ const Experiment3 = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="glass-card p-1 mb-6">
-            <TabsTrigger 
-              value="theory" 
+            <TabsTrigger
+              value="theory"
               className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               <BookOpen className="w-4 h-4" />
               Theory
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="simulator"
               className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
