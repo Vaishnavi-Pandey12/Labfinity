@@ -319,30 +319,89 @@ def generate_conductance_table_volume(trials):
     return table
 
 # --------------------------------------------------
-# 7️⃣ Electrochemistry – Daniel Cell
-# E = E°cathode - E°anode
+# 7️⃣ Electrochemistry – Daniell Cell (Observation Table)
+# E_cell = E°_cathode - E°_anode - (0.0591/n) * log([anode]/[cathode])
 # --------------------------------------------------
 
-def generate_daniel_cell_table(trials):
+# Standard reduction potentials (V)
+STANDARD_POTENTIALS = {
+    "Zn": -0.76,
+    "Cu": 0.34,
+    "Ag": 0.80,
+    "Ni": -0.26,
+}
+
+def electrochemistry_cell_table(
+    anode_metal="Zn",
+    cathode_metal="Cu",
+    anode_concentration=1.0,
+    cathode_concentrations=None,
+    unknown_emf=None,
+    n=2
+):
     """
-    trials = [
-        {"E0_cathode": 0.34, "E0_anode": -0.76}
-    ]
+    Generate observation table for electrochemistry experiment.
+
+    Parameters:
+        anode_metal: Symbol of the anode metal (e.g. "Zn")
+        cathode_metal: Symbol of the cathode metal (e.g. "Cu")
+        anode_concentration: Fixed concentration of anode solution (M)
+        cathode_concentrations: List of cathode concentrations to test (M)
+        unknown_emf: EMF value (V) for the unknown concentration row
+        n: Number of electrons transferred (default 2)
+
+    Returns:
+        dict with "table" (list of row dicts), "E0_cell", and "unknown_concentration"
     """
+
+    if cathode_concentrations is None:
+        cathode_concentrations = [0.01, 0.05, 0.10, 0.50, 1.00]
+
+    E0_anode = STANDARD_POTENTIALS.get(anode_metal, -0.76)
+    E0_cathode = STANDARD_POTENTIALS.get(cathode_metal, 0.34)
+    E0_cell = round(E0_cathode - E0_anode, 3)
 
     table = []
 
-    for i, trial in enumerate(trials, start=1):
-        E_cell = trial["E0_cathode"] - trial["E0_anode"]
+    for i, c_conc in enumerate(cathode_concentrations, start=1):
+        ratio = anode_concentration / c_conc
+        log_ratio = math.log10(ratio)
+        emf = E0_cell - (0.0591 / n) * log_ratio
+        emf = round(max(0, emf), 4)
 
         table.append({
-            "Trial": i,
-            "E° Cathode (V)": trial["E0_cathode"],
-            "E° Anode (V)": trial["E0_anode"],
-            "Cell Potential (V)": round(E_cell, 3)
+            "S. No.": i,
+            "Anode Concentration (M)": anode_concentration,
+            "Cathode Concentration (M)": c_conc,
+            "log([Anode]/[Cathode])": round(log_ratio, 4),
+            "EMF (V)": emf,
+            "Remark": ""
         })
 
-    return table
+    # Calculate unknown concentration from given EMF
+    unknown_concentration = None
+    if unknown_emf is not None:
+        # E = E0_cell - (0.0591/n) * log(anode/cathode)
+        # log(anode/cathode) = (E0_cell - E) * n / 0.0591
+        log_val = (E0_cell - unknown_emf) * n / 0.0591
+        ratio_val = 10 ** log_val
+        if ratio_val != 0:
+            unknown_concentration = round(anode_concentration / ratio_val, 4)
+
+        table.append({
+            "S. No.": len(cathode_concentrations) + 1,
+            "Anode Concentration (M)": anode_concentration,
+            "Cathode Concentration (M)": unknown_concentration if unknown_concentration else "?",
+            "log([Anode]/[Cathode])": round(log_val, 4) if unknown_concentration else "?",
+            "EMF (V)": unknown_emf,
+            "Remark": "Unknown (Calculated)"
+        })
+
+    return {
+        "table": table,
+        "E0_cell": E0_cell,
+        "unknown_concentration": unknown_concentration
+    }
 
 
 if __name__ == "__main__":
@@ -457,16 +516,20 @@ if __name__ == "__main__":
     for row in cond_vol_result:
         print(row)
 
-    # Test 7: Daniel Cell
+    # Test 7: Electrochemistry Cell Table
     print("\n" + "="*60)
-    print("7️⃣  ELECTROCHEMISTRY - DANIEL CELL TEST")
+    print("7️⃣  ELECTROCHEMISTRY - OBSERVATION TABLE TEST")
     print("="*60)
-    daniel_result = generate_daniel_cell_table([
-        {"E0_cathode": 0.34, "E0_anode": -0.76},
-        {"E0_cathode": 0.80, "E0_anode": 0.0},
-        {"E0_cathode": 1.36, "E0_anode": -0.44}
-    ])
-    for row in daniel_result:
+    echem_result = electrochemistry_cell_table(
+        anode_metal="Zn",
+        cathode_metal="Cu",
+        anode_concentration=1.0,
+        cathode_concentrations=[0.01, 0.05, 0.10, 0.50, 1.00],
+        unknown_emf=1.05
+    )
+    print(f"E°_cell = {echem_result['E0_cell']} V")
+    print(f"Unknown Concentration = {echem_result['unknown_concentration']} M")
+    for row in echem_result["table"]:
         print(row)
 
     print("\n" + "="*60)
