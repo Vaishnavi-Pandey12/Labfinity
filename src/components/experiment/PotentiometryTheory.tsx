@@ -1,16 +1,9 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { 
   Target, 
   BookOpen, 
-  Beaker, 
-  ListChecks,
+  Beaker,
   Lightbulb,
   Zap
 } from "lucide-react";
@@ -125,88 +118,6 @@ const PotentiometryTheory = () => {
               </li>
             ))}
           </ul>
-        </CardContent>
-      </Card>
-
-      {/* Procedure */}
-      <Card className="glass-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-display">
-            <ListChecks className="w-5 h-5 text-primary" />
-            Procedure
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="step1">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">1</span>
-                  Calibration of pH Electrode
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Calibrate the glass electrode using standard buffer solutions (pH 4.0, 7.0, and 10.0). 
-                Rinse the electrode with distilled water between measurements. Allow the reading to stabilize 
-                after each buffer immersion.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step2">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">2</span>
-                  Setting Up the Titration Apparatus
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Place a known volume of analyte solution (e.g., 20 mL of HCl) in a clean beaker. 
-                Insert the glass electrode and reference electrode into the solution. Position a magnetic 
-                stir bar in the beaker and activate the stirrer at moderate speed to ensure thorough mixing.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step3">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">3</span>
-                  Initial pH Reading
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Record the initial pH of the analyte solution. This is the starting point for the titration curve. 
-                Note the exact volume of titrant in the burette at the start.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step4">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">4</span>
-                  Adding Titrant in Increments
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Add titrant (e.g., NaOH solution) in small increments (1-2 mL) from the burette. After each addition, 
-                allow the solution to equilibrate for a few seconds and then record the pH reading. Continue adding titrant 
-                until pH passes the equivalence point. Near the equivalence point, use smaller increments (0.5 mL).
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step5">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">5</span>
-                  Data Collection and Analysis
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Record the volume of titrant added and corresponding pH for each point. Create a titration curve by 
-                plotting pH vs. volume of titrant. The equivalence point is located at the inflection point (maximum slope) 
-                of the curve. Calculate the first derivative (ΔpH/ΔV) to find the exact equivalence point.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
         </CardContent>
       </Card>
 
