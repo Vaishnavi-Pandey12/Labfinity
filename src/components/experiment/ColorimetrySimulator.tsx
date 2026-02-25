@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Play, 
-  RotateCcw, 
+import {
+  Play,
+  RotateCcw,
   Lock,
   Unlock,
   Lightbulb,
@@ -41,7 +41,7 @@ const generateSpectrum = (solution: Solution, concentration: number): Wavelength
   const { lambdaMax, epsilon } = solutionData[solution];
   const pathLength = 1; // 1 cm
   const points: WavelengthDataPoint[] = [];
-  
+
   for (let wavelength = 400; wavelength <= 700; wavelength += 10) {
     // Gaussian distribution around λmax
     const sigma = 40;
@@ -49,7 +49,7 @@ const generateSpectrum = (solution: Solution, concentration: number): Wavelength
     const absorbance = absorbanceMax * Math.exp(-Math.pow(wavelength - lambdaMax, 2) / (2 * sigma * sigma));
     points.push({ wavelength, absorbance: Math.min(absorbance, 2.5) });
   }
-  
+
   return points;
 };
 
@@ -63,6 +63,19 @@ const calculateAbsorbance = (solution: Solution, concentration: number, waveleng
   return Math.min(absorbance, 2.5);
 };
 
+// ─── Table row types ───────────────────────────────────────────────────────────
+interface LambdaMaxRow {
+  s_no: number;
+  wavelength: number;
+}
+
+interface ConcRow {
+  s_no: number;
+  concentration: number;
+}
+
+const BACKEND = "http://localhost:8000";
+
 const ColorimetrySimulator = () => {
   const [solution, setSolution] = useState<Solution>("KMnO4");
   const [wavelength, setWavelength] = useState(525);
@@ -74,6 +87,40 @@ const ColorimetrySimulator = () => {
   const [calibrationData, setCalibrationData] = useState<DataPoint[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [step, setStep] = useState(1);
+
+  // ─── Observation Table 1 – λmax determination ────────────────────────────
+  const [lambdaRows, setLambdaRows] = useState<LambdaMaxRow[]>([]);
+  const [lambdaAbsorbances, setLambdaAbsorbances] = useState<string[]>([]);
+  const [lambdaMax, setLambdaMax] = useState<number>(525);
+
+  // ─── Observation Table 2 – Beer-Lambert verification ─────────────────────
+  const [concRows, setConcRows] = useState<ConcRow[]>([]);
+  const [concAbsorbances, setConcAbsorbances] = useState<string[]>([]);
+  const [concLambdaMax, setConcLambdaMax] = useState<number>(525);
+
+  // Fetch lambda max table whenever solution changes
+  useEffect(() => {
+    fetch(`${BACKEND}/api/colorimetry-lambda-max-table?solution=${solution}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setLambdaRows(data.rows);
+        setLambdaMax(data.lambda_max);
+        setLambdaAbsorbances(Array(data.rows.length).fill(""));
+      })
+      .catch(() => { });
+  }, [solution]);
+
+  // Fetch concentration table whenever solution changes
+  useEffect(() => {
+    fetch(`${BACKEND}/api/colorimetry-concentration-table?solution=${solution}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setConcRows(data.rows);
+        setConcLambdaMax(data.lambda_max);
+        setConcAbsorbances(Array(data.rows.length).fill(""));
+      })
+      .catch(() => { });
+  }, [solution]);
 
   // Update spectrum when solution changes
   useEffect(() => {
@@ -115,7 +162,32 @@ const ColorimetrySimulator = () => {
     setShowResult(false);
     setStep(1);
     setConcentration(0.05);
-  }, []);
+    setLambdaAbsorbances(Array(lambdaRows.length).fill(""));
+    setConcAbsorbances(Array(concRows.length).fill(""));
+  }, [lambdaRows.length, concRows.length]);
+
+  // ─── Input change handlers ─────────────────────────────────────────────────
+  const handleLambdaAbsorbanceChange = (index: number, value: string) => {
+    setLambdaAbsorbances((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
+  };
+
+  const handleConcAbsorbanceChange = (index: number, value: string) => {
+    setConcAbsorbances((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
+  };
+
+  // ─── Shared table styles ───────────────────────────────────────────────────
+  const thClass = "text-left py-3 px-4 font-semibold text-sm text-muted-foreground border-b border-border";
+  const tdClass = "py-2 px-4 text-sm border-b border-border/40";
+  const inputClass =
+    "w-full bg-muted rounded-lg px-3 py-1.5 text-sm font-mono outline-none focus:ring-2 focus:ring-primary/50 transition placeholder:text-muted-foreground/50";
 
   return (
     <div className="space-y-6">
@@ -154,8 +226,8 @@ const ColorimetrySimulator = () => {
             {/* Solution Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Select Solution</label>
-              <Select 
-                value={solution} 
+              <Select
+                value={solution}
                 onValueChange={(v) => setSolution(v as Solution)}
                 disabled={isWavelengthLocked}
               >
@@ -166,8 +238,8 @@ const ColorimetrySimulator = () => {
                   {Object.entries(solutionData).map(([key, data]) => (
                     <SelectItem key={key} value={key}>
                       <div className="flex items-center gap-2">
-                        <div 
-                          className="w-4 h-4 rounded-full" 
+                        <div
+                          className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: data.color }}
                         />
                         {data.name}
@@ -200,13 +272,13 @@ const ColorimetrySimulator = () => {
                   </Button>
                 </div>
               </div>
-              <div 
+              <div
                 className="h-3 rounded-full relative overflow-hidden"
                 style={{
                   background: 'linear-gradient(to right, #8B00FF, #0000FF, #00FFFF, #00FF00, #FFFF00, #FF7F00, #FF0000)',
                 }}
               >
-                <div 
+                <div
                   className="absolute top-0 h-full w-1 bg-foreground rounded"
                   style={{ left: `${((wavelength - 400) / 300) * 100}%` }}
                 />
@@ -304,6 +376,131 @@ const ColorimetrySimulator = () => {
         </Card>
       </div>
 
+      {/* ═══════════════════════════════════════════════════════════════════
+          OBSERVATION TABLE 1 – λmax Determination
+          (Wavelengths auto-generated; Absorbance entered manually)
+      ══════════════════════════════════════════════════════════════════ */}
+      <Card className="glass-card border-0">
+        <CardHeader>
+          <div>
+            <CardTitle className="font-display text-base">
+              Observation Table 1 &nbsp;–&nbsp; λmax Determination
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              For <span className="font-medium">{solutionData[solution].name}</span>{" "}
+              &nbsp;|&nbsp; λmax =&nbsp;
+              <span className="font-semibold text-primary">{lambdaMax} nm</span>
+              &nbsp;·&nbsp; Enter observed absorbance values below.
+            </p>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className={thClass}>S.No</th>
+                  <th className={thClass}>Wavelength (nm)</th>
+                  <th className={thClass}>Absorbance <span className="text-primary/70">(enter value)</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {lambdaRows.map((row, idx) => (
+                  <motion.tr
+                    key={row.s_no}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.04 }}
+                    className={`hover:bg-muted/30 transition-colors ${row.wavelength === lambdaMax ? "bg-primary/5" : ""
+                      }`}
+                  >
+                    <td className={tdClass}>{row.s_no}</td>
+                    <td className={`${tdClass} font-mono font-medium`}>
+                      {row.wavelength}
+                      {row.wavelength === lambdaMax && (
+                        <span className="ml-2 text-xs font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                          λmax
+                        </span>
+                      )}
+                    </td>
+                    <td className={tdClass}>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        placeholder="e.g. 0.450"
+                        value={lambdaAbsorbances[idx] ?? ""}
+                        onChange={(e) => handleLambdaAbsorbanceChange(idx, e.target.value)}
+                        className={inputClass}
+                      />
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          OBSERVATION TABLE 2 – Beer-Lambert Law Verification
+          (Concentrations auto-generated; Absorbance entered manually)
+      ══════════════════════════════════════════════════════════════════ */}
+      <Card className="glass-card border-0">
+        <CardHeader>
+          <div>
+            <CardTitle className="font-display text-base">
+              Observation Table 2 &nbsp;–&nbsp; Beer-Lambert Law Verification
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              Measured at λ =&nbsp;
+              <span className="font-semibold text-primary">{concLambdaMax} nm</span>
+              &nbsp;·&nbsp; Enter observed absorbance values below.
+            </p>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className={thClass}>S.No</th>
+                  <th className={thClass}>Concentration (mol/L)</th>
+                  <th className={thClass}>Absorbance <span className="text-primary/70">(enter value)</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {concRows.map((row, idx) => (
+                  <motion.tr
+                    key={row.s_no}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.04 }}
+                    className="hover:bg-muted/30 transition-colors"
+                  >
+                    <td className={tdClass}>{row.s_no}</td>
+                    <td className={`${tdClass} font-mono font-medium`}>
+                      {row.concentration}
+                    </td>
+                    <td className={tdClass}>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        placeholder="e.g. 0.230"
+                        value={concAbsorbances[idx] ?? ""}
+                        onChange={(e) => handleConcAbsorbanceChange(idx, e.target.value)}
+                        className={inputClass}
+                      />
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Graphs */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Absorption Spectrum */}
@@ -330,54 +527,6 @@ const ColorimetrySimulator = () => {
           lineColor="#2196F3"
         />
       </div>
-
-      {/* Data Table */}
-      {calibrationData.length > 0 && (
-        <Card className="glass-card border-0">
-          <CardHeader>
-            <CardTitle className="font-display">Observation Table</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 font-semibold">S.No</th>
-                    <th className="text-left py-3 px-4 font-semibold">Concentration (M)</th>
-                    <th className="text-left py-3 px-4 font-semibold">Absorbance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {calibrationData.map((point, index) => (
-                    <motion.tr
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="border-b border-border/50 hover:bg-muted/50"
-                    >
-                      <td className="py-3 px-4">{index + 1}</td>
-                      <td className="py-3 px-4 font-mono">{point.concentration.toFixed(3)}</td>
-                      <td className="py-3 px-4 font-mono">{point.absorbance.toFixed(4)}</td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {calibrationData.length >= 3 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-4 p-4 bg-green-500/10 rounded-lg border border-green-500/20"
-              >
-                <p className="text-green-600 dark:text-green-400 font-medium">
-                  ✓ The linear relationship between Absorbance and Concentration verifies Beer-Lambert Law!
-                </p>
-              </motion.div>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

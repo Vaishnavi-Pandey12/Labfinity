@@ -5,19 +5,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
   Rocket,
+  Ruler,
   ChevronRight,
   ChevronLeft,
   BookOpen,
   Play,
-  Atom
+  Atom,
+  CheckCircle
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 
 import ProjectileMotionSimulator from "@/components/experiment/ProjectileMotionSimulator";
 import ProjectileMotionTheory from "@/components/experiment/ProjectileMotionTheory";
+import ProjectileMotionProcedure from "@/components/experiment/ProjectileMotionProcedure";
 
 const PhysicsExperiment1 = () => {
   const [activeTab, setActiveTab] = useState("theory");
+  const [completed, setCompleted] = useState({ procedure: false });
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,6 +123,14 @@ const PhysicsExperiment1 = () => {
               Theory
             </TabsTrigger>
 
+            <TabsTrigger value="procedure" className="gap-2">
+                <Ruler className="w-4 h-4" />
+                Procedure
+                {completed.procedure && (
+                  <CheckCircle className="w-4 h-4 text-green-500 ml-1" />
+                )}
+              </TabsTrigger>
+
             <TabsTrigger
               value="simulator"
               className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -131,6 +143,10 @@ const PhysicsExperiment1 = () => {
 
           <TabsContent value="theory" className="mt-0">
             <ProjectileMotionTheory />
+          </TabsContent>
+
+          <TabsContent value="procedure">
+            <ProjectileMotionProcedure />
           </TabsContent>
 
           <TabsContent value="simulator" className="mt-0">

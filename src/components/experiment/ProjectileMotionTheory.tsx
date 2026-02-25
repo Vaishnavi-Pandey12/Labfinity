@@ -1,19 +1,13 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChevronDown, ListChecks, ClipboardList, AlertCircle } from "lucide-react";
+import { ListChecks, AlertCircle } from "lucide-react";
 
 const ProjectileMotionTheory = () => {
-  const [activeStep, setActiveStep] = useState<number | null>(1);
-
-  const toggleStep = (step: number) => {
-    setActiveStep(activeStep === step ? null : step);
-  };
 
   return (
     <div className="space-y-6">
@@ -71,74 +65,6 @@ const ProjectileMotionTheory = () => {
               <li>Graph sheet / observation table</li>
             </ul>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Procedure (Accordion Style like Optics) */}
-      <Card className="glass-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-display text-lg">
-            <ClipboardList className="w-5 h-5 text-primary" />
-            Procedure
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="space-y-4 text-sm">
-
-          {[ 
-            {
-              title: "Setup",
-              content: "Open the simulator and set an initial velocity and projection angle."
-            },
-            {
-              title: "Measurement",
-              content: "Run the simulation and record Time of Flight, Maximum Height and Range."
-            },
-            {
-              title: "Verification",
-              content: "Repeat for multiple angles and verify maximum range at 45°."
-            }
-          ].map((step, index) => {
-            const stepNumber = index + 1;
-            const isOpen = activeStep === stepNumber;
-
-            return (
-              <div key={stepNumber} className="border-b border-border/50 pb-3">
-                <div
-                  className="flex items-center justify-between cursor-pointer group"
-                  onClick={() => toggleStep(stepNumber)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
-                      {stepNumber}
-                    </div>
-                    <span className="font-medium group-hover:text-primary transition-colors">
-                      {step.title}
-                    </span>
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      isOpen ? "rotate-180 text-primary" : ""
-                    }`}
-                  />
-                </div>
-
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="ml-11 mt-2 text-muted-foreground"
-                    >
-                      {step.content}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-
         </CardContent>
       </Card>
 

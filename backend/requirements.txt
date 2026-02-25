@@ -1,3 +1,20 @@
-fastapi
-uvicorn
-pydantic
+# Labfinity Backend Dependencies
+
+# Web Framework
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+
+# Data Validation
+pydantic>=2.0.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# File Upload Support (multipart/form-data)
+python-multipart>=0.0.9
+
+# Static Files (used by FastAPI StaticFiles)
+aiofiles>=23.2.1
+
+# CORS (included in fastapi, but listed for clarity)
+# starlette is a transitive dependency of fastapi
