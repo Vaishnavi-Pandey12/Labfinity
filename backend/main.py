@@ -5,13 +5,33 @@ from datetime import datetime
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List, Optional
+from supabase import create_client, Client
 import os
 import shutil
 import uuid
+import psycopg2
+import bcrypt
 from chem_tables import electrochemistry_cell_table, generate_lambda_max_table, generate_concentration_absorbance_table, generate_ph_titration_table
 
 # ---------------- Load Environment ----------------
 load_dotenv()
+
+# ---------------- Supabase Client ----------------
+SUPABASE_URL: str = os.getenv("SUPABASE_URL")
+SUPABASE_KEY: str = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# ---------------- Supabase DB Connection (Direct SQL) ----------------
+def get_db_connection():
+    conn = psycopg2.connect(
+        host=os.getenv("SUPABASE_HOST"),
+        user=os.getenv("SUPABASE_USER"),
+        password=os.getenv("SUPABASE_PASSWORD"),
+        dbname=os.getenv("SUPABASE_DB"),
+        port=int(os.getenv("SUPABASE_PORT", "5432")),
+        sslmode="require",
+    )
+    return conn
 
 # ---------------- App ----------------
 app = FastAPI()
@@ -36,6 +56,57 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 @app.get("/api/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/api/supabase-test")
+def supabase_test():
+    """Test the Supabase client connection by querying the students table."""
+    try:
+        response = supabase.table("students").select("*").limit(1).execute()
+        return {
+            "status": "connected",
+            "supabase_url": SUPABASE_URL,
+            "sample_data": response.data,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Supabase connection failed: {str(e)}")
+
+
+# ---------------- Student Registration ----------------
+
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
+@app.post("/api/register")
+def register_student(req: RegisterRequest):
+    """
+    Register a new student: hash password with bcrypt and insert into Supabase students table.
+    Returns 409 if the email already exists.
+    """
+    # Hash the password
+    hashed_pw = bcrypt.hashpw(req.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    try:
+        # Check if student already exists
+        existing = supabase.table("students").select("email").eq("email", req.email).execute()
+        if existing.data:
+            raise HTTPException(status_code=409, detail="A student with this email already exists.")
+
+        # Insert new student using Supabase client
+        response = supabase.table("students").insert({
+            "name": req.name,
+            "email": req.email,
+            "encrypted_password": hashed_pw
+        }).execute()
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[DB ERROR] {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"message": "User registered successfully"}
 
 
 # ---------------- Electrochemistry Table ----------------

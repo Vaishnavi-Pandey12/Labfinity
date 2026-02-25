@@ -18,3 +18,12 @@ aiofiles>=23.2.1
 
 # CORS (included in fastapi, but listed for clarity)
 # starlette is a transitive dependency of fastapi
+
+# PostgreSQL (Supabase)
+psycopg2-binary>=2.9.9
+
+# Supabase Python Client
+supabase>=2.0.0
+
+# Password Hashing
+bcrypt>=4.1.2

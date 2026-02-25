@@ -104,7 +104,7 @@ venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 
 # Start the API server
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload 
 ```
 
 Backend API runs at → **http://localhost:8000**
