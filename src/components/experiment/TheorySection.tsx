@@ -138,50 +138,6 @@ const TheorySection = () => {
         </CardContent>
       </Card>
 
-      {/* Procedure */}
-      <Card className="glass-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-display">
-            <FileText className="w-5 h-5 text-primary" />
-            Procedure
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div>
-              <h4 className="font-semibold text-primary mb-3">Step 1: Determination of λmax</h4>
-              <ul className="space-y-2 text-muted-foreground ml-4">
-                <li>• Select a colored solution (e.g., KMnO₄)</li>
-                <li>• Keep concentration constant</li>
-                <li>• Vary wavelength from 400-700 nm</li>
-                <li>• Record absorbance at each wavelength</li>
-                <li>• Plot Absorbance vs Wavelength</li>
-                <li>• Identify the peak (λmax)</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-primary mb-3">Step 2: Fix the Wavelength</h4>
-              <ul className="space-y-2 text-muted-foreground ml-4">
-                <li>• Set the wavelength to λmax</li>
-                <li>• This ensures maximum sensitivity</li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-primary mb-3">Step 3: Verification of Beer-Lambert Law</h4>
-              <ul className="space-y-2 text-muted-foreground ml-4">
-                <li>• Prepare solutions of different concentrations</li>
-                <li>• Measure absorbance for each concentration</li>
-                <li>• Record data in a table</li>
-                <li>• Plot Absorbance (Y-axis) vs Concentration (X-axis)</li>
-                <li>• A straight line through origin verifies the law</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Tips */}
       <Card className="glass-card border-0 border-l-4 border-l-accent">
         <CardHeader>
