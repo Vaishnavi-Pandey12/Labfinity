@@ -1,12 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Target, BookOpen, Beaker, ListChecks, Lightbulb, Zap } from "lucide-react";
+import { Target, BookOpen, Beaker, Lightbulb, Zap } from "lucide-react";
 
 const RefractionTheory = () => {
   return (
@@ -91,65 +85,6 @@ const RefractionTheory = () => {
             <li>• White sheet of paper</li>
             <li>• Pencil & scale</li>
           </ul>
-        </CardContent>
-      </Card>
-
-      {/* Procedure */}
-      <Card className="glass-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-display">
-            <ListChecks className="w-5 h-5 text-primary" />
-            Procedure
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-
-            <AccordionItem value="step1">
-              <AccordionTrigger>
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                    1
-                  </span>
-                  Setup
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pl-11 text-muted-foreground">
-                Place the glass slab on paper and draw its outline. Shine a ray
-                of light at a chosen angle of incidence.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step2">
-              <AccordionTrigger>
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                    2
-                  </span>
-                  Measure Angles
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pl-11 text-muted-foreground">
-                Measure angle of incidence and angle of refraction using a protractor.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step3">
-              <AccordionTrigger>
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                    3
-                  </span>
-                  Verification
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pl-11 text-muted-foreground">
-                Calculate sin θ₁ and sin θ₂ and verify that their ratio remains constant.
-              </AccordionContent>
-            </AccordionItem>
-
-          </Accordion>
         </CardContent>
       </Card>
 
