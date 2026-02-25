@@ -9,14 +9,19 @@ import {
   ChevronLeft,
   BookOpen,
   Beaker,
-  Play
+  Play,
+  CheckCircle
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 import PotentiometryTheory from "@/components/experiment/PotentiometryTheory";
 import PotentiometrySimulator from "@/components/experiment/PotentiometrySimulator";
+import GraphUpload from "../components/experiment/GraphUpload";
+import { Upload } from "lucide-react"; // add icon
+import PotentiometryProcedure from "@/components/experiment/PotentiometryProcedure";
 
 const Experiment3 = () => {
   const [activeTab, setActiveTab] = useState("theory");
+  const [completed, setCompleted] = useState({ procedure: false });
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,6 +101,13 @@ const Experiment3 = () => {
               <BookOpen className="w-4 h-4" />
               Theory
             </TabsTrigger>
+            <TabsTrigger value="procedure" className="gap-2">
+              <FlaskConical className="w-4 h-4" />
+              Procedure
+              {completed.procedure && (
+                <CheckCircle className="w-4 h-4 text-green-500 ml-1" />
+              )}
+            </TabsTrigger>
             <TabsTrigger
               value="simulator"
               className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -107,6 +119,10 @@ const Experiment3 = () => {
 
           <TabsContent value="theory" className="mt-0">
             <PotentiometryTheory />
+          </TabsContent>
+
+          <TabsContent value="procedure">
+            <PotentiometryProcedure />
           </TabsContent>
 
           <TabsContent value="simulator" className="mt-0">
