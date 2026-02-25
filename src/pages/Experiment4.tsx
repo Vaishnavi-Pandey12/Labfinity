@@ -1,4 +1,6 @@
 import ExperimentLayout from "@/components/experiment/ExperimentLayout";
+import ObservationsSection from "@/components/experiment/ObservationsSection";
+import QuizSection from "@/components/experiment/QuizSection";
 import UVVisProcedure from "@/components/experiment/UVVisProcedure";
 import UVVisSimulator from "@/components/experiment/UVVisSimulator";
 import UVVisTheory from "@/components/experiment/UVVisTheory";
@@ -11,7 +13,8 @@ const Experiment4 = () => {
       theory={<UVVisTheory />}
       procedure={<UVVisProcedure />}
       simulator={<UVVisSimulator />}
-      lockOrder
+      observations={<ObservationsSection />}
+      quiz={<QuizSection />}
     />
   );
 };

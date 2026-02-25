@@ -1,8 +1,9 @@
 import ExperimentLayout from "@/components/experiment/ExperimentLayout";
-import GraphUpload from "@/components/experiment/GraphUpload";
+import ObservationsSection from "@/components/experiment/ObservationsSection";
 import PotentiometryProcedure from "@/components/experiment/PotentiometryProcedure";
 import PotentiometrySimulator from "@/components/experiment/PotentiometrySimulator";
 import PotentiometryTheory from "@/components/experiment/PotentiometryTheory";
+import QuizSection from "@/components/experiment/QuizSection";
 
 const Experiment3 = () => {
   return (
@@ -12,8 +13,8 @@ const Experiment3 = () => {
       theory={<PotentiometryTheory />}
       procedure={<PotentiometryProcedure />}
       simulator={<PotentiometrySimulator />}
-      upload={<GraphUpload studentId="student-1" experimentId="experiment-3" onUploadSuccess={() => {}} />}
-      lockOrder
+      observations={<ObservationsSection />}
+      quiz={<QuizSection />}
     />
   );
 };
