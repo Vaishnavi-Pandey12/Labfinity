@@ -14,6 +14,9 @@ import {
 import vitapLogo from "@/assets/vitap-logo.png";
 import PotentiometryTheory from "@/components/experiment/PotentiometryTheory";
 import PotentiometrySimulator from "@/components/experiment/PotentiometrySimulator";
+import GraphUpload from "../components/experiment/GraphUpload";
+import { Upload } from "lucide-react"; // add icon
+import PotentiometryProcedure from "@/components/experiment/PotentiometryProcedure";
 
 const Experiment3 = () => {
   const [activeTab, setActiveTab] = useState("theory");
