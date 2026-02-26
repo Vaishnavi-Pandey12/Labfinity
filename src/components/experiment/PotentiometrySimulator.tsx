@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import {
   Beaker,
   FlaskConical,
   Table2,
+  Download,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────
@@ -169,6 +170,49 @@ const PotentiometrySimulator = () => {
     setIsStirring(false);
   };
 
+  // ── Wire path: dynamically measured so it always connects ──
+  const containerRef = useRef<HTMLDivElement>(null);
+  const meterRef = useRef<HTMLDivElement>(null);
+  const electrodeRef = useRef<HTMLDivElement>(null);
+  const [wire1, setWire1] = useState("");
+  const [wire2, setWire2] = useState("");
+
+  useEffect(() => {
+    const computeWire = () => {
+      const c = containerRef.current;
+      const m = meterRef.current;
+      const e = electrodeRef.current;
+      if (!c || !m || !e) return;
+      const cr = c.getBoundingClientRect();
+      const mr = m.getBoundingClientRect();
+      const er = e.getBoundingClientRect();
+
+      // Red terminal: left banana-jack on the meter (left side of the two jacks)
+      const mx1 = mr.left - cr.left + mr.width * 0.36;
+      const my1 = mr.bottom - cr.top;
+      // Black terminal: slightly to the right
+      const mx2 = mr.left - cr.left + mr.width * 0.58;
+      const my2 = mr.bottom - cr.top;
+
+      // Electrode top centre
+      const ex = er.left - cr.left + er.width / 2;
+      const ey = er.top - cr.top;
+
+      // Control points: go DOWN from meter, then curve LEFT to electrode
+      const cp1y = my1 + (ey - my1) * 0.55;
+      const cp2x = ex + (mx1 - ex) * 0.4;
+
+      setWire1(`M ${mx1} ${my1} C ${mx1} ${cp1y}, ${cp2x} ${ey - 20}, ${ex - 4} ${ey}`);
+      setWire2(`M ${mx2} ${my2} C ${mx2} ${cp1y + 8}, ${cp2x + 12} ${ey - 14}, ${ex + 4} ${ey + 4}`);
+    };
+
+    computeWire();
+    const ro = new ResizeObserver(computeWire);
+    if (containerRef.current) ro.observe(containerRef.current);
+    window.addEventListener("resize", computeWire);
+    return () => { ro.disconnect(); window.removeEventListener("resize", computeWire); };
+  }, []);
+
   // ── Observation Table State ──
   const [tableRows, setTableRows] = useState<TableRow[]>([
     { volume: 0, pH: "" },
@@ -193,6 +237,39 @@ const PotentiometrySimulator = () => {
       }
       return copy;
     });
+  };
+
+  const downloadTableCSV = () => {
+    if (!processedTable || !tableMeta) return;
+
+    const headers = [
+      "S. No.",
+      tableMeta.acid_col,
+      tableMeta.base_col,
+      "pH measured",
+      "ΔpH",
+      "ΔV",
+      "ΔpH / ΔV",
+      "Remark"
+    ];
+
+    const csvRows = processedTable.map(row => [
+      row["S. No."],
+      acidVolume.toFixed(1),
+      row[tableMeta.base_col] ?? "",
+      row["pH measured"] ?? "",
+      row["ΔpH"] ?? "",
+      row["ΔV"] ?? "",
+      row["ΔpH / ΔV"] ?? "",
+      row["Remark"] ?? ""
+    ]);
+
+    const csvContent = [headers.join(","), ...csvRows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `potentiometry_titration_table.csv`;
+    link.click();
   };
 
   const generateTable = async () => {
@@ -326,26 +403,7 @@ const PotentiometrySimulator = () => {
               </Button>
             </div>
 
-            {/* pH display */}
-            <div className="bg-primary/10 rounded-xl p-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Current pH</p>
-                <p className="text-4xl font-display font-bold text-primary">
-                  {currentPH.toFixed(2)}
-                </p>
-                <div className="relative w-full h-3 rounded-full mt-3 overflow-hidden"
-                  style={{ background: "linear-gradient(to right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6)" }}
-                >
-                  <div
-                    className="absolute top-0 w-3 h-3 bg-white border-2 border-foreground rounded-full transition-all duration-300 shadow"
-                    style={{ left: `${(currentPH / 14) * 100}%`, transform: "translateX(-50%)" }}
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>Acidic</span><span>Neutral</span><span>Basic</span>
-                </div>
-              </div>
-            </div>
+            {/* pH display removed — shown on pH Meter in apparatus */}
           </CardContent>
         </Card>
 
@@ -358,16 +416,19 @@ const PotentiometrySimulator = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative h-[540px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner select-none">
+            <div
+              ref={containerRef}
+              className="relative h-[540px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner select-none"
+            >
 
               {/* ── Table surface ── */}
               <div className="absolute bottom-0 left-0 right-0 h-5 bg-amber-900/15 border-t border-amber-700/20 rounded-b-xl" />
 
               {/* ══════════════════════════════════
-                  STAND  (left side)
+                  STAND  (wider base so beaker sits on it)
               ══════════════════════════════════ */}
-              {/* Base plate */}
-              <div className="absolute bottom-5 left-[60px] w-[150px] h-5 bg-gradient-to-r from-slate-600 to-slate-500 rounded shadow-lg" />
+              {/* Base plate — widened to span under beaker */}
+              <div className="absolute bottom-5 left-[40px] w-[230px] h-5 bg-gradient-to-r from-slate-600 to-slate-500 rounded shadow-lg" />
               {/* Vertical rod */}
               <div
                 className="absolute left-[128px] w-3 bg-gradient-to-b from-slate-300 to-slate-400 rounded-t shadow-md"
@@ -425,13 +486,15 @@ const PotentiometrySimulator = () => {
               </div>
 
               {/* ══════════════════════════════════
-                  BEAKER  (on stand base platform)
+                  BEAKER  — centred under burette tip
+                  Burette left-[190px] + w-7 → centre ≈ 204px
+                  Beaker w-[130px] → left = 204 - 65 = 139px
               ══════════════════════════════════ */}
-              {/* Support platform (wire gauze / ceramic pad look) */}
-              <div className="absolute bottom-[25px] left-[62px] w-[146px] h-3 bg-slate-500/70 rounded shadow-md" />
+              {/* Support platform on stand base */}
+              <div className="absolute bottom-[25px] left-[139px] w-[130px] h-3 bg-slate-500/70 rounded shadow-md" />
 
-              {/* Beaker placed on platform */}
-              <div className="absolute bottom-[38px] left-[70px] w-[130px] z-10">
+              {/* Beaker placed on platform, centred under burette */}
+              <div className="absolute bottom-[38px] left-[139px] w-[130px] z-10">
                 {/* Beaker glass body */}
                 <div className="relative w-full h-[155px] bg-white/6 backdrop-blur-sm border-2 border-slate-300/50 border-t-0 rounded-b-2xl overflow-hidden shadow-xl">
                   {/* Rim highlight */}
@@ -467,10 +530,10 @@ const PotentiometrySimulator = () => {
               </div>
 
               {/* ══════════════════════════════════
-                  ELECTRODE  (inside beaker)
+                  ELECTRODE  — offset to left side of beaker
+                  Beaker left=139, slightly inside left rim → left=156
               ══════════════════════════════════ */}
-              {/* Electrode clamped to stand and dipped into beaker */}
-              <div className="absolute z-30" style={{ bottom: "80px", left: "152px" }}>
+              <div ref={electrodeRef} className="absolute z-30" style={{ bottom: "80px", left: "160px" }}>
                 {/* Electrode body */}
                 <div className="w-[14px] h-[110px] bg-gradient-to-b from-slate-300 via-slate-200 to-slate-100 border border-slate-400/70 rounded-full shadow-lg flex flex-col items-center justify-end overflow-hidden">
                   {/* Sensing bulb at tip */}
@@ -481,7 +544,15 @@ const PotentiometrySimulator = () => {
               {/* ══════════════════════════════════
                   pH METER  (right side, mounted)
               ══════════════════════════════════ */}
-              <div className="absolute top-[30px] right-[16px] w-[108px] z-40">
+              {/* Dynamic wire SVG — drawn after refs measured */}
+              {wire1 && (
+                <svg className="absolute inset-0 w-full h-full pointer-events-none z-50" overflow="visible">
+                  <path d={wire1} stroke="#ef4444" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                  <path d={wire2} stroke="#0f172a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                </svg>
+              )}
+
+              <div ref={meterRef} className="absolute top-[30px] right-[16px] w-[108px] z-40">
                 {/* Device body */}
                 <div className="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl p-3 flex flex-col items-center gap-2">
                   <span className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">PH METER</span>
@@ -506,24 +577,6 @@ const PotentiometrySimulator = () => {
                     <div className="w-2.5 h-3.5 bg-slate-900 rounded-sm shadow border border-slate-600" />
                   </div>
                 </div>
-
-                {/* ── Connecting wire: pH meter → electrode ── */}
-                {/* SVG cable from meter terminals down and left to the electrode */}
-                <svg
-                  className="absolute"
-                  style={{ top: "100%", right: "20px" }}
-                  width="200" height="240"
-                  overflow="visible"
-                >
-                  {/* Cable drawn as a gentle S-curve from meter bottom-right to electrode top */}
-                  <path
-                    d="M 20 0 C 20 60, -130 80, -130 180"
-                    stroke="#94a3b8"
-                    strokeWidth="2"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                </svg>
               </div>
 
             </div>
@@ -626,7 +679,18 @@ const PotentiometrySimulator = () => {
               transition={{ duration: 0.35 }}
               className="overflow-x-auto"
             >
-              <p className="text-sm font-semibold mb-2 text-foreground">Processed Results</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-foreground">Processed Results</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadTableCSV}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download CSV
+                </Button>
+              </div>
               <table className="w-full text-sm border border-border rounded-xl overflow-hidden">
                 <thead className="bg-muted/60">
                   <tr>

@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Play, 
-  RotateCcw, 
+import {
+  Play,
+  RotateCcw,
   Lightbulb,
   Scan
 } from "lucide-react";
@@ -86,7 +86,7 @@ const compoundDatabase: Record<Compound, CompoundData> = {
 const generateSpectrum = (compound: Compound): { wavelength: number; absorbance: number }[] => {
   const data = compoundDatabase[compound];
   const points: { wavelength: number; absorbance: number }[] = [];
-  
+
   for (let wavelength = 200; wavelength <= 500; wavelength += 2) {
     let absorbance = 0;
     for (const peak of data.peaks) {
@@ -97,7 +97,7 @@ const generateSpectrum = (compound: Compound): { wavelength: number; absorbance:
     }
     points.push({ wavelength, absorbance: Math.min(absorbance, 2.5) });
   }
-  
+
   return points;
 };
 
@@ -124,7 +124,7 @@ const UVVisSimulator = () => {
 
     const spectrum = generateSpectrum(compound);
     let index = 0;
-    
+
     const scanInterval = setInterval(() => {
       if (index < spectrum.length) {
         setScannedData(prev => [...prev, { x: spectrum[index].wavelength, y: spectrum[index].absorbance }]);
@@ -164,8 +164,8 @@ const UVVisSimulator = () => {
             {/* Compound Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Select Compound</label>
-              <Select 
-                value={compound} 
+              <Select
+                value={compound}
                 onValueChange={(v) => setCompound(v as Compound)}
                 disabled={isScanning}
               >
@@ -242,100 +242,128 @@ const UVVisSimulator = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative h-72 bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden">
-              {/* Light Source */}
-              <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                <motion.div
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-300 to-orange-400 flex items-center justify-center"
-                  animate={isScanning ? { 
-                    boxShadow: ["0 0 20px rgba(251, 191, 36, 0.5)", "0 0 40px rgba(251, 191, 36, 0.8)", "0 0 20px rgba(251, 191, 36, 0.5)"]
-                  } : {}}
-                  transition={{ duration: 1, repeat: Infinity }}
-                >
-                  <Lightbulb className="w-8 h-8 text-white" />
-                </motion.div>
-                <p className="text-xs text-center mt-2 text-muted-foreground">UV/Vis<br/>Source</p>
+            <div className="relative h-80 bg-[#f8fafc] rounded-xl overflow-hidden flex items-center justify-center px-4 md:px-10">
+              {/* Wavelength Display Container - Top Right */}
+              <div className="absolute top-6 right-6 bg-white border border-slate-200 rounded-2xl px-5 py-3 shadow-sm flex flex-col items-center min-w-[120px] z-30">
+                <span className="text-sm font-medium text-slate-500 mb-1">Wavelength</span>
+                <span className="text-2xl font-bold text-blue-600 font-mono tracking-wider flex items-center gap-1">
+                  {isScanning ? `${(200 + (scanProgress * 3)).toFixed(0)}` : "---"}
+                  <span className="text-lg"> nm</span>
+                </span>
               </div>
 
-              {/* Light Beam */}
-              <motion.div
-                className="absolute left-24 top-1/2 -translate-y-1/2 h-4"
-                style={{
-                  width: 60,
-                  background: isScanning 
-                    ? `linear-gradient(90deg, 
-                        hsl(${280 - (scanProgress * 0.8)}, 100%, 60%), 
-                        hsl(${280 - (scanProgress * 0.8) + 20}, 100%, 60%))`
-                    : 'linear-gradient(90deg, #666, #888)',
-                }}
-                animate={isScanning ? { opacity: [0.7, 1, 0.7] } : {}}
-                transition={{ duration: 0.5, repeat: Infinity }}
-              />
+              {/* Main Setup Container */}
+              <div className="w-full flex items-center justify-between relative z-10 max-w-4xl mx-auto pt-8">
 
-              {/* Monochromator */}
-              <div className="absolute left-36 top-1/2 -translate-y-1/2">
-                <div className="w-12 h-20 bg-gradient-to-b from-gray-600 to-gray-700 rounded flex items-center justify-center">
-                  <div 
-                    className="w-8 h-16 rounded"
-                    style={{
-                      background: 'linear-gradient(to bottom, #8B00FF, #0000FF, #00FFFF, #00FF00, #FFFF00, #FF7F00, #FF0000)',
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-center mt-1 text-muted-foreground">Mono-<br/>chromator</p>
-              </div>
-
-              {/* Sample Cuvette */}
-              <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
-                <div className="w-10 h-24 border-2 border-gray-400 rounded-b-lg overflow-hidden bg-white/10">
+                {/* 1. UV/Vis Source */}
+                <div className="flex flex-col items-center z-20 w-24 flex-shrink-0 relative group">
                   <motion.div
-                    className="w-full h-16 mt-4"
-                    style={{ backgroundColor: compoundData.color === 'transparent' ? 'rgba(200, 200, 200, 0.2)' : compoundData.color }}
-                    animate={isScanning ? { opacity: [0.5, 0.8, 0.5] } : {}}
+                    className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-[#fcd34d] via-[#fbbf24] to-[#f59e0b] flex items-center justify-center shadow-[0_0_30px_rgba(251,191,36,0.4)]"
+                    animate={isScanning ? {
+                      boxShadow: ["0 0 20px rgba(251, 191, 36, 0.4)", "0 0 50px rgba(251, 191, 36, 0.8)", "0 0 20px rgba(251, 191, 36, 0.4)"]
+                    } : {}}
                     transition={{ duration: 1, repeat: Infinity }}
-                  />
+                  >
+                    <Lightbulb className="w-8 h-8 text-white drop-shadow-sm" />
+                  </motion.div>
+                  <p className="text-[13px] text-center mt-5 text-slate-500 font-medium leading-tight">UV/Vis<br />Source</p>
                 </div>
-                <p className="text-xs text-center mt-1 text-muted-foreground">Sample</p>
-              </div>
 
-              {/* Transmitted Light */}
-              <AnimatePresence>
-                {isScanning && (
-                  <motion.div
-                    className="absolute right-24 top-1/2 -translate-y-1/2 h-2"
-                    initial={{ width: 0 }}
-                    animate={{ width: 60 }}
-                    style={{
-                      background: `hsl(${280 - (scanProgress * 0.8)}, 100%, 60%)`,
-                      opacity: 0.6,
-                    }}
-                  />
-                )}
-              </AnimatePresence>
+                {/* Gray Connector */}
+                <div className="w-12 h-3 bg-gradient-to-b from-gray-400 to-gray-500 rounded-sm -ml-4 z-10 flex-shrink-0 relative -top-6"></div>
 
-              {/* Detector */}
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center border-2 border-gray-600">
-                  <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center">
-                    <motion.div
-                      className="w-4 h-4 rounded-full"
+                {/* 2. Monochromator */}
+                <div className="flex flex-col items-center z-20 w-24 flex-shrink-0 -ml-4 relative">
+                  <div className="w-[64px] h-[110px] bg-[#334155] rounded-xl flex items-center justify-center p-[6px] shadow-xl border border-slate-600/50">
+                    <div
+                      className="w-full h-full rounded-[4px] shadow-inner"
                       style={{
-                        backgroundColor: isScanning ? '#22c55e' : '#666',
+                        background: 'linear-gradient(to bottom, #7e22ce, #3b82f6, #06b6d4, #10b981, #eab308, #f97316, #ef4444)',
                       }}
-                      animate={isScanning ? { scale: [1, 1.2, 1] } : {}}
-                      transition={{ duration: 0.5, repeat: Infinity }}
                     />
                   </div>
+                  <p className="text-[13px] text-center mt-5 text-slate-500 font-medium leading-tight absolute -bottom-12 w-24">Mono-<br />chromator</p>
                 </div>
-                <p className="text-xs text-center mt-2 text-muted-foreground">Detector</p>
-              </div>
 
-              {/* Wavelength Display */}
-              <div className="absolute top-4 right-4 bg-card border border-border rounded-lg px-3 py-2">
-                <p className="text-xs text-muted-foreground">Wavelength</p>
-                <p className="text-lg font-mono font-bold text-primary">
-                  {isScanning ? `${(200 + (scanProgress * 3)).toFixed(0)} nm` : "--- nm"}
-                </p>
+                {/* Beam 1: Monochromator to Sample */}
+                <div className="flex-1 h-3 z-10 relative -top-6 min-w-[40px]">
+                  <motion.div
+                    className="w-full h-full"
+                    style={{
+                      background: isScanning
+                        ? `linear-gradient(90deg, 
+                            hsl(${280 - (scanProgress * 0.8)}, 100%, 60%), 
+                            hsl(${280 - (scanProgress * 0.8) + 20}, 100%, 60%))`
+                        : 'linear-gradient(90deg, #ef4444, #f97316, #eab308, #10b981)',
+                    }}
+                  />
+                </div>
+
+                {/* 3. Sample Platform and Cuvette */}
+                <div className="flex flex-col items-center z-20 w-32 flex-shrink-0 relative">
+                  <div className="relative flex flex-col items-center">
+                    {/* Cuvette */}
+                    <div className="w-[48px] h-[90px] border-x-[3px] border-b-[4px] border-t-0 border-white/80 bg-white/20 rounded-b-lg overflow-hidden relative z-20 shadow-[inset_0_0_15px_rgba(255,255,255,0.8),_0_4px_10px_rgba(0,0,0,0.1)] translate-y-3 backdrop-blur-sm">
+                      <motion.div
+                        className="absolute bottom-0 w-full rounded-b-md"
+                        style={{
+                          height: '65%',
+                          backgroundColor: compoundData.color === 'transparent' ? '#fde68a' : compoundData.color,
+                          opacity: 0.8
+                        }}
+                        animate={isScanning ? { opacity: [0.7, 0.9, 0.7] } : {}}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        {/* Highlights for liquid */}
+                        <div className="absolute inset-x-0 top-0 h-1 bg-white/40" />
+                        <div className="absolute right-1 top-1 bottom-1 w-2 bg-white/20 rounded-full" />
+                      </motion.div>
+                      {/* Glass glare */}
+                      <div className="absolute left-1 top-2 bottom-2 w-2 bg-white/40 rounded-full" />
+                    </div>
+                    {/* Platform */}
+                    <div className="w-32 h-10 rounded-t-sm rounded-b-lg shadow-2xl relative z-10 bg-[#2d3748]">
+                      {/* Platform top highlighting */}
+                      <div className="absolute top-0 left-0 w-full h-3 bg-[#4a5568] rounded-t-sm" />
+                    </div>
+                  </div>
+                  <p className="text-[13px] text-center mt-5 text-slate-500 font-medium absolute -bottom-12 w-32">Sample</p>
+                </div>
+
+                {/* Beam 2: Sample to Detector */}
+                <div className="flex-1 h-3 z-10 relative -top-6 min-w-[40px]">
+                  {(!isScanning || (isScanning && scanProgress > 0)) && (
+                    <motion.div
+                      className="w-full h-full"
+                      style={{
+                        background: isScanning
+                          ? `linear-gradient(90deg, 
+                              hsl(${280 - (scanProgress * 0.8) + 20}, 100%, 60%), 
+                              transparent)`
+                          : 'linear-gradient(90deg, #06b6d4, #3b82f6, #7e22ce, rgba(126, 34, 206, 0.1))',
+                        opacity: isScanning ? 0.6 : 0.8,
+                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: isScanning ? 0.6 : 0.8 }}
+                    />
+                  )}
+                </div>
+
+                {/* 4. Detector */}
+                <div className="flex flex-col items-center z-20 w-24 flex-shrink-0 relative">
+                  <div className="w-[84px] h-[84px] bg-[#2d3748] rounded-[1.5rem] shadow-xl flex items-center justify-center border border-slate-600/50 relative -top-2">
+                    <div className="w-10 h-10 rounded-full bg-[#171923] shadow-inner flex items-center justify-center border border-slate-700">
+                      <motion.div
+                        className="w-4 h-4 rounded-full"
+                        style={{
+                          backgroundColor: isScanning ? '#22c55e' : '#4a5568',
+                          boxShadow: isScanning ? '0 0 10px #22c55e' : 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[13px] text-center mt-5 text-slate-500 font-medium absolute -bottom-10 w-24">Detector</p>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -398,14 +426,14 @@ const UVVisSimulator = () => {
                     </ul>
                   </div>
                 </div>
-                
+
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="mt-6 p-4 bg-green-500/10 rounded-lg border border-green-500/20"
                 >
                   <p className="text-green-600 dark:text-green-400 font-medium">
-                    ✓ Spectrum recorded successfully! The absorption peaks correspond to the 
+                    ✓ Spectrum recorded successfully! The absorption peaks correspond to the
                     expected electronic transitions for {compoundData.name}.
                   </p>
                 </motion.div>
