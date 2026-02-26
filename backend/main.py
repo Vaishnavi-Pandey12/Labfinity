@@ -1,7 +1,6 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from datetime import datetime
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List, Optional
@@ -9,29 +8,15 @@ from supabase import create_client, Client
 import os
 import shutil
 import uuid
-import psycopg2
-import bcrypt
 from chem_tables import electrochemistry_cell_table, generate_lambda_max_table, generate_concentration_absorbance_table, generate_ph_titration_table
 
 # ---------------- Load Environment ----------------
 load_dotenv()
 
 # ---------------- Supabase Client ----------------
-SUPABASE_URL: str = os.getenv("SUPABASE_URL")
-SUPABASE_KEY: str = os.getenv("SUPABASE_KEY")
+SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# ---------------- Supabase DB Connection (Direct SQL) ----------------
-def get_db_connection():
-    conn = psycopg2.connect(
-        host=os.getenv("SUPABASE_HOST"),
-        user=os.getenv("SUPABASE_USER"),
-        password=os.getenv("SUPABASE_PASSWORD"),
-        dbname=os.getenv("SUPABASE_DB"),
-        port=int(os.getenv("SUPABASE_PORT", "5432")),
-        sslmode="require",
-    )
-    return conn
 
 # ---------------- App ----------------
 app = FastAPI()
@@ -72,41 +57,134 @@ def supabase_test():
         raise HTTPException(status_code=500, detail=f"Supabase connection failed: {str(e)}")
 
 
-# ---------------- Student Registration ----------------
+# ---------------- Auth: Sign Up ----------------
 
-class RegisterRequest(BaseModel):
-    name: str
+class SignUpRequest(BaseModel):
+    full_name: str
     email: str
     password: str
 
-@app.post("/api/register")
-def register_student(req: RegisterRequest):
+@app.post("/api/signup")
+def sign_up(req: SignUpRequest):
     """
-    Register a new student: hash password with bcrypt and insert into Supabase students table.
-    Returns 409 if the email already exists.
+    Create a new student via Supabase Auth.
+    full_name is stored in user metadata AND in the students table.
     """
-    # Hash the password
-    hashed_pw = bcrypt.hashpw(req.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
     try:
-        # Check if student already exists
-        existing = supabase.table("students").select("email").eq("email", req.email).execute()
-        if existing.data:
-            raise HTTPException(status_code=409, detail="A student with this email already exists.")
-
-        # Insert new student using Supabase client
-        response = supabase.table("students").insert({
-            "name": req.name,
+        # 1. Create auth user — store full_name in metadata so it's always available
+        auth_response = supabase.auth.sign_up({
             "email": req.email,
-            "encrypted_password": hashed_pw
-        }).execute()
+            "password": req.password,
+            "options": {
+                "data": {"full_name": req.full_name}
+            }
+        })
+        user = auth_response.user
+        if not user:
+            raise HTTPException(status_code=400, detail="Sign-up failed. Email may already be registered.")
+
+        # 2. Try to insert profile row into students table (may fail if email confirmation pending)
+        try:
+            supabase.table("students").insert({
+                "id": user.id,
+                "full_name": req.full_name,
+            }).execute()
+        except Exception as table_err:
+            print(f"[SIGNUP] students table insert failed (non-fatal): {table_err}")
+            # Auth user was created; students table will be populated via trigger if set up
+
+        return {
+            "message": "Account created successfully",
+            "user_id": user.id,
+            "email": user.email,
+            "full_name": req.full_name,
+        }
     except HTTPException:
         raise
     except Exception as e:
-        print(f"[DB ERROR] {e}")
+        print(f"[SIGNUP ERROR] {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "User registered successfully"}
+
+# ---------------- Auth: Sign In ----------------
+
+class SignInRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/signin")
+def sign_in(req: SignInRequest):
+    """
+    Sign in an existing student via Supabase Auth.
+    Returns access_token and student info.
+    """
+    try:
+        auth_response = supabase.auth.sign_in_with_password({
+            "email": req.email,
+            "password": req.password,
+        })
+        user = auth_response.user
+        session = auth_response.session
+        if not user or not session:
+            raise HTTPException(status_code=401, detail="Invalid email or password.")
+
+        # Fetch full_name — try students table first, fall back to user metadata
+        full_name = ""
+        try:
+            profile = supabase.table("students").select("full_name").eq("id", user.id).single().execute()
+            full_name = profile.data.get("full_name", "") if profile.data else ""
+        except Exception:
+            pass
+        if not full_name:
+            # Fallback: read from auth user metadata set during sign_up
+            full_name = (user.user_metadata or {}).get("full_name", "")
+
+        return {
+            "access_token": session.access_token,
+            "user_id": user.id,
+            "email": user.email,
+            "full_name": full_name,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[SIGNIN ERROR] {e}")
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+
+
+# ---------------- Auth: Get Current User ----------------
+
+@app.get("/api/me")
+def get_me(authorization: Optional[str] = Header(None)):
+    """
+    Return current user info using the Bearer token from the Authorization header.
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    token = authorization.split(" ", 1)[1]
+    try:
+        user_response = supabase.auth.get_user(token)
+        user = user_response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid or expired token")
+        profile = supabase.table("students").select("full_name").eq("id", user.id).single().execute()
+        full_name = profile.data.get("full_name", "") if profile.data else ""
+        return {"user_id": user.id, "email": user.email, "full_name": full_name}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+
+# ---------------- Auth: Sign Out ----------------
+
+@app.post("/api/signout")
+def sign_out(authorization: Optional[str] = Header(None)):
+    """
+    Sign out the current user (invalidate server-side session if possible).
+    """
+    # Client should delete stored token; this just confirms logout
+    return {"message": "Signed out successfully"}
 
 
 # ---------------- Electrochemistry Table ----------------

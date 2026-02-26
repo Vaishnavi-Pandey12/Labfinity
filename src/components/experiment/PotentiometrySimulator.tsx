@@ -11,7 +11,6 @@ import {
   FlaskConical,
   Table2,
 } from "lucide-react";
-import AbsorbanceGraph from "./AbsorbanceGraph";
 
 // ─────────────────────────────────────────────
 //  Types
@@ -359,29 +358,37 @@ const PotentiometrySimulator = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative h-[520px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner select-none">
+            <div className="relative h-[540px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner select-none">
 
-              {/* Table surface */}
+              {/* ── Table surface ── */}
               <div className="absolute bottom-0 left-0 right-0 h-5 bg-amber-900/15 border-t border-amber-700/20 rounded-b-xl" />
 
-              {/* ─── Stand ─── */}
+              {/* ══════════════════════════════════
+                  STAND  (left side)
+              ══════════════════════════════════ */}
               {/* Base plate */}
-              <div className="absolute bottom-5 left-[80px] w-40 h-4 bg-gradient-to-r from-slate-600 to-slate-500 rounded shadow-lg" />
+              <div className="absolute bottom-5 left-[60px] w-[150px] h-5 bg-gradient-to-r from-slate-600 to-slate-500 rounded shadow-lg" />
               {/* Vertical rod */}
-              <div className="absolute bottom-9 left-[154px] w-3 bg-gradient-to-r from-slate-400 to-slate-300 rounded-t shadow-md"
-                style={{ height: "calc(100% - 56px)" }} />
-              {/* Horizontal clamp arm (for burette) */}
-              <div className="absolute top-[32px] left-[154px] w-28 h-3 bg-gradient-to-r from-slate-500 to-slate-400 rounded-r shadow" />
-              {/* Clamp block */}
-              <div className="absolute top-[26px] left-[148px] w-10 h-[14px] bg-slate-600 rounded shadow" />
+              <div
+                className="absolute left-[128px] w-3 bg-gradient-to-b from-slate-300 to-slate-400 rounded-t shadow-md"
+                style={{ bottom: "calc(5px + 20px)", top: "8px" }}
+              />
 
-              {/* ─── Burette ─── */}
-              {/* Mounted via clamp at left-[268px] (end of arm) */}
-              <div className="absolute top-[12px] left-[264px] flex flex-col items-center z-20">
-                {/* Burette top cap */}
-                <div className="w-9 h-3 bg-slate-500 rounded-t shadow" />
-                {/* Burette body */}
-                <div className="w-7 h-72 bg-white/15 backdrop-blur-sm border-2 border-slate-400/60 relative overflow-hidden shadow-xl">
+              {/* Burette clamp arm (horizontal, near top) */}
+              <div className="absolute top-[20px] left-[128px] w-[70px] h-3 bg-gradient-to-r from-slate-500 to-slate-400 rounded-r shadow" />
+              {/* Clamp ring around burette */}
+              <div className="absolute top-[14px] left-[184px] w-5 h-[14px] bg-slate-600 rounded shadow z-30" />
+
+              {/* ══════════════════════════════════
+                  BURETTE  (clamped to stand rod)
+              ══════════════════════════════════ */}
+              <div className="absolute top-[8px] left-[190px] flex flex-col items-center z-20">
+                {/* Top cap / funnel rim */}
+                <div className="w-10 h-3 bg-slate-500 rounded-t-md shadow" />
+                {/* Label above burette */}
+                <div className="absolute -top-4 left-0 right-0 text-center text-[8px] font-mono text-slate-500 font-semibold">{selectedBase.value}</div>
+                {/* Burette tube */}
+                <div className="w-7 h-[260px] bg-white/10 backdrop-blur-sm border-2 border-slate-400/60 relative overflow-hidden shadow-xl">
                   {/* Graduation marks */}
                   {[...Array(11)].map((_, i) => (
                     <div key={i} className="absolute right-0 flex items-center gap-0.5" style={{ top: `${i * 9.1}%` }}>
@@ -389,110 +396,134 @@ const PotentiometrySimulator = () => {
                       <div className="w-2 h-[1px] bg-slate-500/70" />
                     </div>
                   ))}
-                  {/* Liquid */}
+                  {/* Liquid fill */}
                   <motion.div
                     className="absolute bottom-0 left-0 right-0"
-                    style={{ background: selectedBase.value === "NH3" ? "rgba(250,204,21,0.4)" : "rgba(96,165,250,0.4)" }}
+                    style={{ background: selectedBase.value === "NH3" ? "rgba(250,204,21,0.45)" : "rgba(96,165,250,0.45)" }}
                     animate={{ height: `${Math.max(0, 100 - (volumeAdded / 40) * 100)}%` }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
                   />
-                  {/* Fill label */}
-                  <div className="absolute top-1 left-0 right-0 text-center text-[7px] font-mono text-slate-500">{selectedBase.value}</div>
                 </div>
                 {/* Stopcock */}
                 <div className="flex flex-col items-center">
                   <div className="w-2 h-2 bg-slate-400" />
-                  <div className={`w-8 h-2 bg-slate-700 rounded-full transition-transform duration-300 shadow ${isStirring ? "rotate-90" : ""}`} />
-                  <div className="w-2 h-7 bg-slate-400 rounded-b-sm" />
+                  <div className={`w-9 h-2.5 bg-slate-700 rounded-full shadow transition-transform duration-300 ${isStirring ? "rotate-90" : ""}`} />
+                  <div className="w-2 h-8 bg-slate-400 rounded-b-sm" />
                 </div>
-                {/* Drip */}
+                {/* Drip drop */}
                 <AnimatePresence>
                   {isStirring && (
                     <motion.div
                       initial={{ y: 0, opacity: 1, scale: 1 }}
-                      animate={{ y: 55, opacity: 0, scale: 0.4 }}
+                      animate={{ y: 60, opacity: 0, scale: 0.3 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
-                      className="absolute top-[100%] left-1/2 -translate-x-1/2 w-2.5 h-3 bg-blue-400/70 rounded-b-full"
+                      transition={{ duration: 0.65, repeat: Infinity, ease: "linear" }}
+                      className="w-2.5 h-3 bg-blue-400/80 rounded-b-full"
                     />
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* ─── Beaker on stand base ─── */}
-              {/* Stand platform under beaker (different from base rod) */}
-              <div className="absolute bottom-9 left-[88px] w-36 h-3 bg-slate-500/60 rounded shadow" />
+              {/* ══════════════════════════════════
+                  BEAKER  (on stand base platform)
+              ══════════════════════════════════ */}
+              {/* Support platform (wire gauze / ceramic pad look) */}
+              <div className="absolute bottom-[25px] left-[62px] w-[146px] h-3 bg-slate-500/70 rounded shadow-md" />
 
-              <div className="absolute bottom-[52px] left-[96px] w-36 z-10">
-                {/* Beaker body */}
-                <div className="relative w-full h-44 bg-white/8 backdrop-blur-sm border-2 border-slate-300/50 border-t-0 rounded-b-2xl overflow-hidden shadow-xl">
-                  {/* Rim */}
+              {/* Beaker placed on platform */}
+              <div className="absolute bottom-[38px] left-[70px] w-[130px] z-10">
+                {/* Beaker glass body */}
+                <div className="relative w-full h-[155px] bg-white/6 backdrop-blur-sm border-2 border-slate-300/50 border-t-0 rounded-b-2xl overflow-hidden shadow-xl">
+                  {/* Rim highlight */}
                   <div className="absolute -top-0.5 left-0 right-0 h-1.5 bg-slate-300/40 rounded-full" />
+                  {/* Measurement lines */}
+                  {[25, 50, 75].map(pct => (
+                    <div key={pct} className="absolute left-2 right-2 h-[1px] bg-slate-300/20" style={{ bottom: `${pct}%` }} />
+                  ))}
                   {/* Solution */}
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 rounded-b-2xl transition-colors duration-700"
+                    className="absolute bottom-0 left-0 right-0 rounded-b-2xl"
                     style={{
                       backgroundColor: getSolutionColor(currentPH),
-                      height: `${45 + volumeAdded * 1.2}%`,
+                      height: `${40 + volumeAdded * 1.1}%`,
                     }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <div className="absolute top-0 w-full h-2 bg-white/25 blur-[1px]" />
+                    <div className="absolute top-0 w-full h-2 bg-white/20 blur-[1px]" />
                   </motion.div>
-                  {/* Magnetic stirrer */}
+                  {/* Magnetic stirrer bar */}
                   <motion.div
-                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-7 h-2 bg-white/80 rounded-full shadow-md"
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-8 h-2 bg-white/80 rounded-full shadow-md"
                     animate={isStirring ? { rotate: 360 } : {}}
                     transition={{ duration: 0.25, repeat: Infinity, ease: "linear" }}
                   />
                 </div>
-                {/* Beaker spout / rim top */}
+                {/* Beaker top rim / pouring lip */}
                 <div className="absolute -top-3 left-2 right-2 h-3 border-2 border-slate-300/50 border-b-0 rounded-t-sm" />
-                {/* Beaker label */}
-                <div className="absolute -bottom-6 left-0 right-0 text-center text-xs font-medium text-muted-foreground">
+                {/* Label */}
+                <div className="absolute -bottom-6 left-0 right-0 text-center text-[11px] font-medium text-muted-foreground">
                   {selectedAcid.value} + {selectedBase.value}
                 </div>
               </div>
 
-              {/* ─── Electrode ─── */}
-              {/* Probe inside beaker  */}
-              <div className="absolute bottom-[94px] left-[208px] z-30 flex flex-col items-center">
-                {/* Wire going up-right to pH meter */}
-                <svg className="absolute bottom-[100%] left-1/2" width="90" height="120" style={{ transform: "translateX(-50%)" }} overflow="visible">
-                  <path d="M 28 110 C 28 60, 80 40, 80 0" stroke="#94a3b8" strokeWidth="1.5" fill="none" strokeDasharray="none" />
-                </svg>
+              {/* ══════════════════════════════════
+                  ELECTRODE  (inside beaker)
+              ══════════════════════════════════ */}
+              {/* Electrode clamped to stand and dipped into beaker */}
+              <div className="absolute z-30" style={{ bottom: "80px", left: "152px" }}>
                 {/* Electrode body */}
-                <div className="w-4 h-36 bg-gradient-to-b from-slate-300 to-slate-200 border border-slate-400/70 rounded-full shadow-lg flex flex-col items-center justify-end overflow-hidden">
-                  <div className="w-full h-6 bg-blue-200/70 border-t border-slate-400/40 rounded-b-full" />
+                <div className="w-[14px] h-[110px] bg-gradient-to-b from-slate-300 via-slate-200 to-slate-100 border border-slate-400/70 rounded-full shadow-lg flex flex-col items-center justify-end overflow-hidden">
+                  {/* Sensing bulb at tip */}
+                  <div className="w-full h-7 bg-blue-200/80 border-t border-slate-400/40 rounded-b-full" />
                 </div>
               </div>
 
-              {/* ─── pH Meter / Digital Voltmeter ─── */}
-              <div className="absolute top-[28px] right-6 w-[96px] z-40">
+              {/* ══════════════════════════════════
+                  pH METER  (right side, mounted)
+              ══════════════════════════════════ */}
+              <div className="absolute top-[30px] right-[16px] w-[108px] z-40">
                 {/* Device body */}
-                <div className="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl p-2.5 flex flex-col items-center gap-2">
-                  <span className="text-[9px] text-slate-400 font-semibold tracking-widest uppercase">pH Meter</span>
-                  {/* LCD display */}
-                  <div className="w-full bg-green-950 border border-green-800 rounded-md px-2 py-1.5 text-center shadow-inner">
-                    <span className="text-green-400 font-mono text-xl font-bold tracking-wider">
+                <div className="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl p-3 flex flex-col items-center gap-2">
+                  <span className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">PH METER</span>
+                  {/* LCD */}
+                  <div className="w-full bg-green-950 border border-green-800 rounded-md px-2 py-2 text-center shadow-inner">
+                    <span className="text-green-400 font-mono text-[22px] font-bold tracking-wider leading-none">
                       {currentPH.toFixed(2)}
                     </span>
                     <span className="text-green-600 text-[10px] ml-1">pH</span>
                   </div>
-                  {/* Indicator LED */}
+                  {/* Status LED */}
                   <div className="flex items-center gap-1.5">
-                    <div className={`w-2 h-2 rounded-full shadow ${currentPH < 7 ? "bg-red-500" : currentPH > 7 ? "bg-blue-500" : "bg-green-500"}`} />
-                    <span className="text-[9px] text-slate-400">
+                    <div className={`w-2.5 h-2.5 rounded-full shadow-md ${currentPH < 7 ? "bg-red-500" : currentPH > 7 ? "bg-blue-500" : "bg-green-500"
+                      }`} />
+                    <span className="text-[9px] text-slate-300">
                       {currentPH < 6.8 ? "Acidic" : currentPH > 7.2 ? "Basic" : "Neutral"}
                     </span>
                   </div>
-                  {/* Probe terminals */}
-                  <div className="flex gap-2 mt-0.5">
-                    <div className="w-2 h-3 bg-red-500/80 rounded-sm" />
-                    <div className="w-2 h-3 bg-black rounded-sm" />
+                  {/* Banana jack terminals */}
+                  <div className="flex gap-3 mt-0.5">
+                    <div className="w-2.5 h-3.5 bg-red-500 rounded-sm shadow" />
+                    <div className="w-2.5 h-3.5 bg-slate-900 rounded-sm shadow border border-slate-600" />
                   </div>
                 </div>
-                {/* Wire from meter down to electrode */}
-                <div className="w-[1.5px] h-16 bg-slate-400/70 mx-auto" />
+
+                {/* ── Connecting wire: pH meter → electrode ── */}
+                {/* SVG cable from meter terminals down and left to the electrode */}
+                <svg
+                  className="absolute"
+                  style={{ top: "100%", right: "20px" }}
+                  width="200" height="240"
+                  overflow="visible"
+                >
+                  {/* Cable drawn as a gentle S-curve from meter bottom-right to electrode top */}
+                  <path
+                    d="M 20 0 C 20 60, -130 80, -130 180"
+                    stroke="#94a3b8"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </div>
 
             </div>
@@ -500,17 +531,7 @@ const PotentiometrySimulator = () => {
         </Card>
       </div>
 
-      {/* ── Titration Curve ── */}
-      <AbsorbanceGraph
-        title="Titration Curve"
-        subtitle={`pH vs Volume of ${selectedBase.value}`}
-        data={dataPoints.map(d => ({ x: d.volume, y: d.pH }))}
-        xLabel={`Volume of ${selectedBase.value} (mL)`}
-        yLabel="pH"
-        showPoints
-        lineColor="#22c55e"
-        xDomain={[0, 40]}
-      />
+
 
       {/* ── Observation Table (Backend-connected) ── */}
       <Card className="glass-card border-0">
@@ -657,61 +678,7 @@ const PotentiometrySimulator = () => {
         </CardContent>
       </Card>
 
-      {/* ── Simulation Data Table ── */}
-      {dataPoints.length > 0 && (
-        <Card className="glass-card border-0">
-          <CardHeader>
-            <CardTitle className="font-display">Simulation Readings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 font-semibold">S.No</th>
-                    <th className="text-left py-3 px-4 font-semibold">Volume {selectedBase.value} (mL)</th>
-                    <th className="text-left py-3 px-4 font-semibold">pH</th>
-                    <th className="text-left py-3 px-4 font-semibold">ΔpH/ΔV</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dataPoints.map((point, index) => {
-                    const prev = dataPoints[index - 1];
-                    const deriv = prev
-                      ? (point.pH - prev.pH) / (point.volume - prev.volume || 1)
-                      : 0;
-                    return (
-                      <motion.tr
-                        key={index}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.04 }}
-                        className="border-b border-border/40 hover:bg-muted/40"
-                      >
-                        <td className="py-2.5 px-4">{index + 1}</td>
-                        <td className="py-2.5 px-4 font-mono">{point.volume.toFixed(1)}</td>
-                        <td className="py-2.5 px-4 font-mono">{point.pH.toFixed(2)}</td>
-                        <td className="py-2.5 px-4 font-mono">{deriv.toFixed(2)}</td>
-                      </motion.tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {dataPoints.some(p => Math.abs(p.volume - equivalenceVolume) < 1.5) && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-4 p-4 bg-green-500/10 rounded-lg border border-green-500/20"
-              >
-                <p className="text-green-600 dark:text-green-400 font-medium text-sm">
-                  ✓ Equivalence point reached at ≈ {equivalenceVolume.toFixed(1)} mL {selectedBase.value}
-                </p>
-              </motion.div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+
     </div>
   );
 };
