@@ -6,44 +6,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FlaskConical, Atom, Microscope, Eye, EyeOff, Beaker, User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const { signIn, signUp, user } = useAuth();
+
+  // Already logged in — redirect to home
+  if (user) {
+    navigate("/home");
+    return null;
+  }
+
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: username,
-          emailid: email,
-          password: password,
-        }),
-      });
-
-      if (response.ok) {
-        navigate("/home");
-      } else {
-        const data = await response.json();
-        if (response.status === 409) {
-          setErrorMsg("This email is already registered. Please use a different email.");
-        } else {
-          setErrorMsg(data.detail || "Something went wrong. Please try again.");
+      if (mode === "signup") {
+        if (!fullName.trim()) {
+          setErrorMsg("Please enter your full name.");
+          return;
         }
+        await signUp(fullName.trim(), email, password);
+      } else {
+        await signIn(email, password);
       }
-    } catch {
-      setErrorMsg("Unable to connect to the server. Please try again.");
+      navigate("/home");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setErrorMsg(message);
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +91,7 @@ const Login = () => {
         className="relative z-10 w-full max-w-md px-4"
       >
         <Card className="glass-card border-0 shadow-xl">
-          <CardHeader className="text-center space-y-4 pb-8">
+          <CardHeader className="text-center space-y-4 pb-6">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -113,34 +114,65 @@ const Login = () => {
                 Virtual Laboratory Platform
               </CardDescription>
             </motion.div>
+
+            {/* Mode Toggle */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.35 }}
+              className="flex rounded-xl overflow-hidden border border-border/50 bg-background/30"
+            >
+              <button
+                type="button"
+                onClick={() => { setMode("signin"); setErrorMsg(""); }}
+                className={`flex-1 py-2 text-sm font-semibold transition-all ${mode === "signin"
+                  ? "lab-gradient-bg text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMode("signup"); setErrorMsg(""); }}
+                className={`flex-1 py-2 text-sm font-semibold transition-all ${mode === "signup"
+                  ? "lab-gradient-bg text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
+              >
+                Sign Up
+              </button>
+            </motion.div>
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
 
-              {/* Username */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35 }}
-                className="space-y-2"
-              >
-                <Label htmlFor="username" className="text-foreground font-medium">
-                  Username
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="Your full name"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors pl-10"
-                    required
-                  />
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                </div>
-              </motion.div>
+              {/* Full Name — only for sign up */}
+              {mode === "signup" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="fullName" className="text-foreground font-medium">
+                    Full Name
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="Your full name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors pl-10"
+                      required
+                    />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  </div>
+                </motion.div>
+              )}
 
               {/* Email */}
               <motion.div
@@ -182,6 +214,7 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors pr-12"
                     required
+                    minLength={6}
                   />
                   <button
                     type="button"
@@ -222,8 +255,10 @@ const Login = () => {
                     >
                       <Atom className="w-5 h-5" />
                     </motion.div>
-                  ) : (
+                  ) : mode === "signin" ? (
                     "Sign In"
+                  ) : (
+                    "Create Account"
                   )}
                 </Button>
               </motion.div>

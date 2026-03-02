@@ -20,6 +20,7 @@ import {
   FlaskConical,
   HelpCircle,
   Loader2,
+  Download,
 } from "lucide-react";
 
 // ----- Metal Electrode Data -----
@@ -269,6 +270,57 @@ const ElectrochemistrySimulator = () => {
     const entered = parseFloat(unknownEmfObserved);
     // Allow ±0.05 V tolerance
     setUnknownEmfVerified(Math.abs(entered - unknownEmfFromBackend) <= 0.05);
+  };
+
+  const downloadTableCSV = () => {
+    if (tableRows.length === 0) return;
+
+    // Headers
+    const headers = [
+      "S.No",
+      "Anode Conc (M)",
+      "Cathode Conc (M)",
+      "logRatio",
+      "Calculated EMF (V)",
+      "Observed EMF (V)"
+    ];
+
+    // Rows
+    const csvRows = tableRows.map(row => [
+      row.sNo,
+      row.anodeConc.toFixed(2),
+      row.cathodeConc.toFixed(2),
+      row.logRatio.toFixed(4),
+      row.emfCalculated.toFixed(4),
+      row.emfObserved || ""
+    ]);
+
+    // Add unknown row if applied
+    if (unknownConcApplied) {
+      csvRows.push([
+        tableRows.length + 1,
+        anodeConcentration.toFixed(2),
+        unknownConcApplied.toFixed(2),
+        Math.log10(anodeConcentration / unknownConcApplied).toFixed(4),
+        unknownEmfFromBackend !== null ? unknownEmfFromBackend.toFixed(4) : "",
+        unknownEmfObserved || ""
+      ]);
+    }
+
+    const csvContent = [
+      headers.join(","),
+      ...csvRows.map(e => e.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `electrochemistry_observations.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -552,10 +604,22 @@ const ElectrochemistrySimulator = () => {
       {isConnected && (
         <Card className="glass-card border-0">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 font-display">
-              <FlaskConical className="w-5 h-5 text-primary" />
-              Observation Table
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-3 font-display">
+                <FlaskConical className="w-5 h-5 text-primary" />
+                Observation Table
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadTableCSV}
+                className="gap-2"
+                disabled={tableRows.length === 0}
+              >
+                <Download className="w-4 h-4" />
+                Download CSV
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground">
               {anode.name} ({anode.symbol}) anode at <strong>{anodeConcentration.toFixed(2)} M</strong> — varying {cathode.name} ({cathode.symbol}) cathode concentration.
               <br />Enter your <strong>observed EMF</strong> values from the voltmeter for each row.

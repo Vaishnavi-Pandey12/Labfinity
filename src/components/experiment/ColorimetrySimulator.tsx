@@ -10,7 +10,8 @@ import {
   Lock,
   Unlock,
   Lightbulb,
-  Zap
+  Zap,
+  Download
 } from "lucide-react";
 import ColorimetryApparatus from "./ColorimetryApparatus";
 import AbsorbanceGraph from "./AbsorbanceGraph";
@@ -181,6 +182,38 @@ const ColorimetrySimulator = () => {
       updated[index] = value;
       return updated;
     });
+  };
+
+  const downloadTable1CSV = () => {
+    if (lambdaRows.length === 0) return;
+    const headers = ["S.No", "Wavelength (nm)", "Absorbance"];
+    const csvRows = lambdaRows.map((row, idx) => [
+      row.s_no,
+      row.wavelength,
+      lambdaAbsorbances[idx] || ""
+    ]);
+    const csvContent = [headers.join(","), ...csvRows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `colorimetry_lambda_max_table.csv`;
+    link.click();
+  };
+
+  const downloadTable2CSV = () => {
+    if (concRows.length === 0) return;
+    const headers = ["S.No", "Concentration (mol/L)", "Absorbance"];
+    const csvRows = concRows.map((row, idx) => [
+      row.s_no,
+      row.concentration,
+      concAbsorbances[idx] || ""
+    ]);
+    const csvContent = [headers.join(","), ...csvRows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `colorimetry_beer_lambert_table.csv`;
+    link.click();
   };
 
   // ─── Shared table styles ───────────────────────────────────────────────────
@@ -382,16 +415,28 @@ const ColorimetrySimulator = () => {
       ══════════════════════════════════════════════════════════════════ */}
       <Card className="glass-card border-0">
         <CardHeader>
-          <div>
-            <CardTitle className="font-display text-base">
-              Observation Table 1 &nbsp;–&nbsp; λmax Determination
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              For <span className="font-medium">{solutionData[solution].name}</span>{" "}
-              &nbsp;|&nbsp; λmax =&nbsp;
-              <span className="font-semibold text-primary">{lambdaMax} nm</span>
-              &nbsp;·&nbsp; Enter observed absorbance values below.
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="font-display text-base">
+                Observation Table 1 &nbsp;–&nbsp; λmax Determination
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                For <span className="font-medium">{solutionData[solution].name}</span>{" "}
+                &nbsp;|&nbsp; λmax =&nbsp;
+                <span className="font-semibold text-primary">{lambdaMax} nm</span>
+                &nbsp;·&nbsp; Enter observed absorbance values below.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={downloadTable1CSV}
+              className="gap-2"
+              disabled={lambdaRows.length === 0}
+            >
+              <Download className="w-4 h-4" />
+              Download CSV
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -448,15 +493,27 @@ const ColorimetrySimulator = () => {
       ══════════════════════════════════════════════════════════════════ */}
       <Card className="glass-card border-0">
         <CardHeader>
-          <div>
-            <CardTitle className="font-display text-base">
-              Observation Table 2 &nbsp;–&nbsp; Beer-Lambert Law Verification
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              Measured at λ =&nbsp;
-              <span className="font-semibold text-primary">{concLambdaMax} nm</span>
-              &nbsp;·&nbsp; Enter observed absorbance values below.
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="font-display text-base">
+                Observation Table 2 &nbsp;–&nbsp; Beer-Lambert Law Verification
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Measured at λ =&nbsp;
+                <span className="font-semibold text-primary">{concLambdaMax} nm</span>
+                &nbsp;·&nbsp; Enter observed absorbance values below.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={downloadTable2CSV}
+              className="gap-2"
+              disabled={concRows.length === 0}
+            >
+              <Download className="w-4 h-4" />
+              Download CSV
+            </Button>
           </div>
         </CardHeader>
         <CardContent>

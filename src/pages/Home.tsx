@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +13,11 @@ import {
   GraduationCap,
   Users,
   BookOpen,
-  LogIn
+  LogOut,
+  UserCircle
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
+import { useAuth } from "@/hooks/useAuth";
 
 const subjects = [
   {
@@ -90,6 +92,14 @@ const itemVariants = {
 };
 
 const Home = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/login");
+  };
+
   return (
     <div className="min-h-screen bg-background particles-bg">
       {/* Header */}
@@ -120,12 +130,29 @@ const Home = () => {
               alt="VITAP University"
               className="h-10 object-contain"
             />
-            <Link to="/login">
-              <Button className="lab-gradient-bg text-primary-foreground font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-                <LogIn className="w-4 h-4" />
-                Login
-              </Button>
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/40">
+                  <UserCircle className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{user.full_name}</span>
+                </div>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="font-semibold px-4 py-2 rounded-lg flex items-center gap-2 border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Link to="/login">
+                <Button className="lab-gradient-bg text-primary-foreground font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+                  <UserCircle className="w-4 h-4" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
