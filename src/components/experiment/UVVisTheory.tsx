@@ -1,16 +1,9 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { 
   Target, 
   BookOpen, 
-  Beaker, 
-  ListChecks,
+  Beaker,
   Lightbulb,
   Zap
 } from "lucide-react";
@@ -130,84 +123,6 @@ const UVVisTheory = () => {
               </li>
             ))}
           </ul>
-        </CardContent>
-      </Card>
-
-      {/* Procedure */}
-      <Card className="glass-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 font-display">
-            <ListChecks className="w-5 h-5 text-primary" />
-            Procedure
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="step1">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">1</span>
-                  Instrument Setup
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Switch on the UV-Vis spectrophotometer and allow it to warm up for 15-20 minutes. 
-                Set the wavelength range (typically 200-800 nm) and scan parameters.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step2">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">2</span>
-                  Baseline Correction
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Fill a cuvette with pure solvent (blank) and run a baseline scan. 
-                This corrects for solvent absorption and instrument artifacts.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step3">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">3</span>
-                  Sample Preparation
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Prepare sample solutions at appropriate concentrations (absorbance between 0.1-1.0). 
-                Use spectroscopy-grade solvents. Filter if necessary to remove particles.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step4">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">4</span>
-                  Record Spectrum
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Place sample in cuvette and record the absorption spectrum. 
-                Note λmax values and absorbance. Repeat for different compounds.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="step5">
-              <AccordionTrigger className="hover:no-underline">
-                <span className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">5</span>
-                  Analysis
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-11">
-                Identify absorption bands and assign them to specific electronic transitions. 
-                Compare λmax with literature values. Calculate molar absorptivity if needed.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
         </CardContent>
       </Card>
 

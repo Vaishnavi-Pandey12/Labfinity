@@ -6,9 +6,10 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   FlaskConical,
+  HelpCircle,
   Play,
-  Upload,
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 import { Button } from "@/components/ui/button";
@@ -21,24 +22,26 @@ interface Props {
   theory: ReactNode;
   procedure: ReactNode;
   simulator: ReactNode;
-  upload?: ReactNode;
-  lockOrder?: boolean;
+  observations?: ReactNode;
+  quiz?: ReactNode;
 }
 
-type TabKey = "theory" | "procedure" | "simulator" | "upload";
+type TabKey = "theory" | "procedure" | "simulator" | "observations" | "quiz";
 
 type CompletedState = {
   theory: boolean;
   procedure: boolean;
   simulator: boolean;
-  upload: boolean;
+  observations: boolean;
+  quiz: boolean;
 };
 
 const EMPTY_COMPLETED: CompletedState = {
   theory: false,
   procedure: false,
   simulator: false,
-  upload: false,
+  observations: false,
+  quiz: false,
 };
 
 const toStorageKey = (subjectLabel: string, title: string) => {
@@ -56,8 +59,8 @@ const ExperimentLayout = ({
   theory,
   procedure,
   simulator,
-  upload,
-  lockOrder = false,
+  observations,
+  quiz,
 }: Props) => {
   const [activeTab, setActiveTab] = useState<TabKey>("theory");
 
@@ -83,10 +86,16 @@ const ExperimentLayout = ({
     }
   });
 
-  const hasUpload = Boolean(upload);
-  const availableTabs: TabKey[] = hasUpload
-    ? ["theory", "procedure", "simulator", "upload"]
-    : ["theory", "procedure", "simulator"];
+  const hasObservations = Boolean(observations);
+  const hasQuiz = Boolean(quiz);
+
+  const availableTabs: TabKey[] = [
+    "theory",
+    "procedure",
+    "simulator",
+    ...(hasObservations ? (["observations"] as const) : []),
+    ...(hasQuiz ? (["quiz"] as const) : []),
+  ];
 
   useEffect(() => {
     setCompleted((prev) => ({
@@ -102,23 +111,6 @@ const ExperimentLayout = ({
 
     window.localStorage.setItem(storageKey, JSON.stringify(completed));
   }, [completed, storageKey]);
-
-  const canOpenSimulator = !lockOrder || completed.procedure;
-  const canOpenUpload = !lockOrder || completed.simulator;
-
-  const handleTabChange = (value: string) => {
-    const tab = value as TabKey;
-
-    if (tab === "simulator" && !canOpenSimulator) {
-      return;
-    }
-
-    if (tab === "upload" && !canOpenUpload) {
-      return;
-    }
-
-    setActiveTab(tab);
-  };
 
   const completedCount = availableTabs.filter((tab) => completed[tab]).length;
   const progressPercent = Math.round((completedCount / availableTabs.length) * 100);
@@ -186,7 +178,7 @@ const ExperimentLayout = ({
           <Progress value={progressPercent} />
         </div>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabKey)} className="w-full">
           <TabsList className="glass-card p-1 mb-6">
             <TabsTrigger value="theory" className="gap-2">
               <BookOpen className="w-4 h-4" />
@@ -200,17 +192,25 @@ const ExperimentLayout = ({
               {completed.procedure && <CheckCircle className="w-4 h-4 text-green-500 ml-1" />}
             </TabsTrigger>
 
-            <TabsTrigger value="simulator" className="gap-2" disabled={!canOpenSimulator}>
+            <TabsTrigger value="simulator" className="gap-2">
               <Play className="w-4 h-4" />
               Virtual Lab
               {completed.simulator && <CheckCircle className="w-4 h-4 text-green-500 ml-1" />}
             </TabsTrigger>
 
-            {hasUpload && (
-              <TabsTrigger value="upload" className="gap-2" disabled={!canOpenUpload}>
-                <Upload className="w-4 h-4" />
-                Upload Graph
-                {completed.upload && <CheckCircle className="w-4 h-4 text-green-500 ml-1" />}
+            {hasObservations && (
+              <TabsTrigger value="observations" className="gap-2">
+                <ClipboardList className="w-4 h-4" />
+                Observations
+                {completed.observations && <CheckCircle className="w-4 h-4 text-green-500 ml-1" />}
+              </TabsTrigger>
+            )}
+
+            {hasQuiz && (
+              <TabsTrigger value="quiz" className="gap-2">
+                <HelpCircle className="w-4 h-4" />
+                Quiz
+                {completed.quiz && <CheckCircle className="w-4 h-4 text-green-500 ml-1" />}
               </TabsTrigger>
             )}
           </TabsList>
@@ -227,9 +227,15 @@ const ExperimentLayout = ({
             {simulator}
           </TabsContent>
 
-          {hasUpload && (
-            <TabsContent value="upload" className="mt-0">
-              {upload}
+          {hasObservations && (
+            <TabsContent value="observations" className="mt-0">
+              {observations}
+            </TabsContent>
+          )}
+
+          {hasQuiz && (
+            <TabsContent value="quiz" className="mt-0">
+              {quiz}
             </TabsContent>
           )}
         </Tabs>

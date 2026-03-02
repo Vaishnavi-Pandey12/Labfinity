@@ -1,8 +1,9 @@
 import ElectrochemistryProcedure from "@/components/experiment/ElectrochemistryProcedure";
 import ExperimentLayout from "@/components/experiment/ExperimentLayout";
+import ObservationsSection from "@/components/experiment/ObservationsSection";
+import QuizSection from "@/components/experiment/QuizSection";
 import ElectrochemistrySimulator from "@/components/experiment/ElectrochemistrySimulator";
 import ElectrochemistryTheory from "@/components/experiment/ElectrochemistryTheory";
-import GraphUpload from "@/components/experiment/GraphUpload";
 
 const Experiment1 = () => {
   return (
@@ -12,8 +13,8 @@ const Experiment1 = () => {
       theory={<ElectrochemistryTheory />}
       procedure={<ElectrochemistryProcedure />}
       simulator={<ElectrochemistrySimulator />}
-      upload={<GraphUpload studentId="student-1" experimentId="experiment-1" onUploadSuccess={() => {}} />}
-      lockOrder
+      observations={<ObservationsSection />}
+      quiz={<QuizSection />}
     />
   );
 };
