@@ -5,23 +5,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FlaskConical, Atom, Microscope, Eye, EyeOff, Beaker } from "lucide-react";
+import { FlaskConical, Atom, Microscope, Eye, EyeOff, Beaker, User } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login - in production, replace with actual auth
-    setTimeout(() => {
+    setErrorMsg("");
+
+    try {
+      const response = await fetch("http://localhost:8000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: username,
+          emailid: email,
+          password: password,
+        }),
+      });
+
+      if (response.ok) {
+        navigate("/home");
+      } else {
+        const data = await response.json();
+        if (response.status === 409) {
+          setErrorMsg("This email is already registered. Please use a different email.");
+        } else {
+          setErrorMsg(data.detail || "Something went wrong. Please try again.");
+        }
+      }
+    } catch {
+      setErrorMsg("Unable to connect to the server. Please try again.");
+    } finally {
       setIsLoading(false);
-      navigate("/home");
-    }, 1000);
+    }
   };
 
   return (
@@ -92,6 +117,32 @@ const Login = () => {
 
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-5">
+
+              {/* Username */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.35 }}
+                className="space-y-2"
+              >
+                <Label htmlFor="username" className="text-foreground font-medium">
+                  Username
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Your full name"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors pl-10"
+                    required
+                  />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                </div>
+              </motion.div>
+
+              {/* Email */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -112,6 +163,7 @@ const Login = () => {
                 />
               </motion.div>
 
+              {/* Password */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -141,6 +193,18 @@ const Login = () => {
                 </div>
               </motion.div>
 
+              {/* Error message */}
+              {errorMsg && (
+                <motion.p
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+                >
+                  {errorMsg}
+                </motion.p>
+              )}
+
+              {/* Submit */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
