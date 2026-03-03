@@ -16,14 +16,19 @@ python-multipart>=0.0.9
 # Static Files (used by FastAPI StaticFiles)
 aiofiles>=23.2.1
 
-# CORS (included in fastapi, but listed for clarity)
-# starlette is a transitive dependency of fastapi
+# ORM and database engine
+sqlalchemy>=2.0.0
 
-# PostgreSQL (Supabase)
+# PostgreSQL driver (for Neon managed Postgres)
 psycopg2-binary>=2.9.9
 
-# Supabase Python Client
-supabase>=2.0.0
+# JWT for authentication tokens
+PyJWT>=2.0.0
 
 # Password Hashing
 bcrypt>=4.1.2
+
+# Google OAuth verification
+google-auth>=2.28.0
+google-auth-httplib2>=0.2.0
+google-auth-oauthlib>=1.2.0
