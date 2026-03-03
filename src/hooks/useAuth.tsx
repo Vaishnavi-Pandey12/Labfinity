@@ -3,17 +3,19 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 const API = "http://localhost:8000";
 
 interface User {
-    user_id: string;
+    user_id: number;
     email: string;
-    full_name: string;
+    username: string;
+    profile_picture?: string;
 }
 
 interface AuthContextType {
     user: User | null;
     token: string | null;
     loading: boolean;
-    signUp: (fullName: string, email: string, password: string) => Promise<void>;
+    signUp: (username: string, email: string, password: string) => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
+    googleLogin: (googleToken: string) => Promise<void>;
     signOut: () => Promise<void>;
 }
 
@@ -60,30 +62,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
         setToken(data.access_token);
-        setUser({ user_id: data.user_id, email: data.email, full_name: data.full_name });
+        setUser({ user_id: data.user_id, email: data.email, username: data.username });
     }, []);
 
-    const signUp = useCallback(async (fullName: string, email: string, password: string) => {
+    const signUp = useCallback(async (username: string, email: string, password: string) => {
         const res = await fetch(`${API}/api/signup`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ full_name: fullName, email, password }),
+            body: JSON.stringify({ username, email, password }),
         });
         if (!res.ok) {
             const err = await res.json();
             throw new Error(err.detail || "Sign-up failed");
         }
-        // After sign-up, sign them in automatically to get a token
-        const loginRes = await fetch(`${API}/api/signin`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-        if (!loginRes.ok) throw new Error("Auto sign-in after signup failed");
-        const data = await loginRes.json();
+        const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
         setToken(data.access_token);
-        setUser({ user_id: data.user_id, email: data.email, full_name: data.full_name });
+        setUser({ user_id: data.user_id, email: data.email, username: data.username });
+    }, []);
+
+    const googleLogin = useCallback(async (googleToken: string) => {
+        const res = await fetch(`${API}/auth/google`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: googleToken }),
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || "Google login failed");
+        }
+        const data = await res.json();
+        localStorage.setItem("labfinity_token", data.access_token);
+        setToken(data.access_token);
+        setUser({
+            user_id: data.user_id,
+            email: data.email,
+            username: data.username,
+        });
     }, []);
 
     const signOut = useCallback(async () => {
@@ -100,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, signUp, signIn, signOut }}>
+        <AuthContext.Provider value={{ user, token, loading, signUp, signIn, googleLogin, signOut }}>
             {children}
         </AuthContext.Provider>
     );

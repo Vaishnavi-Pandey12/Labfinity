@@ -134,7 +134,7 @@ const Home = () => {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/40">
                   <UserCircle className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">{user.full_name}</span>
+                  <span className="text-sm font-medium text-foreground">{user.username}</span>
                 </div>
                 <Button
                   onClick={handleLogout}

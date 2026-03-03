@@ -154,6 +154,9 @@ Labfinity/
 | Method | Endpoint | Description |
 |--------|---------|-------------|
 | `GET` | `/api/health` | Health check |
+| `POST` | `/api/signup` | Register a new user (Neon/Postgres)
+| `POST` | `/api/signin` | Obtain JWT access token
+| `GET` | `/api/me` | Fetch current user info (requires Bearer token)
 | `POST` | `/api/electrochemistry-table` | Generate Daniell Cell observation table |
 | `POST` | `/api/upload` | Upload student graph image |
 
@@ -171,8 +174,31 @@ npm run test         # Run tests
 
 ### Backend
 ```bash
+# install Python dependencies first (example using a virtualenv)
+# cd into the backend folder before installing if you like
+pip install -r backend/requirements.txt
+
+# environment variables needed by the backend
+# - DATABASE_URL : PostgreSQL connection URL (typically a Neon-managed database).  e.g. `postgresql://user:pass@host:port/dbname`
+# - SECRET_KEY    : random string used to sign JWT tokens
+# - GOOGLE_CLIENT_ID : OAuth 2.0 client ID from Google (optional, required for Google login)
+#
+# The application no longer uses SQLite or Supabase; all user data is stored in PostgreSQL.
+
+
+# two equivalent ways to start the API:
+
+# 1. run from the backend directory (matches the examples in earlier
+# documentation)
+cd backend
 uvicorn main:app --reload          # Dev server with hot-reload
 uvicorn main:app --port 8000       # Production-like start
+
+# 2. run from the workspace root using the package name.  this mode is
+# required if you want to keep your frontend and backend in the same
+# process or using a single Docker container.
+uvicorn backend.main:app --reload
+uvicorn backend.main:app --port 8000
 ```
 
 ---
@@ -180,8 +206,10 @@ uvicorn main:app --port 8000       # Production-like start
 ## 🧪 Running Backend Tests
 
 ```bash
+# make sure dependencies are installed (see "Available Scripts" above)
+# you don't need a database URL to run the pure-Python table tests
 cd backend
-python chem_tables.py   # Run all built-in table generation tests
+python chem_tables.py   # Run built-in table generation tests
 ```
 
 ---
