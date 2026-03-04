@@ -111,15 +111,40 @@ Backend API runs at → **http://localhost:8000**
 
 > 💡 API docs available at **http://localhost:8000/docs** (Swagger UI)
 
+### Google authentication
+
+The backend exposes a POST `/auth/google` endpoint that expects a JSON body
+`{ "token": "<google-id-token>" }`.  The ID token **must** be obtained using
+the official Google Identity Services SDK in the frontend; never trust the email
+address supplied by the client without verifying the token.  On the server the
+`google-auth` package verifies the token, extracts `sub`, `email`, `name`, and
+`picture`, and either creates a new user or links an existing account.  A JWT
+(access token) is returned just like the normal `/api/signin` route.
 ---
 
 ### 4. Environment Variables
 
-Create a `.env` file in the `backend/` directory:
+Create a `.env` file in the `backend/` directory and, if using Google login, add your OAuth
+client ID obtained from the Google Cloud console:
 
 ```env
-# Add any API keys or config here
+DATABASE_URL=postgresql://user:pass@host:port/dbname
+SECRET_KEY=some_random_secret
+GOOGLE_CLIENT_ID=12345-your-google-client-id.apps.googleusercontent.com
 ```
+
+The frontend also needs access to the Google client ID.  Add the corresponding Vite
+variable to the root `.env` (next to `package.json`):
+
+```env
+VITE_API_URL=http://localhost:8000          # already used elsewhere
+VITE_GOOGLE_CLIENT_ID=12345-your-google-client-id.apps.googleusercontent.com
+```
+
+(Any variable prefixed with `VITE_` will be exposed to the browser by Vite.)
+
+Once these values are populated you can use the **Continue with Google** button on the
+login screen to authenticate.
 
 ---
 

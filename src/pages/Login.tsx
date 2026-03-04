@@ -1,4 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// Google Identity script attaches itself to `window.google`.
+// declare to please TypeScript since we reference it below.
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -10,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, googleLogin, user } = useAuth();
 
   // Already logged in — redirect to home
   if (user) {
@@ -25,6 +33,49 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [googleReady, setGoogleReady] = useState(false);
+
+  // called when the Google SDK returns an ID token (credential)
+  const handleGoogleCredential = async (response: any) => {
+    setIsLoading(true);
+    setErrorMsg("");
+    if (response?.credential) {
+      try {
+        await googleLogin(response.credential);
+        navigate("/home");
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Google login failed";
+        setErrorMsg(msg);
+      }
+    } else {
+      setErrorMsg("Google authentication failed");
+    }
+    setIsLoading(false);
+  };
+
+  // load the Google Identity Services script dynamically and initialize it
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredential,
+        });
+        setGoogleReady(true);
+      }
+    };
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -287,9 +338,12 @@ const Login = () => {
                 variant="outline"
                 className="w-full h-12 border-border/50 bg-background/50 hover:bg-background/80 font-medium transition-all"
                 onClick={() => {
-                  // Google Sign-In will be initialized when GOOGLE_CLIENT_ID is set.
-                  // For now this is a placeholder — integrate with Google Identity Services SDK.
-                  setErrorMsg("Google Sign-In requires the Google Identity Services SDK to be configured.");
+                  if (!googleReady) {
+                    setErrorMsg("Google SDK not loaded yet, please try again.");
+                    return;
+                  }
+                  // ask Google to prompt the user; callback will handle response
+                  window.google?.accounts?.id.prompt();
                 }}
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -328,5 +382,6 @@ const Login = () => {
     </div>
   );
 };
+
 
 export default Login;

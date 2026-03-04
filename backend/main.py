@@ -173,7 +173,8 @@ def sign_in(req: SignInRequest, db: Session = Depends(get_db)):
     """Authenticate a user and return a JWT token."""
 
     user = db.query(User).filter(User.email == req.email).first()
-    if not user:
+    if not user or not user.hashed_password:
+        # either the user doesn't exist, or they signed up with Google only
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     if not bcrypt.checkpw(req.password.encode(), user.hashed_password.encode()):
@@ -203,17 +204,26 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
         from google.oauth2 import id_token
         from google.auth.transport import requests as google_requests
 
+        if not GOOGLE_CLIENT_ID:
+            raise Exception("GOOGLE_CLIENT_ID not set in environment")
+
+        print(f"[DEBUG] Verifying token with CLIENT_ID: {GOOGLE_CLIENT_ID}")
+        
         idinfo = id_token.verify_oauth2_token(
             req.token, google_requests.Request(), GOOGLE_CLIENT_ID
         )
 
+        print(f"[DEBUG] Token verified successfully. Email: {idinfo.get('email')}")
+        
         google_id = idinfo["sub"]
         email = idinfo.get("email", "")
         name = idinfo.get("name", "")
         picture = idinfo.get("picture")
 
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid Google token")
+    except Exception as e:
+        error_msg = str(e)
+        print(f"[ERROR] Google token verification failed: {error_msg}")
+        raise HTTPException(status_code=400, detail=f"Invalid Google token: {error_msg}")
 
     # Try to find user by google_id first, then by email
     user = db.query(User).filter(User.google_id == google_id).first()
@@ -232,7 +242,7 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
             user = User(
                 username=email.split("@")[0],   # derive username from email
                 email=email,
-                hashed_password="",              # no password for Google-only users
+                hashed_password=None,              # no password for Google-only users
                 google_id=google_id,
                 profile_picture=picture,
             )
@@ -247,6 +257,7 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
         "user_id": user.id,
         "email": user.email,
         "username": user.username,
+        "profile_picture": user.profile_picture,
     }
 
 
