@@ -9,7 +9,8 @@ import {
   Beaker,
   Sparkles,
   Lightbulb,
-  TestTube2
+  TestTube2,
+  Droplets
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 
@@ -45,6 +46,25 @@ const experiments = [
     description: "Study electronic transitions and absorption spectra of compounds",
     icon: Lightbulb,
   },
+  {
+  id: 5,
+  title: "pH-Metry - Determination of Molarity of HCl",
+  topic: "pH-Metry",
+  description: "Determine the molarity of HCl by pH-metry using standard NaOH solution and plot the titration curve",
+  icon: FlaskConical,
+},
+{
+  id: 6,
+  title: "Acid-Base Titration - Phenolphthalein",
+  topic: "Volumetric Analysis",
+  description: "Determine the molarity of dilute HCl using standard NaOH with phenolphthalein indicator",
+  icon: FlaskConical,
+},
+{ id: 7, title: "Hardness of Water — EDTA & Ion Exchange", 
+  topic: "Water Analysis",
+  description: "Estimate total hardness by EDTA titration and purify using ion-exchange resin column",
+  icon: Droplets,
+},
 ];
 
 const containerVariants = {

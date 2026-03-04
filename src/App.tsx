@@ -12,6 +12,9 @@ import Experiment1 from "./pages/Experiment1";
 import Experiment2 from "./pages/Experiment2";
 import Experiment3 from "./pages/Experiment3";
 import Experiment4 from "./pages/Experiment4";
+import Experiment5 from "./pages/Experiment5";
+import Experiment6 from "./pages/Experiment6";
+import Experiment7 from "./pages/Experiment7";
 import PhysicsExperiment1 from "./pages/PhysicsExperiment1";
 import PhysicsExperiment2 from "./pages/PhysicsExperiment2";
 import NotFound from "./pages/NotFound";
@@ -20,13 +23,12 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <Routes>
-            {/* All routes are public — login is optional */}
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -37,15 +39,18 @@ const App = () => (
             <Route path="/subjects/chemistry/experiments/2" element={<Experiment2 />} />
             <Route path="/subjects/chemistry/experiments/3" element={<Experiment3 />} />
             <Route path="/subjects/chemistry/experiments/4" element={<Experiment4 />} />
+            <Route path="/subjects/chemistry/experiments/5" element={<Experiment5 />} />
+            <Route path="/subjects/chemistry/experiments/6" element={<Experiment6 />} />
+            <Route path="/subjects/chemistry/experiments/7" element={<Experiment7 />} />
             <Route path="/subjects/physics/experiments/1" element={<PhysicsExperiment1 />} />
             <Route path="/subjects/physics/experiments/2" element={<PhysicsExperiment2 />} />
             <Route path="/experiments" element={<Navigate to="/home" replace />} />
-            {/* Catch-all */}
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
