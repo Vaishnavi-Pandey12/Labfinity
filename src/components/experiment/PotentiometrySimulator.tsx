@@ -216,11 +216,20 @@ const PotentiometrySimulator = () => {
   // ── Observation Table State ──
   const [tableRows, setTableRows] = useState<TableRow[]>([
     { volume: 0, pH: "" },
-    { volume: 5, pH: "" },
+    { volume: 2, pH: "" },
+    { volume: 4, pH: "" },
+    { volume: 6, pH: "" },
+    { volume: 8, pH: "" },
     { volume: 10, pH: "" },
-    { volume: 15, pH: "" },
+    { volume: 12, pH: "" },
+    { volume: 14, pH: "" },
+    { volume: 16, pH: "" },
+    { volume: 18, pH: "" },
     { volume: 20, pH: "" },
-    { volume: 25, pH: "" },
+    { volume: 24, pH: "" },
+    { volume: 28, pH: "" },
+    { volume: 32, pH: "" },
+    { volume: 36, pH: "" },
   ]);
   const [processedTable, setProcessedTable] = useState<ProcessedRow[] | null>(null);
   const [tableLoading, setTableLoading] = useState(false);

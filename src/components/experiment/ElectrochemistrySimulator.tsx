@@ -108,12 +108,11 @@ const ElectrochemistrySimulator = () => {
   const [tableError, setTableError] = useState("");
 
   // Unknown row state
-  const [unknownConcInput, setUnknownConcInput] = useState("");
-  const [unknownConcApplied, setUnknownConcApplied] = useState<number | null>(null);
+  const [generatedUnknownConc, setGeneratedUnknownConc] = useState<number | null>(null);
   const [unknownEmfFromBackend, setUnknownEmfFromBackend] = useState<number | null>(null);
   const [unknownEmfLoading, setUnknownEmfLoading] = useState(false);
-  const [unknownEmfObserved, setUnknownEmfObserved] = useState("");
-  const [unknownEmfVerified, setUnknownEmfVerified] = useState<boolean | null>(null);
+  const [unknownConcObserved, setUnknownConcObserved] = useState("");
+  const [unknownConcVerified, setUnknownConcVerified] = useState<boolean | null>(null);
 
   const anode = METALS[anodeMetal];
   const cathode = METALS[cathodeMetal];
@@ -196,16 +195,21 @@ const ElectrochemistrySimulator = () => {
     setEmf(0);
     setElectronFlow(false);
     setTableRows([]);
-    setUnknownConcInput("");
-    setUnknownConcApplied(null);
+    setGeneratedUnknownConc(null);
     setUnknownEmfFromBackend(null);
-    setUnknownEmfObserved("");
-    setUnknownEmfVerified(null);
+    setUnknownConcObserved("");
+    setUnknownConcVerified(null);
   }, [anodeMetal, cathodeMetal]);
 
   const connectCell = useCallback(() => {
     setIsConnected(true);
     setElectronFlow(true);
+    // Generate a random unknown concentration between 0.1 and 2.0 M
+    const randomConc = parseFloat((Math.random() * 1.9 + 0.1).toFixed(2));
+    setGeneratedUnknownConc(randomConc);
+    setUnknownEmfFromBackend(null);
+    setUnknownConcObserved("");
+    setUnknownConcVerified(null);
     fetchTable(anodeMetal, cathodeMetal, anodeConcentration);
   }, [anodeMetal, cathodeMetal, anodeConcentration, fetchTable]);
 
@@ -217,11 +221,10 @@ const ElectrochemistrySimulator = () => {
     setAnodeInputStr("1.00");
     setCathodeConcentration(1.0);
     setTableRows([]);
-    setUnknownConcInput("");
-    setUnknownConcApplied(null);
+    setGeneratedUnknownConc(null);
     setUnknownEmfFromBackend(null);
-    setUnknownEmfObserved("");
-    setUnknownEmfVerified(null);
+    setUnknownConcObserved("");
+    setUnknownConcVerified(null);
   }, []);
 
   const handleAnodeChange = (value: string) => { if (value !== cathodeMetal) setAnodeMetal(value); };
@@ -231,14 +234,12 @@ const ElectrochemistrySimulator = () => {
     setTableRows(prev => prev.map((row, i) => i === index ? { ...row, emfObserved: value } : row));
   };
 
-  // Fetch EMF for the unknown concentration from backend
-  const applyUnknownConcentration = useCallback(async () => {
-    const parsed = parseFloat(unknownConcInput);
-    if (isNaN(parsed) || parsed <= 0) return;
-    setUnknownConcApplied(parsed);
+  // Fetch EMF for the auto-generated unknown concentration
+  const getUnknownEmf = useCallback(async () => {
+    if (!generatedUnknownConc) return;
     setUnknownEmfFromBackend(null);
-    setUnknownEmfObserved("");
-    setUnknownEmfVerified(null);
+    setUnknownConcObserved("");
+    setUnknownConcVerified(null);
     setUnknownEmfLoading(true);
     try {
       const resp = await fetch(`${API_BASE}/api/electrochemistry-table`, {
@@ -249,7 +250,7 @@ const ElectrochemistrySimulator = () => {
           cathode_metal: cathodeMetal,
           anode_concentration: anodeConcentration,
           cathode_concentrations: CATHODE_CONCENTRATIONS,
-          unknown_concentration: parsed,
+          unknown_concentration: generatedUnknownConc,
           n: 2,
         }),
       });
@@ -257,19 +258,19 @@ const ElectrochemistrySimulator = () => {
       setUnknownEmfFromBackend(data.unknown_emf);
     } catch {
       // fallback calculation
-      const logRatio = Math.log10(anodeConcentration / parsed);
+      const logRatio = Math.log10(anodeConcentration / generatedUnknownConc);
       const emf = Math.max(0, E0cell - (0.0591 / 2) * logRatio);
       setUnknownEmfFromBackend(parseFloat(emf.toFixed(4)));
     } finally {
       setUnknownEmfLoading(false);
     }
-  }, [unknownConcInput, anodeMetal, cathodeMetal, anodeConcentration, E0cell]);
+  }, [generatedUnknownConc, anodeMetal, cathodeMetal, anodeConcentration, E0cell]);
 
-  const verifyUnknownEmf = () => {
-    if (!unknownEmfFromBackend || !unknownEmfObserved) return;
-    const entered = parseFloat(unknownEmfObserved);
-    // Allow ±0.05 V tolerance
-    setUnknownEmfVerified(Math.abs(entered - unknownEmfFromBackend) <= 0.05);
+  const verifyUnknownConc = () => {
+    if (!generatedUnknownConc || !unknownConcObserved) return;
+    const entered = parseFloat(unknownConcObserved);
+    // Allow ±0.05 M tolerance
+    setUnknownConcVerified(Math.abs(entered - generatedUnknownConc) <= 0.05);
   };
 
   const downloadTableCSV = () => {
@@ -295,15 +296,15 @@ const ElectrochemistrySimulator = () => {
       row.emfObserved || ""
     ]);
 
-    // Add unknown row if applied
-    if (unknownConcApplied) {
+    // Add unknown row if present
+    if (generatedUnknownConc) {
       csvRows.push([
         tableRows.length + 1,
         anodeConcentration.toFixed(2),
-        unknownConcApplied.toFixed(2),
-        Math.log10(anodeConcentration / unknownConcApplied).toFixed(4),
+        "Unknown",
+        unknownEmfFromBackend !== null ? Math.log10(anodeConcentration / generatedUnknownConc).toFixed(4) : "",
         unknownEmfFromBackend !== null ? unknownEmfFromBackend.toFixed(4) : "",
-        unknownEmfObserved || ""
+        unknownConcObserved || ""
       ]);
     }
 
@@ -699,80 +700,62 @@ const ElectrochemistrySimulator = () => {
                         </td>
                         <td className="text-center py-3 px-3 font-mono">{anodeConcentration.toFixed(2)}</td>
 
-                        {/* Unknown cathode concentration input */}
+                        {/* Unknown cathode concentration — shown as "Unknown" */}
                         <td className="text-center py-3 px-3">
                           <div className="flex items-center justify-center gap-2">
-                            <Input
-                              type="number"
-                              step="0.001"
-                              placeholder="Enter X"
-                              value={unknownConcInput}
-                              onChange={e => {
-                                setUnknownConcInput(e.target.value);
-                                setUnknownEmfFromBackend(null);
-                                setUnknownEmfObserved("");
-                                setUnknownEmfVerified(null);
-                                setUnknownConcApplied(null);
-                              }}
-                              className="w-24 text-center font-mono h-8 text-sm border-amber-300"
-                            />
+                            <span className="font-semibold text-amber-700 italic">Unknown</span>
                             <Button
                               size="sm"
-                              onClick={applyUnknownConcentration}
-                              disabled={!unknownConcInput || unknownEmfLoading}
+                              onClick={getUnknownEmf}
+                              disabled={unknownEmfLoading || unknownEmfFromBackend !== null}
                               className="h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white text-xs"
                             >
                               {unknownEmfLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Get EMF"}
                             </Button>
                           </div>
-                          {unknownConcApplied && (
-                            <p className="text-xs text-amber-700 mt-1 font-medium">
-                              X = {unknownConcApplied} M
-                            </p>
-                          )}
                         </td>
 
-                        {/* log ratio — show once concentration is known */}
+                        {/* log ratio — show only after EMF is revealed */}
                         <td className="text-center py-3 px-3 font-mono text-amber-700">
-                          {unknownConcApplied
-                            ? Math.log10(anodeConcentration / unknownConcApplied).toFixed(4)
+                          {unknownEmfFromBackend !== null && generatedUnknownConc
+                            ? Math.log10(anodeConcentration / generatedUnknownConc).toFixed(4)
                             : <span className="text-amber-400"><HelpCircle className="w-4 h-4 inline" /></span>}
                         </td>
 
-                        {/* EMF column: show computed EMF, then let student enter observed EMF */}
+                        {/* EMF column: show computed EMF, then let student enter concentration to verify */}
                         <td className="text-center py-3 px-3">
                           {unknownEmfFromBackend !== null ? (
                             <div className="space-y-2">
                               <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1 text-center">
-                                <p className="text-xs text-blue-600 font-medium">Theoretical EMF</p>
+                                <p className="text-xs text-blue-600 font-medium">EMF (from cell)</p>
                                 <p className="font-mono font-bold text-blue-700">{unknownEmfFromBackend.toFixed(4)} V</p>
                               </div>
                               <div className="flex items-center gap-2 justify-center">
                                 <Input
                                   type="number"
-                                  step="0.0001"
-                                  placeholder="Your EMF"
-                                  value={unknownEmfObserved}
-                                  onChange={e => { setUnknownEmfObserved(e.target.value); setUnknownEmfVerified(null); }}
+                                  step="0.01"
+                                  placeholder="Your Conc (M)"
+                                  value={unknownConcObserved}
+                                  onChange={e => { setUnknownConcObserved(e.target.value); setUnknownConcVerified(null); }}
                                   className="w-28 text-center font-mono h-8 text-sm"
                                 />
                                 <Button
                                   size="sm"
-                                  onClick={verifyUnknownEmf}
-                                  disabled={!unknownEmfObserved}
+                                  onClick={verifyUnknownConc}
+                                  disabled={!unknownConcObserved}
                                   className="h-8 px-3 lab-gradient-bg text-primary-foreground text-xs"
                                 >
                                   Verify
                                 </Button>
                               </div>
-                              {unknownEmfVerified !== null && (
-                                <p className={`text-xs font-semibold ${unknownEmfVerified ? "text-green-600" : "text-red-500"}`}>
-                                  {unknownEmfVerified ? "✓ Correct! Well done." : `✗ Expected ≈ ${unknownEmfFromBackend.toFixed(4)} V`}
+                              {unknownConcVerified !== null && (
+                                <p className={`text-xs font-semibold ${unknownConcVerified ? "text-green-600" : "text-red-500"}`}>
+                                  {unknownConcVerified ? "✓ Correct! Well done." : `✗ Incorrect. Try again using the Nernst equation.`}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <span className="text-xs text-amber-500 italic">Enter concentration and click Get EMF</span>
+                            <span className="text-xs text-amber-500 italic">Click "Get EMF" to reveal the EMF</span>
                           )}
                         </td>
                       </motion.tr>

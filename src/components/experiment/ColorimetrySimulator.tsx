@@ -410,157 +410,84 @@ const ColorimetrySimulator = () => {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          OBSERVATION TABLE 1 – λmax Determination
-          (Wavelengths auto-generated; Absorbance entered manually)
+          ROW 1: OBSERVATION TABLE 1 (left) + ABSORPTION SPECTRUM (right)
       ══════════════════════════════════════════════════════════════════ */}
-      <Card className="glass-card border-0">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="font-display text-base">
-                Observation Table 1 &nbsp;–&nbsp; λmax Determination
-              </CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">
-                For <span className="font-medium">{solutionData[solution].name}</span>{" "}
-                &nbsp;|&nbsp; λmax =&nbsp;
-                <span className="font-semibold text-primary">{lambdaMax} nm</span>
-                &nbsp;·&nbsp; Enter observed absorbance values below.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={downloadTable1CSV}
-              className="gap-2"
-              disabled={lambdaRows.length === 0}
-            >
-              <Download className="w-4 h-4" />
-              Download CSV
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className={thClass}>S.No</th>
-                  <th className={thClass}>Wavelength (nm)</th>
-                  <th className={thClass}>Absorbance <span className="text-primary/70">(enter value)</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {lambdaRows.map((row, idx) => (
-                  <motion.tr
-                    key={row.s_no}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.04 }}
-                    className={`hover:bg-muted/30 transition-colors ${row.wavelength === lambdaMax ? "bg-primary/5" : ""
-                      }`}
-                  >
-                    <td className={tdClass}>{row.s_no}</td>
-                    <td className={`${tdClass} font-mono font-medium`}>
-                      {row.wavelength}
-                      {row.wavelength === lambdaMax && (
-                        <span className="ml-2 text-xs font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                          λmax
-                        </span>
-                      )}
-                    </td>
-                    <td className={tdClass}>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.001"
-                        placeholder="e.g. 0.450"
-                        value={lambdaAbsorbances[idx] ?? ""}
-                        onChange={(e) => handleLambdaAbsorbanceChange(idx, e.target.value)}
-                        className={inputClass}
-                      />
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          OBSERVATION TABLE 2 – Beer-Lambert Law Verification
-          (Concentrations auto-generated; Absorbance entered manually)
-      ══════════════════════════════════════════════════════════════════ */}
-      <Card className="glass-card border-0">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="font-display text-base">
-                Observation Table 2 &nbsp;–&nbsp; Beer-Lambert Law Verification
-              </CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">
-                Measured at λ =&nbsp;
-                <span className="font-semibold text-primary">{concLambdaMax} nm</span>
-                &nbsp;·&nbsp; Enter observed absorbance values below.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={downloadTable2CSV}
-              className="gap-2"
-              disabled={concRows.length === 0}
-            >
-              <Download className="w-4 h-4" />
-              Download CSV
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className={thClass}>S.No</th>
-                  <th className={thClass}>Concentration (mol/L)</th>
-                  <th className={thClass}>Absorbance <span className="text-primary/70">(enter value)</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {concRows.map((row, idx) => (
-                  <motion.tr
-                    key={row.s_no}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.04 }}
-                    className="hover:bg-muted/30 transition-colors"
-                  >
-                    <td className={tdClass}>{row.s_no}</td>
-                    <td className={`${tdClass} font-mono font-medium`}>
-                      {row.concentration}
-                    </td>
-                    <td className={tdClass}>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.001"
-                        placeholder="e.g. 0.230"
-                        value={concAbsorbances[idx] ?? ""}
-                        onChange={(e) => handleConcAbsorbanceChange(idx, e.target.value)}
-                        className={inputClass}
-                      />
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Graphs */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Absorption Spectrum */}
+        <Card className="glass-card border-0">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="font-display text-base">
+                  Observation Table 1 &nbsp;–&nbsp; λmax Determination
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  For <span className="font-medium">{solutionData[solution].name}</span>{" "}
+                  &nbsp;|&nbsp; λmax =&nbsp;
+                  <span className="font-semibold text-primary">{lambdaMax} nm</span>
+                  &nbsp;·&nbsp; Enter observed absorbance values below.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadTable1CSV}
+                className="gap-2"
+                disabled={lambdaRows.length === 0}
+              >
+                <Download className="w-4 h-4" />
+                Download CSV
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={thClass}>S.No</th>
+                    <th className={thClass}>Wavelength (nm)</th>
+                    <th className={thClass}>Absorbance <span className="text-primary/70">(enter value)</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lambdaRows.map((row, idx) => (
+                    <motion.tr
+                      key={row.s_no}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.04 }}
+                      className={`hover:bg-muted/30 transition-colors ${row.wavelength === lambdaMax ? "bg-primary/5" : ""
+                        }`}
+                    >
+                      <td className={tdClass}>{row.s_no}</td>
+                      <td className={`${tdClass} font-mono font-medium`}>
+                        {row.wavelength}
+                        {row.wavelength === lambdaMax && (
+                          <span className="ml-2 text-xs font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                            λmax
+                          </span>
+                        )}
+                      </td>
+                      <td className={tdClass}>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.001"
+                          placeholder="e.g. 0.450"
+                          value={lambdaAbsorbances[idx] ?? ""}
+                          onChange={(e) => handleLambdaAbsorbanceChange(idx, e.target.value)}
+                          className={inputClass}
+                        />
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Absorption Spectrum Graph */}
         <AbsorbanceGraph
           title="Absorption Spectrum"
           subtitle="Absorbance vs Wavelength"
@@ -571,8 +498,80 @@ const ColorimetrySimulator = () => {
           highlightX={wavelength}
           lineColor={solutionData[solution].color}
         />
+      </div>
 
-        {/* Calibration Curve */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          ROW 2: OBSERVATION TABLE 2 (left) + CALIBRATION CURVE (right)
+      ══════════════════════════════════════════════════════════════════ */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card className="glass-card border-0">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="font-display text-base">
+                  Observation Table 2 &nbsp;–&nbsp; Beer-Lambert Law Verification
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Measured at λ =&nbsp;
+                  <span className="font-semibold text-primary">{concLambdaMax} nm</span>
+                  &nbsp;·&nbsp; Enter observed absorbance values below.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadTable2CSV}
+                className="gap-2"
+                disabled={concRows.length === 0}
+              >
+                <Download className="w-4 h-4" />
+                Download CSV
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={thClass}>S.No</th>
+                    <th className={thClass}>Concentration (mol/L)</th>
+                    <th className={thClass}>Absorbance <span className="text-primary/70">(enter value)</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {concRows.map((row, idx) => (
+                    <motion.tr
+                      key={row.s_no}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.04 }}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
+                      <td className={tdClass}>{row.s_no}</td>
+                      <td className={`${tdClass} font-mono font-medium`}>
+                        {row.concentration}
+                      </td>
+                      <td className={tdClass}>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.001"
+                          placeholder="e.g. 0.230"
+                          value={concAbsorbances[idx] ?? ""}
+                          onChange={(e) => handleConcAbsorbanceChange(idx, e.target.value)}
+                          className={inputClass}
+                        />
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Calibration Curve Graph */}
         <AbsorbanceGraph
           title="Calibration Curve"
           subtitle="Beer-Lambert Law Verification"
