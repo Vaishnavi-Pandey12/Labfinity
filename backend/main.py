@@ -416,6 +416,64 @@ def get_colorimetry_concentration_table(solution: str = "KMnO4"):
 
 
 # ================================================================
+#  Quiz endpoint
+# ================================================================
+
+import json
+import random as _random
+
+_QUIZ_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "quiz_questions.json")
+
+def _load_quiz_data():
+    with open(_QUIZ_JSON_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+@app.get("/api/quiz/{experiment_id}")
+def get_quiz(experiment_id: int, count: int = 7):
+    """
+    Return `count` random questions for the given experiment_id.
+    Each question has its options shuffled so the correct answer is
+    not always in the first position.
+    """
+    data = _load_quiz_data()
+    experiments = data.get("experiments", [])
+
+    # Find the experiment
+    experiment = next((e for e in experiments if e["id"] == experiment_id), None)
+    if experiment is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No experiment found with id={experiment_id}",
+        )
+
+    all_questions = experiment.get("questions", [])
+    if not all_questions:
+        raise HTTPException(status_code=404, detail="No questions found for this experiment")
+
+    # Pick `count` random questions (or all if fewer exist)
+    picked = _random.sample(all_questions, min(count, len(all_questions)))
+
+    # Shuffle each question's options (keep correct_answer reference intact)
+    result = []
+    for q in picked:
+        options = list(q["options"])
+        _random.shuffle(options)
+        result.append({
+            "id": q["id"],
+            "question": q["question"],
+            "options": options,
+            "correct_answer": q["correct_answer"],
+        })
+
+    return {
+        "experiment_id": experiment_id,
+        "title": experiment.get("title", ""),
+        "questions": result,
+    }
+
+
+# ================================================================
 #  File Upload
 # ================================================================
 

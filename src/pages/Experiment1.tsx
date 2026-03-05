@@ -14,7 +14,7 @@ const Experiment1 = () => {
       procedure={<ElectrochemistryProcedure />}
       simulator={<ElectrochemistrySimulator />}
       observations={<ObservationsSection />}
-      quiz={<QuizSection />}
+      quiz={<QuizSection experimentId={7} />}
     />
   );
 };
