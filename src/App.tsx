@@ -24,13 +24,12 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* All routes are public — login is optional */}
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -41,16 +40,18 @@ const App = () => (
             <Route path="/subjects/chemistry/experiments/2" element={<Experiment2 />} />
             <Route path="/subjects/chemistry/experiments/3" element={<Experiment3 />} />
             <Route path="/subjects/chemistry/experiments/4" element={<Experiment4 />} />
+            <Route path="/subjects/chemistry/experiments/5" element={<Experiment5 />} />
+            <Route path="/subjects/chemistry/experiments/6" element={<Experiment6 />} />
+            <Route path="/subjects/chemistry/experiments/7" element={<Experiment7 />} />
             <Route path="/subjects/physics/experiments/1" element={<PhysicsExperiment1 />} />
             <Route path="/subjects/physics/experiments/2" element={<PhysicsExperiment2 />} />
-             <Route path="/subjects/physics/experiments/3" element={<PhysicsExperiment3 />} />
             <Route path="/experiments" element={<Navigate to="/home" replace />} />
-            {/* Catch-all */}
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
