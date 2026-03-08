@@ -14,7 +14,7 @@ const Experiment2 = () => {
       procedure={<ColorimetryProcedure />}
       simulator={<ColorimetrySimulator />}
       observations={<ObservationsSection />}
-      quiz={<QuizSection />}
+      quiz={<QuizSection experimentId={5} />}
     />
   );
 };

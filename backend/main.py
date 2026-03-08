@@ -50,12 +50,16 @@ except ImportError:
     )
 
 # --------------- Environment ---------------
-load_dotenv()
+# Try loading .env from the project root (one level up from backend/)
+_root_env = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+load_dotenv(dotenv_path=_root_env)
+load_dotenv()  # also load local .env if present
 
 SECRET_KEY = os.getenv("SECRET_KEY", "please-set-a-secret")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+# Accept either GOOGLE_CLIENT_ID or the Vite-prefixed variant from the root .env
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") or os.getenv("VITE_GOOGLE_CLIENT_ID", "")
 
 # --------------- App ---------------
 app = FastAPI(title="Labfinity API")
@@ -409,6 +413,64 @@ def get_colorimetry_concentration_table(solution: str = "KMnO4"):
     concentrations = data["conc_range"]
     rows = [{"s_no": i + 1, "concentration": c} for i, c in enumerate(concentrations)]
     return {"solution": solution, "lambda_max": data["lambda_max"], "rows": rows}
+
+
+# ================================================================
+#  Quiz endpoint
+# ================================================================
+
+import json
+import random as _random
+
+_QUIZ_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "quiz_questions.json")
+
+def _load_quiz_data():
+    with open(_QUIZ_JSON_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+@app.get("/api/quiz/{experiment_id}")
+def get_quiz(experiment_id: int, count: int = 7):
+    """
+    Return `count` random questions for the given experiment_id.
+    Each question has its options shuffled so the correct answer is
+    not always in the first position.
+    """
+    data = _load_quiz_data()
+    experiments = data.get("experiments", [])
+
+    # Find the experiment
+    experiment = next((e for e in experiments if e["id"] == experiment_id), None)
+    if experiment is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No experiment found with id={experiment_id}",
+        )
+
+    all_questions = experiment.get("questions", [])
+    if not all_questions:
+        raise HTTPException(status_code=404, detail="No questions found for this experiment")
+
+    # Pick `count` random questions (or all if fewer exist)
+    picked = _random.sample(all_questions, min(count, len(all_questions)))
+
+    # Shuffle each question's options (keep correct_answer reference intact)
+    result = []
+    for q in picked:
+        options = list(q["options"])
+        _random.shuffle(options)
+        result.append({
+            "id": q["id"],
+            "question": q["question"],
+            "options": options,
+            "correct_answer": q["correct_answer"],
+        })
+
+    return {
+        "experiment_id": experiment_id,
+        "title": experiment.get("title", ""),
+        "questions": result,
+    }
 
 
 # ================================================================

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 // Google Identity script attaches itself to `window.google`.
 // declare to please TypeScript since we reference it below.
@@ -19,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 const Login = () => {
   const navigate = useNavigate();
   const { signIn, signUp, googleLogin, user } = useAuth();
+  const hiddenGoogleButtonRef = useRef<HTMLDivElement>(null);
 
   // Already logged in — redirect to home
   if (user) {
@@ -35,47 +36,104 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [googleReady, setGoogleReady] = useState(false);
 
-  // called when the Google SDK returns an ID token (credential)
-  const handleGoogleCredential = async (response: any) => {
+  // Use a ref so the Google callback always calls the latest version
+  const googleCallbackRef = useRef<(response: any) => void>();
+
+  googleCallbackRef.current = async (response: any) => {
+    console.log("Google callback triggered. Response:", response);
+    
     setIsLoading(true);
     setErrorMsg("");
-    if (response?.credential) {
-      try {
-        await googleLogin(response.credential);
-        navigate("/home");
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Google login failed";
-        setErrorMsg(msg);
-      }
-    } else {
-      setErrorMsg("Google authentication failed");
+    
+    // Handle both callback format and requestCredential format
+    const credentialToken = response?.credential || response?.token;
+    
+    if (!credentialToken) {
+      const errorMsg = response?.error || "No credential received from Google";
+      console.error("Google auth error:", errorMsg);
+      setErrorMsg(errorMsg);
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
+    
+    try {
+      console.log("Sending credential to backend...");
+      await googleLogin(credentialToken);
+      console.log("Login successful, redirecting...");
+      navigate("/home");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Google login failed";
+      console.error("Google login error details:", err);
+      setErrorMsg(msg);
+      setIsLoading(false);
+    }
   };
 
   // load the Google Identity Services script dynamically and initialize it
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) return;
+    if (!clientId) {
+      console.warn("VITE_GOOGLE_CLIENT_ID not set — Google login disabled");
+      setErrorMsg("Google login configuration missing");
+      return;
+    }
+
+    // If the script is already loaded, just initialize
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (res: any) => googleCallbackRef.current?.(res),
+      });
+      // Render the hidden Google button
+      if (hiddenGoogleButtonRef.current) {
+        window.google.accounts.id.renderButton(hiddenGoogleButtonRef.current, {
+          type: "standard",
+          size: "large",
+          theme: "outline",
+          text: "signin",
+        });
+      }
+      setGoogleReady(true);
+      console.log("Google SDK already loaded and initialized");
+      return;
+    }
 
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      if (window.google && window.google.accounts && window.google.accounts.id) {
+      console.log("Google SDK script loaded");
+      if (window.google?.accounts?.id) {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: handleGoogleCredential,
+          callback: (res: any) => googleCallbackRef.current?.(res),
         });
+        // Render the hidden Google button
+        if (hiddenGoogleButtonRef.current) {
+          window.google.accounts.id.renderButton(hiddenGoogleButtonRef.current, {
+            type: "standard",
+            size: "large",
+            theme: "outline",
+            text: "signin",
+          });
+        }
         setGoogleReady(true);
+        console.log("Google SDK initialized successfully");
+      } else {
+        console.error("window.google?.accounts?.id not available after script load");
+        setErrorMsg("Failed to initialize Google SDK");
       }
+    };
+    script.onerror = () => {
+      console.error("Failed to load Google SDK script");
+      setErrorMsg("Failed to load Google SDK");
     };
     document.body.appendChild(script);
     return () => {
-      document.body.removeChild(script);
+      try { document.body.removeChild(script); } catch { }
     };
-  }, []);
+  }, [hiddenGoogleButtonRef]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -342,8 +400,31 @@ const Login = () => {
                     setErrorMsg("Google SDK not loaded yet, please try again.");
                     return;
                   }
-                  // ask Google to prompt the user; callback will handle response
-                  window.google?.accounts?.id.prompt();
+                  
+                  console.log("Attempting to trigger Google authentication...");
+                  try {
+                    // Try to click the rendered Google button inside the hidden container
+                    const container = hiddenGoogleButtonRef.current;
+                    if (container) {
+                      // Find the button element within the rendered Google button
+                      const button = container.querySelector("button, [role='button']") as HTMLElement;
+                      if (button) {
+                        console.log("Found Google button, clicking it...");
+                        button.click();
+                      } else {
+                        // Fallback: try to trigger using prompt
+                        console.log("No button found, trying prompt...");
+                        window.google?.accounts?.id?.prompt?.();
+                      }
+                    } else {
+                      console.error("Hidden container not found");
+                      setErrorMsg("Google button container not initialized");
+                    }
+                  } catch (err: any) {
+                    const errorMsg = err?.message || "Failed to trigger Google sign-in";
+                    console.error("Google sign-in error:", err);
+                    setErrorMsg(errorMsg);
+                  }
                 }}
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -367,6 +448,13 @@ const Login = () => {
                 Continue with Google
               </Button>
             </motion.div>
+
+            {/* Hidden Google Sign-In Button Container */}
+            <div
+              ref={hiddenGoogleButtonRef}
+              style={{ display: "none" }}
+              className="google-button-container"
+            />
 
             <motion.p
               initial={{ opacity: 0 }}
