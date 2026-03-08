@@ -21,12 +21,6 @@ const Login = () => {
   const { signIn, signUp, googleLogin, user } = useAuth();
   const hiddenGoogleButtonRef = useRef<HTMLDivElement>(null);
 
-  // Already logged in — redirect to home
-  if (user) {
-    navigate("/home");
-    return null;
-  }
-
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -36,18 +30,27 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [googleReady, setGoogleReady] = useState(false);
 
-  // Use a ref so the Google callback always calls the latest version
+  // use a ref so the Google callback always calls the latest version
   const googleCallbackRef = useRef<(response: any) => void>();
+
+  // Already logged in — redirect to home
+  useEffect(() => {
+    if (user) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
+
+
 
   googleCallbackRef.current = async (response: any) => {
     console.log("Google callback triggered. Response:", response);
-    
+
     setIsLoading(true);
     setErrorMsg("");
-    
+
     // Handle both callback format and requestCredential format
     const credentialToken = response?.credential || response?.token;
-    
+
     if (!credentialToken) {
       const errorMsg = response?.error || "No credential received from Google";
       console.error("Google auth error:", errorMsg);
@@ -55,7 +58,7 @@ const Login = () => {
       setIsLoading(false);
       return;
     }
-    
+
     try {
       console.log("Sending credential to backend...");
       await googleLogin(credentialToken);
@@ -400,7 +403,7 @@ const Login = () => {
                     setErrorMsg("Google SDK not loaded yet, please try again.");
                     return;
                   }
-                  
+
                   console.log("Attempting to trigger Google authentication...");
                   try {
                     // Try to click the rendered Google button inside the hidden container

@@ -17,15 +17,15 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List, Optional
-from sqlalchemy import text
-from sqlalchemy.orm import Session
-
+from supabase import create_client, Client
 import os
 import shutil
 import uuid
-import bcrypt
 import jwt
+import bcrypt
 from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 # --------------- Local imports ---------------
 # Support both `uvicorn backend.main:app` (from repo root) and
@@ -39,6 +39,7 @@ try:
         generate_concentration_absorbance_table,
         generate_ph_titration_table,
     )
+    from backend.chatbotai import generate_response
 except ImportError:
     from db import engine, get_db, init_db, Base
     from models import User
@@ -48,6 +49,7 @@ except ImportError:
         generate_concentration_absorbance_table,
         generate_ph_titration_table,
     )
+    from chatbotai import generate_response
 
 # --------------- Environment ---------------
 # Try loading .env from the project root (one level up from backend/)
@@ -75,6 +77,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:8080",
+        "http://localhost:8081",
         "http://localhost:3000",
     ],
     allow_credentials=True,
@@ -496,3 +499,22 @@ async def upload_graph(
         "message": "Upload successful",
         "fileUrl": f"http://localhost:8000/uploads/{unique_filename}",
     }
+
+# ---- Pydantic Models ----
+class ChatRequest(BaseModel):
+    message: str
+
+class ChatResponse(BaseModel):
+    response: str
+
+# ---- Chatbot Endpoint ----
+@app.post("/api/chat")
+async def chat_endpoint(request: ChatRequest):
+    """
+    Chat with the AI assistant for experiment help
+    """
+    try:
+        response = generate_response(request.message)
+        return ChatResponse(response=response)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,84 @@
+﻿
+C:\Users\janak\Labfinity\src\components\experiment\ColorimetryApparatusProcedure.tsx
+  3:7  warning  Fast refresh only works when a file has exports. Move your component(s) to a separate file  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\components\experiment\ColorimetrySimulator.tsx
+  130:6  warning  React Hook useEffect has a missing dependency: 'concentration'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setSpectrumData' needs the current value of 'concentration'  react-hooks/exhaustive-deps
+
+C:\Users\janak\Labfinity\src\components\experiment\ElectrochemistrySimulator.tsx
+  155:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\janak\Labfinity\src\components\experiment\PotentiometrySimulator.tsx
+  143:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  307:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\janak\Labfinity\src\components\experiment\physicsthermosimulator.tsx
+  13:27  error  React Hook "useState" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  16:31  error  React Hook "useState" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  18:37  error  React Hook "useState" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  18:46  error  Unexpected any. Specify a different type                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+  21:41  error  React Hook "useState" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  23:41  error  React Hook "useState" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  23:50  error  Unexpected any. Specify a different type                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+  26:33  error  React Hook "useState" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  27:35  error  React Hook "useState" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  29:39  error  React Hook "useState" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"  react-hooks/rules-of-hooks
+  29:48  error  Unexpected any. Specify a different type                                                                                                                                                                                                                      @typescript-eslint/no-explicit-any
+  63:21  error  React Hook "useMemo" is called in function "physicsthermosimulator" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"   react-hooks/rules-of-hooks
+
+C:\Users\janak\Labfinity\src\components\ui\badge.tsx
+  29:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\components\ui\button.tsx
+  47:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\components\ui\command.tsx
+  24:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\janak\Labfinity\src\components\ui\form.tsx
+  129:10  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\components\ui\navigation-menu.tsx
+  111:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\components\ui\sidebar.tsx
+  636:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\components\ui\sonner.tsx
+  27:19  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\components\ui\textarea.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\janak\Labfinity\src\components\ui\toggle.tsx
+  37:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\hooks\useAuth.tsx
+  125:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\janak\Labfinity\src\pages\Login.tsx
+    7:14  error  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+   30:27  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+   31:35  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+   32:29  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+   33:35  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+   34:43  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+   35:37  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+   36:35  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+   37:41  error  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+   40:29  error  React Hook "useRef" is called conditionally. React Hooks must be called in the exact same order in every component render     react-hooks/rules-of-hooks
+   40:47  error  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+   42:48  error  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+   73:3   error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+   85:25  error  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+  110:27  error  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+  134:56  error  Empty block statement                                                                                                         no-empty
+  423:33  error  Unexpected any. Specify a different type                                                                                      @typescript-eslint/no-explicit-any
+
+C:\Users\janak\Labfinity\tailwind.config.ts
+  114:13  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+Γ£û 47 problems (37 errors, 10 warnings)
+
