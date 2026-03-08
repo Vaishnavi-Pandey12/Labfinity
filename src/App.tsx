@@ -12,6 +12,9 @@ import Experiment1 from "./pages/Experiment1";
 import Experiment2 from "./pages/Experiment2";
 import Experiment3 from "./pages/Experiment3";
 import Experiment4 from "./pages/Experiment4";
+import Experiment5 from "./pages/Experiment5";
+import Experiment6 from "./pages/Experiment6";
+import Experiment7 from "./pages/Experiment7";
 import PhysicsExperiment1 from "./pages/PhysicsExperiment1";
 import PhysicsExperiment2 from "./pages/PhysicsExperiment2";
 import PhysicsExperiment3 from "./pages/PhysicsExperiment3";
@@ -24,8 +27,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
+      <AuthProvider>
+        <BrowserRouter>
           <Routes>
             {/* All routes are public — login is optional */}
             <Route path="/" element={<Home />} />
@@ -45,8 +48,8 @@ const App = () => (
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
