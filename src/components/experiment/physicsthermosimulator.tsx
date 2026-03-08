@@ -9,7 +9,7 @@ import AbsorbanceGraph from "./AbsorbanceGraph";
 
 type Mode = "boyle" | "charles" | "carnot";
 
-const physicsthermosimulator = () => {
+const PhysicsThermoSimulator = () => {
   const [mode, setMode] = useState<Mode>("boyle");
 
   // Boyle
@@ -155,7 +155,7 @@ const physicsthermosimulator = () => {
                 <tbody>
                   {boyleData.map((d, i) => (
                     <tr key={i}>
-                      <td>{i+1}</td>
+                      <td>{i + 1}</td>
                       <td>{d.volume.toFixed(2)}</td>
                       <td>{d.pressure.toFixed(2)}</td>
                       <td>{d.pv.toFixed(2)}</td>
@@ -175,7 +175,7 @@ const physicsthermosimulator = () => {
                 <tbody>
                   {charlesData.map((d, i) => (
                     <tr key={i}>
-                      <td>{i+1}</td>
+                      <td>{i + 1}</td>
                       <td>{d.temperature}</td>
                       <td>{d.volume.toFixed(2)}</td>
                       <td>{d.ratio.toFixed(4)}</td>
@@ -195,7 +195,7 @@ const physicsthermosimulator = () => {
                 <tbody>
                   {carnotData.map((d, i) => (
                     <tr key={i}>
-                      <td>{i+1}</td>
+                      <td>{i + 1}</td>
                       <td>{d.hotTemp}</td>
                       <td>{d.coldTemp}</td>
                       <td>{(d.efficiency * 100).toFixed(1)}%</td>
@@ -216,8 +216,8 @@ const physicsthermosimulator = () => {
           mode === "boyle"
             ? "Pressure vs Volume"
             : mode === "charles"
-            ? "Volume vs Temperature"
-            : "Efficiency vs Hot Temperature"
+              ? "Volume vs Temperature"
+              : "Efficiency vs Hot Temperature"
         }
         data={graphData}
         xLabel="X"
@@ -244,4 +244,4 @@ const physicsthermosimulator = () => {
   );
 };
 
-export default physicsthermosimulator;
+export default PhysicsThermoSimulator;

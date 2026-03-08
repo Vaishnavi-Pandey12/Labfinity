@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 import { useAuth } from "@/hooks/useAuth";
+import { ChatBot } from "@/components/ChatBot";
 
 const subjects = [
   {
@@ -210,7 +211,7 @@ const Home = () => {
         </div>
       </section>
 
-
+      <ChatBot />
 
       {/* Footer */}
       <footer className="py-8 border-t border-border/50">
