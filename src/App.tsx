@@ -17,6 +17,7 @@ import Experiment6 from "./pages/Experiment6";
 import Experiment7 from "./pages/Experiment7";
 import PhysicsExperiment1 from "./pages/PhysicsExperiment1";
 import PhysicsExperiment2 from "./pages/PhysicsExperiment2";
+import PhysicsExperiment3 from "./pages/PhysicsExperiment3";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
