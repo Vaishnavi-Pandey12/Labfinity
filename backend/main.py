@@ -23,33 +23,22 @@ import shutil
 import uuid
 import jwt
 import bcrypt
+import random
+import string
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 # --------------- Local imports ---------------
-# Support both `uvicorn backend.main:app` (from repo root) and
-# `uvicorn main:app` (from backend/ directory).
-try:
-    from backend.db import engine, get_db, init_db, Base
-    from backend.models import User
-    from backend.chem_tables import (
-        electrochemistry_cell_table,
-        generate_lambda_max_table,
-        generate_concentration_absorbance_table,
-        generate_ph_titration_table,
-    )
-    from backend.chatbotai import generate_response
-except ImportError:
-    from db import engine, get_db, init_db, Base
-    from models import User
-    from chem_tables import (
-        electrochemistry_cell_table,
-        generate_lambda_max_table,
-        generate_concentration_absorbance_table,
-        generate_ph_titration_table,
-    )
-    from chatbotai import generate_response
+from db import engine, get_db, init_db, Base
+from models import User, Classroom, ClassroomStudent
+from chem_tables import (
+    electrochemistry_cell_table,
+    generate_lambda_max_table,
+    generate_concentration_absorbance_table,
+    generate_ph_titration_table,
+)
+# from chatbotai import generate_response
 
 # --------------- Environment ---------------
 # Try loading .env from the project root (one level up from backend/)
@@ -132,40 +121,58 @@ class SignUpRequest(BaseModel):
     username: str
     email: str
     password: str
+    role: str = "student"  # one of 'student','faculty'
+    registration_no: Optional[str] = None
 
 
 @app.post("/api/signup")
 def sign_up(req: SignUpRequest, db: Session = Depends(get_db)):
     """Register a new user. Prevents duplicate email or username."""
 
-    # Check duplicate email
+    # ensure role is valid
+    if req.role not in ("student", "faculty"):
+        raise HTTPException(status_code=400, detail="Invalid role")
+
+    # Validate email domain based on role
+    if req.role == "student":
+        if not req.email.endswith("@vitapstudent.ac.in"):
+            raise HTTPException(status_code=400, detail="Invalid domain. Students must use @vitapstudent.ac.in")
+    elif req.role == "faculty":
+        if not req.email.endswith("@vitap.ac.in"):
+            raise HTTPException(status_code=400, detail="Invalid domain. Faculty must use @vitap.ac.in")
+
+
+    # Check duplicate email or username
     existing_email = db.query(User).filter(User.email == req.email).first()
     if existing_email:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Check duplicate username
-    existing_username = db.query(User).filter(User.username == req.username).first()
+    existing_username = db.query(User).filter(User.name == req.username).first()
     if existing_username:
         raise HTTPException(status_code=400, detail="Username already taken")
 
     hashed = bcrypt.hashpw(req.password.encode(), bcrypt.gensalt()).decode()
 
     user = User(
-        username=req.username,
+        name=req.username,
         email=req.email,
-        hashed_password=hashed,
+        password=hashed,
+        role=req.role,
+        registration_no=req.registration_no,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    token = create_access_token({"user_id": user.id, "email": user.email})
+    token = create_access_token({"user_id": user.id, "email": user.email, "role": req.role})
     return {
         "message": "Account created",
         "access_token": token,
         "user_id": user.id,
         "email": user.email,
-        "username": user.username,
+        "username": user.name,
+        "role": req.role,
+        "registration_no": user.registration_no,
     }
 
 
@@ -180,19 +187,20 @@ def sign_in(req: SignInRequest, db: Session = Depends(get_db)):
     """Authenticate a user and return a JWT token."""
 
     user = db.query(User).filter(User.email == req.email).first()
-    if not user or not user.hashed_password:
-        # either the user doesn't exist, or they signed up with Google only
+    if not user or not user.password:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    if not bcrypt.checkpw(req.password.encode(), user.hashed_password.encode()):
+    if not bcrypt.checkpw(req.password.encode(), user.password.encode()):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    token = create_access_token({"user_id": user.id, "email": user.email})
+    token = create_access_token({"user_id": user.id, "email": user.email, "role": user.role})
     return {
         "access_token": token,
         "user_id": user.id,
         "email": user.email,
-        "username": user.username,
+        "username": user.name,
+        "role": user.role,
+        "registration_no": user.registration_no,
     }
 
 
@@ -214,14 +222,9 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
         if not GOOGLE_CLIENT_ID:
             raise Exception("GOOGLE_CLIENT_ID not set in environment")
 
-        print(f"[DEBUG] Verifying token with CLIENT_ID: {GOOGLE_CLIENT_ID}")
-        
         idinfo = id_token.verify_oauth2_token(
             req.token, google_requests.Request(), GOOGLE_CLIENT_ID
         )
-
-        print(f"[DEBUG] Token verified successfully. Email: {idinfo.get('email')}")
-        
         google_id = idinfo["sub"]
         email = idinfo.get("email", "")
         name = idinfo.get("name", "")
@@ -229,42 +232,42 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
 
     except Exception as e:
         error_msg = str(e)
-        print(f"[ERROR] Google token verification failed: {error_msg}")
         raise HTTPException(status_code=400, detail=f"Invalid Google token: {error_msg}")
 
-    # Try to find user by google_id first, then by email
     user = db.query(User).filter(User.google_id == google_id).first()
-
     if not user:
         user = db.query(User).filter(User.email == email).first()
-        if user:
-            # Link existing account to Google
+    if user:
+        # update profile picture or link google id
+        if not user.google_id:
             user.google_id = google_id
-            if picture:
-                user.profile_picture = picture
-            db.commit()
-            db.refresh(user)
-        else:
-            # Create brand-new user
-            user = User(
-                username=email.split("@")[0],   # derive username from email
-                email=email,
-                hashed_password=None,              # no password for Google-only users
-                google_id=google_id,
-                profile_picture=picture,
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+        if picture:
+            user.profile_picture = picture
+        db.commit()
+        db.refresh(user)
+    else:
+        # create new account, default to student role
+        user = User(
+            name=email.split("@")[0] or name,
+            email=email,
+            password="",  # no password for Google-only users
+            role="student",
+            google_id=google_id,
+            profile_picture=picture,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
-    token = create_access_token({"user_id": user.id, "email": user.email})
+    token = create_access_token({"user_id": user.id, "email": user.email, "role": user.role})
     return {
         "message": "Login successful",
         "access_token": token,
         "user_id": user.id,
         "email": user.email,
-        "username": user.username,
+        "username": user.name,
         "profile_picture": user.profile_picture,
+        "role": user.role,
     }
 
 
@@ -279,6 +282,7 @@ def get_me(authorization: Optional[str] = Header(None), db: Session = Depends(ge
     token = authorization.split(" ", 1)[1]
     payload = verify_token(token)
     user_id = payload.get("user_id")
+    role = payload.get("role", "student")  # Default to student for backward compatibility
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
 
@@ -289,8 +293,10 @@ def get_me(authorization: Optional[str] = Header(None), db: Session = Depends(ge
     return {
         "user_id": user.id,
         "email": user.email,
-        "username": user.username,
+        "username": user.name,
         "profile_picture": user.profile_picture,
+        "role": user.role,
+        "registration_no": user.registration_no,
     }
 
 
@@ -299,6 +305,80 @@ def get_me(authorization: Optional[str] = Header(None), db: Session = Depends(ge
 def sign_out():
     """Client should delete stored token; server just confirms."""
     return {"message": "Signed out successfully"}
+
+
+# ================================================================
+#  Classroom endpoints
+# ================================================================
+
+def generate_join_code(db: Session, length=8):
+    """Generate a random unique join code."""
+    characters = string.ascii_uppercase + string.digits
+    while True:
+        code = ''.join(random.choice(characters) for _ in range(length))
+        existing = db.query(Classroom).filter(Classroom.join_code == code).first()
+        if not existing:
+            return code
+
+class CreateClassroomRequest(BaseModel):
+    class_name: str
+    subject: str
+
+class ClassroomResponse(BaseModel):
+    id: int
+    class_name: str
+    subject: str
+    join_code: str
+    created_at: datetime
+    student_count: int
+
+def get_current_user(token: str = Header(None), db: Session = Depends(get_db)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Token missing")
+    payload = verify_token(token)
+    user_id = payload.get("sub")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+@app.post("/api/classrooms")
+def create_classroom(req: CreateClassroomRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if user.role != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can create classrooms")
+    
+    join_code = generate_join_code(db)
+    classroom = Classroom(
+        class_name=req.class_name,
+        subject=req.subject,
+        faculty_id=user.id,
+        join_code=join_code
+    )
+    db.add(classroom)
+    db.commit()
+    db.refresh(classroom)
+    return {"message": "Classroom created", "classroom": classroom}
+
+@app.get("/api/classrooms")
+def get_classrooms(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if user.role == "faculty":
+        classrooms = db.query(Classroom).filter(Classroom.faculty_id == user.id).all()
+    else:
+        # For students, get classrooms they joined
+        classrooms = db.query(Classroom).join(ClassroomStudent).filter(ClassroomStudent.student_id == user.id).all()
+    
+    result = []
+    for c in classrooms:
+        student_count = db.query(ClassroomStudent).filter(ClassroomStudent.classroom_id == c.id).count()
+        result.append({
+            "id": c.id,
+            "class_name": c.class_name,
+            "subject": c.subject,
+            "join_code": c.join_code,
+            "created_at": c.created_at,
+            "student_count": student_count
+        })
+    return result
 
 
 # ================================================================
@@ -501,20 +581,20 @@ async def upload_graph(
     }
 
 # ---- Pydantic Models ----
-class ChatRequest(BaseModel):
-    message: str
+# class ChatRequest(BaseModel):
+#     message: str
 
-class ChatResponse(BaseModel):
-    response: str
+# class ChatResponse(BaseModel):
+#     response: str
 
 # ---- Chatbot Endpoint ----
-@app.post("/api/chat")
-async def chat_endpoint(request: ChatRequest):
-    """
-    Chat with the AI assistant for experiment help
-    """
-    try:
-        response = generate_response(request.message)
-        return ChatResponse(response=response)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# @app.post("/api/chat")
+# async def chat_endpoint(request: ChatRequest):
+#     """
+#     Chat with the AI assistant for experiment help
+#     """
+#     try:
+#         response = generate_response(request.message)
+#         return ChatResponse(response=response)
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))

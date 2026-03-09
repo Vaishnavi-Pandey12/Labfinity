@@ -1,19 +1,22 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 
-const API = "http://localhost:8000";
+// Use relative paths to leverage Vite proxy for backend requests
+const API = "";
 
 interface User {
     user_id: number;
     email: string;
     username: string;
     profile_picture?: string;
+    role?: string;
+    registration_no?: string | null;
 }
 
 interface AuthContextType {
     user: User | null;
     token: string | null;
     loading: boolean;
-    signUp: (username: string, email: string, password: string) => Promise<void>;
+    signUp: (username: string, email: string, password: string, role?: string, registrationNo?: string) => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
     googleLogin: (googleToken: string) => Promise<void>;
     signOut: () => Promise<void>;
@@ -62,14 +65,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
         setToken(data.access_token);
-        setUser({ user_id: data.user_id, email: data.email, username: data.username });
+        setUser({ user_id: data.user_id, email: data.email, username: data.username, registration_no: data.registration_no });
     }, []);
 
-    const signUp = useCallback(async (username: string, email: string, password: string) => {
+    const signUp = useCallback(async (username: string, email: string, password: string, role: string = "student", registrationNo?: string) => {
+        const body: any = { username, email, password, role };
+        if (registrationNo) body.registration_no = registrationNo;
         const res = await fetch(`${API}/api/signup`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email, password }),
+            body: JSON.stringify(body),
         });
         if (!res.ok) {
             const err = await res.json();
@@ -78,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
         setToken(data.access_token);
-        setUser({ user_id: data.user_id, email: data.email, username: data.username });
+        setUser({ user_id: data.user_id, email: data.email, username: data.username, registration_no: data.registration_no });
     }, []);
 
     const googleLogin = useCallback(async (googleToken: string) => {

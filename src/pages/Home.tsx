@@ -123,6 +123,9 @@ const Home = () => {
             <Link to="/experiments" className="text-muted-foreground hover:text-primary transition-colors">
               Experiments
             </Link>
+            <Link to="/classroom" className="text-muted-foreground hover:text-primary transition-colors">
+              Classroom
+            </Link>
           </nav>
 
           <div className="flex items-center gap-4">

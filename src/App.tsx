@@ -18,6 +18,7 @@ import Experiment7 from "./pages/Experiment7";
 import PhysicsExperiment1 from "./pages/PhysicsExperiment1";
 import PhysicsExperiment2 from "./pages/PhysicsExperiment2";
 import PhysicsExperiment3 from "./pages/PhysicsExperiment3";
+import ClassroomDashboard from "./pages/ClassroomDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/subjects/physics/experiments/1" element={<PhysicsExperiment1 />} />
             <Route path="/subjects/physics/experiments/2" element={<PhysicsExperiment2 />} />
             <Route path="/experiments" element={<Navigate to="/home" replace />} />
+            <Route path="/classroom" element={<ClassroomDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

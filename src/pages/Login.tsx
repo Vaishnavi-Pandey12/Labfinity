@@ -21,14 +21,19 @@ const Login = () => {
   const { signIn, signUp, googleLogin, user } = useAuth();
   const hiddenGoogleButtonRef = useRef<HTMLDivElement>(null);
 
+  const [userType, setUserType] = useState<"student" | "faculty" | null>(null);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [registrationNo, setRegistrationNo] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [googleReady, setGoogleReady] = useState(false);
+
+  // Dynamic email placeholder based on user type
+  const emailPlaceholder = userType === "student" ? "student@vitapstudent.ac.in" : "faculty@vitap.ac.in";
 
   // use a ref so the Google callback always calls the latest version
   const googleCallbackRef = useRef<(response: any) => void>();
@@ -149,7 +154,7 @@ const Login = () => {
           setErrorMsg("Please enter a username.");
           return;
         }
-        await signUp(username.trim(), email, password);
+        await signUp(username.trim(), email, password, userType!, registrationNo || undefined);
       } else {
         await signIn(email, password);
       }
@@ -202,7 +207,79 @@ const Login = () => {
         transition={{ duration: 0.6 }}
         className="relative z-10 w-full max-w-md px-4"
       >
-        <Card className="glass-card border-0 shadow-xl">
+        {userType === null ? (
+          // User Type Selection
+          <Card className="glass-card border-0 shadow-xl">
+            <CardHeader className="text-center space-y-4 pb-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="flex justify-center"
+              >
+                <div className="w-20 h-20 rounded-2xl lab-gradient-bg flex items-center justify-center glow-effect">
+                  <FlaskConical className="w-10 h-10 text-primary-foreground" />
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <CardTitle className="text-3xl font-display lab-gradient-text">
+                  Labfinity
+                </CardTitle>
+                <CardDescription className="text-muted-foreground mt-2">
+                  Virtual Laboratory Platform
+                </CardDescription>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <CardTitle className="text-xl font-semibold text-foreground">
+                  Choose Your Role
+                </CardTitle>
+                <CardDescription className="text-muted-foreground mt-1">
+                  Select whether you're a student or faculty member
+                </CardDescription>
+              </motion.div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Button
+                  onClick={() => setUserType("student")}
+                  className="w-full h-14 lab-gradient-bg text-primary-foreground font-semibold text-lg hover:opacity-90 transition-opacity mb-3"
+                >
+                  <User className="w-5 h-5 mr-2" />
+                  Student
+                </Button>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Button
+                  onClick={() => setUserType("faculty")}
+                  variant="outline"
+                  className="w-full h-14 border-border/50 bg-background/50 hover:bg-background/80 font-semibold text-lg transition-all"
+                >
+                  <User className="w-5 h-5 mr-2" />
+                  Faculty
+                </Button>
+              </motion.div>
+
+            </CardContent>
+          </Card>
+        ) : (
+          // Existing Login/Signup Form
+          <Card className="glass-card border-0 shadow-xl">
           <CardHeader className="text-center space-y-4 pb-6">
             <motion.div
               initial={{ scale: 0 }}
@@ -219,12 +296,25 @@ const Login = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setUserType(null)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  ← Back
+                </Button>
+              </div>
               <CardTitle className="text-3xl font-display lab-gradient-text">
                 Labfinity
               </CardTitle>
               <CardDescription className="text-muted-foreground mt-2">
                 Virtual Laboratory Platform
               </CardDescription>
+              <div className="mt-2 text-sm text-muted-foreground capitalize">
+                {userType} Account
+              </div>
             </motion.div>
 
             {/* Mode Toggle */}
@@ -262,28 +352,50 @@ const Login = () => {
 
               {/* Username — only for sign up */}
               {mode === "signup" && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-2"
-                >
-                  <Label htmlFor="username" className="text-foreground font-medium">
-                    Username
-                  </Label>
-                  <div className="relative">
+                <>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-2"
+                  >
+                    <Label htmlFor="username" className="text-foreground font-medium">
+                      Username
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="username"
+                        type="text"
+                        placeholder="Choose a unique username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors pl-10"
+                        required
+                      />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </motion.div>
+
+                  {/* Registration number (optional) */}
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-2"
+                  >
+                    <Label htmlFor="registration" className="text-foreground font-medium">
+                      Registration No. (optional)
+                    </Label>
                     <Input
-                      id="username"
+                      id="registration"
                       type="text"
-                      placeholder="Choose a unique username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors pl-10"
-                      required
+                      placeholder="e.g. 21A1234"
+                      value={registrationNo}
+                      onChange={(e) => setRegistrationNo(e.target.value)}
+                      className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors"
                     />
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </>
               )}
 
               {/* Email */}
@@ -299,7 +411,7 @@ const Login = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="student@vitap.ac.in"
+                  placeholder={emailPlaceholder}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12 bg-background/50 border-border/50 focus:border-primary transition-colors"
@@ -469,6 +581,7 @@ const Login = () => {
             </motion.p>
           </CardContent>
         </Card>
+        )}
       </motion.div>
     </div>
   );
