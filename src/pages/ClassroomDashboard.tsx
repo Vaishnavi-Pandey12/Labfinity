@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Users, Plus, Eye, UserPlus, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Users, Plus, Eye, UserPlus, CheckCircle2, XCircle, AlertCircle, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Classroom {
@@ -262,7 +262,12 @@ const ClassroomDashboard = () => {
     <div className="min-h-screen bg-background p-6">
       <div className="container mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Classroom Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/home")}>
+              <Home className="w-5 h-5" />
+            </Button>
+            <h1 className="text-3xl font-bold">Classroom Dashboard</h1>
+          </div>
 
           {/* Faculty: Create */}
           {user?.role === "faculty" && (
