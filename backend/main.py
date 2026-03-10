@@ -209,7 +209,7 @@ class GoogleLoginRequest(BaseModel):
     token: str
 
 
-@app.post("/auth/google")
+@app.post("/api/auth/google")
 def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
     """
     Verify a Google ID token, create the user if they don't exist,
@@ -234,17 +234,10 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
         error_msg = str(e)
         raise HTTPException(status_code=400, detail=f"Invalid Google token: {error_msg}")
 
-    user = db.query(User).filter(User.google_id == google_id).first()
-    if not user:
-        user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == email).first()
     if user:
-        # update profile picture or link google id
-        if not user.google_id:
-            user.google_id = google_id
-        if picture:
-            user.profile_picture = picture
-        db.commit()
-        db.refresh(user)
+        # User already exists
+        pass
     else:
         # create new account, default to student role
         user = User(
@@ -252,8 +245,6 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
             email=email,
             password="",  # no password for Google-only users
             role="student",
-            google_id=google_id,
-            profile_picture=picture,
         )
         db.add(user)
         db.commit()
@@ -266,7 +257,6 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
         "user_id": user.id,
         "email": user.email,
         "username": user.name,
-        "profile_picture": user.profile_picture,
         "role": user.role,
     }
 
@@ -294,7 +284,6 @@ def get_me(authorization: Optional[str] = Header(None), db: Session = Depends(ge
         "user_id": user.id,
         "email": user.email,
         "username": user.name,
-        "profile_picture": user.profile_picture,
         "role": user.role,
         "registration_no": user.registration_no,
     }

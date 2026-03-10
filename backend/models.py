@@ -26,12 +26,10 @@ class User(Base):
     password = Column(String(255), nullable=False)
     role = Column(String(20), nullable=False)
     registration_no = Column(String(50), nullable=True)
-    google_id = Column(String(255), unique=True, nullable=True)
-    profile_picture = Column(String(255), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
     __table_args__ = (
-        CheckConstraint("role IN ('student','faculty')", name="role_check"),
+        CheckConstraint("role IN ('student','faculty','public')", name="role_check"),
     )
 
     # relationships

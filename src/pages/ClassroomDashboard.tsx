@@ -26,6 +26,9 @@ const ClassroomDashboard = () => {
   const [className, setClassName] = useState("");
   const [subject, setSubject] = useState("");
   const [creating, setCreating] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [joinCode, setJoinCode] = useState("");
+  const [joining, setJoining] = useState(false);
 
   useEffect(() => {
     fetchClassrooms();
@@ -113,6 +116,57 @@ const ClassroomDashboard = () => {
     }
   };
 
+  const joinClassroom = async () => {
+    if (!joinCode.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a join code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setJoining(true);
+    try {
+      const token = localStorage.getItem("labfinity_token");
+      const response = await fetch("/api/classrooms/join", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          join_code: joinCode,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Successfully joined classroom",
+        });
+        setJoinDialogOpen(false);
+        setJoinCode("");
+        fetchClassrooms();
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.detail || "Failed to join classroom",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Network error",
+        variant: "destructive",
+      });
+    } finally {
+      setJoining(false);
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -158,6 +212,39 @@ const ClassroomDashboard = () => {
                   </div>
                   <Button onClick={createClassroom} disabled={creating} className="w-full">
                     {creating ? "Creating..." : "Create Classroom"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {user?.role === "student" && (
+            <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Join Classroom
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Join Classroom</DialogTitle>
+                  <DialogDescription>
+                    Enter the join code provided by your faculty to join the classroom.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="joinCode">Join Code</Label>
+                    <Input
+                      id="joinCode"
+                      value={joinCode}
+                      onChange={(e) => setJoinCode(e.target.value)}
+                      placeholder="Enter join code"
+                    />
+                  </div>
+                  <Button onClick={joinClassroom} disabled={joining} className="w-full">
+                    {joining ? "Joining..." : "Join Classroom"}
                   </Button>
                 </div>
               </DialogContent>

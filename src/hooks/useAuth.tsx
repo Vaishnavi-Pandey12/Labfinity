@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
         setToken(data.access_token);
-        setUser({ user_id: data.user_id, email: data.email, username: data.username, registration_no: data.registration_no });
+        setUser({ user_id: data.user_id, email: data.email, username: data.username, role: data.role, registration_no: data.registration_no });
     }, []);
 
     const signUp = useCallback(async (username: string, email: string, password: string, role: string = "student", registrationNo?: string) => {
@@ -83,11 +83,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
         setToken(data.access_token);
-        setUser({ user_id: data.user_id, email: data.email, username: data.username, registration_no: data.registration_no });
+        setUser({ user_id: data.user_id, email: data.email, username: data.username, role: data.role, registration_no: data.registration_no });
     }, []);
 
     const googleLogin = useCallback(async (googleToken: string) => {
-        const res = await fetch(`${API}/auth/google`, {
+        const res = await fetch(`${API}/api/auth/google`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token: googleToken }),
