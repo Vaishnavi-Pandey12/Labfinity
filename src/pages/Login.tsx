@@ -1,12 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 
-// Google Identity script attaches itself to `window.google`.
-// declare to please TypeScript since we reference it below.
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -30,13 +23,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [googleReady, setGoogleReady] = useState(false);
 
   // Dynamic email placeholder based on user type
   const emailPlaceholder = userType === "student" ? "student@vitapstudent.ac.in" : "faculty@vitap.ac.in";
 
-  // use a ref so the Google callback always calls the latest version
-  const googleCallbackRef = useRef<(response: any) => void>();
 
   // Already logged in — redirect to home
   useEffect(() => {
@@ -45,7 +35,7 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     console.log("Google callback triggered. Response:", credentialResponse);
     setIsLoading(true);
     setErrorMsg("");
@@ -79,7 +69,7 @@ const Login = () => {
 
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg("");

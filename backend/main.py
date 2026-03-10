@@ -31,7 +31,7 @@ from sqlalchemy import text
 
 # --------------- Local imports ---------------
 from db import engine, get_db, init_db, Base
-from models import User, Classroom, ClassroomStudent
+from models import User, Classroom, ClassroomStudent, Assignment, Submission
 from chem_tables import (
     electrochemistry_cell_table,
     generate_lambda_max_table,
@@ -321,11 +321,15 @@ class ClassroomResponse(BaseModel):
     created_at: datetime
     student_count: int
 
-def get_current_user(token: str = Header(None), db: Session = Depends(get_db)):
-    if not token:
-        raise HTTPException(status_code=401, detail="Token missing")
+def get_current_user(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    """Extract the current user from the Authorization: Bearer <token> header."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token missing or invalid format")
+    token = authorization.split(" ", 1)[1]
     payload = verify_token(token)
-    user_id = payload.get("sub")
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
@@ -346,7 +350,18 @@ def create_classroom(req: CreateClassroomRequest, user: User = Depends(get_curre
     db.add(classroom)
     db.commit()
     db.refresh(classroom)
-    return {"message": "Classroom created", "classroom": classroom}
+    student_count = 0  # newly created classroom has no students yet
+    return {
+        "message": "Classroom created",
+        "classroom": {
+            "id": classroom.id,
+            "class_name": classroom.class_name,
+            "subject": classroom.subject,
+            "join_code": classroom.join_code,
+            "created_at": classroom.created_at.isoformat() if classroom.created_at else None,
+            "student_count": student_count,
+        }
+    }
 
 @app.get("/api/classrooms")
 def get_classrooms(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -359,15 +374,370 @@ def get_classrooms(user: User = Depends(get_current_user), db: Session = Depends
     result = []
     for c in classrooms:
         student_count = db.query(ClassroomStudent).filter(ClassroomStudent.classroom_id == c.id).count()
+        faculty_user = db.query(User).filter(User.id == c.faculty_id).first()
         result.append({
             "id": c.id,
             "class_name": c.class_name,
             "subject": c.subject,
             "join_code": c.join_code,
-            "created_at": c.created_at,
-            "student_count": student_count
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "student_count": student_count,
+            "faculty_name": faculty_user.name if faculty_user else "Unknown",
         })
     return result
+
+
+class JoinClassroomRequest(BaseModel):
+    join_code: str
+
+
+@app.post("/api/classrooms/join")
+def join_classroom(
+    req: JoinClassroomRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Allow a student to join a classroom by its join code."""
+    if user.role != "student":
+        raise HTTPException(status_code=403, detail="Only students can join classrooms")
+
+    classroom = db.query(Classroom).filter(Classroom.join_code == req.join_code).first()
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Invalid join code – classroom not found")
+
+    # Check if already a member
+    already_joined = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom.id,
+            ClassroomStudent.student_id == user.id,
+        )
+        .first()
+    )
+    if already_joined:
+        raise HTTPException(status_code=400, detail="You have already joined this classroom")
+
+    entry = ClassroomStudent(classroom_id=classroom.id, student_id=user.id)
+    db.add(entry)
+    db.commit()
+    return {
+        "message": f"Successfully joined '{classroom.class_name}'",
+        "classroom_id": classroom.id,
+        "class_name": classroom.class_name,
+        "subject": classroom.subject,
+    }
+
+
+# ================================================================
+#  Classroom student management endpoints
+# ================================================================
+
+class AddStudentsRequest(BaseModel):
+    emails: List[str]
+
+
+@app.post("/api/classrooms/{classroom_id}/add-students")
+def add_students_to_classroom(
+    classroom_id: int,
+    req: AddStudentsRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Faculty can bulk-add students to a classroom by email."""
+    if user.role != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can add students")
+
+    classroom = db.query(Classroom).filter(
+        Classroom.id == classroom_id,
+        Classroom.faculty_id == user.id,
+    ).first()
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found or not yours")
+
+    results = []
+    added_count = 0
+
+    for raw_email in req.emails:
+        email = raw_email.strip().lower()
+        if not email:
+            continue
+
+        student = db.query(User).filter(User.email == email).first()
+        if not student:
+            results.append({"email": email, "status": "not_found"})
+            continue
+        if student.role != "student":
+            results.append({"email": email, "status": "not_a_student"})
+            continue
+
+        existing = db.query(ClassroomStudent).filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == student.id,
+        ).first()
+        if existing:
+            results.append({"email": email, "status": "already_enrolled", "name": student.name})
+            continue
+
+        db.add(ClassroomStudent(classroom_id=classroom_id, student_id=student.id))
+        added_count += 1
+        results.append({"email": email, "status": "added", "name": student.name})
+
+    db.commit()
+
+    student_count = db.query(ClassroomStudent).filter(
+        ClassroomStudent.classroom_id == classroom_id
+    ).count()
+
+    return {
+        "added": added_count,
+        "student_count": student_count,
+        "results": results,
+    }
+
+
+@app.get("/api/classrooms/{classroom_id}/students")
+def get_classroom_students(
+    classroom_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return list of students enrolled in a classroom."""
+    # Faculty: must own the classroom. Student: must be enrolled.
+    if user.role == "faculty":
+        classroom = db.query(Classroom).filter(
+            Classroom.id == classroom_id,
+            Classroom.faculty_id == user.id,
+        ).first()
+        if not classroom:
+            raise HTTPException(status_code=404, detail="Classroom not found or not yours")
+    else:
+        enrolled = db.query(ClassroomStudent).filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == user.id,
+        ).first()
+        if not enrolled:
+            raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+
+    entries = (
+        db.query(ClassroomStudent, User)
+        .join(User, User.id == ClassroomStudent.student_id)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
+    return [
+        {
+            "student_id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "registration_no": u.registration_no,
+            "joined_at": cs.joined_at.isoformat() if cs.joined_at else None,
+        }
+        for cs, u in entries
+    ]
+
+
+# ================================================================
+#  Classwork / Assignment endpoints
+# ================================================================
+
+class CreateAssignmentRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+    due_date: Optional[str] = None  # ISO date string e.g. "2026-04-01"
+
+
+@app.post("/api/classrooms/{classroom_id}/assignments")
+def create_assignment(
+    classroom_id: int,
+    req: CreateAssignmentRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Faculty creates a new classwork/assignment."""
+    if user.role != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can create assignments")
+
+    classroom = db.query(Classroom).filter(
+        Classroom.id == classroom_id,
+        Classroom.faculty_id == user.id,
+    ).first()
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found or not yours")
+
+    from datetime import date as _date
+    parsed_due = None
+    if req.due_date:
+        try:
+            parsed_due = _date.fromisoformat(req.due_date)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid due_date format. Use YYYY-MM-DD")
+
+    assignment = Assignment(
+        classroom_id=classroom_id,
+        title=req.title,
+        description=req.description,
+        due_date=parsed_due,
+    )
+    db.add(assignment)
+    db.commit()
+    db.refresh(assignment)
+
+    return {
+        "id": assignment.id,
+        "title": assignment.title,
+        "description": assignment.description,
+        "due_date": assignment.due_date.isoformat() if assignment.due_date else None,
+        "created_at": assignment.created_at.isoformat() if assignment.created_at else None,
+    }
+
+
+@app.get("/api/classrooms/{classroom_id}/assignments")
+def list_assignments(
+    classroom_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """List all assignments for a classroom (faculty owner or enrolled student)."""
+    if user.role == "faculty":
+        classroom = db.query(Classroom).filter(
+            Classroom.id == classroom_id,
+            Classroom.faculty_id == user.id,
+        ).first()
+        if not classroom:
+            raise HTTPException(status_code=404, detail="Classroom not found or not yours")
+    else:
+        enrolled = db.query(ClassroomStudent).filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == user.id,
+        ).first()
+        if not enrolled:
+            raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+
+    assignments = (
+        db.query(Assignment)
+        .filter(Assignment.classroom_id == classroom_id)
+        .order_by(Assignment.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for a in assignments:
+        submission_count = db.query(Submission).filter(Submission.assignment_id == a.id).count()
+        # If student, include their own submission status
+        my_submission = None
+        if user.role == "student":
+            sub = db.query(Submission).filter(
+                Submission.assignment_id == a.id,
+                Submission.student_id == user.id,
+            ).first()
+            if sub:
+                my_submission = {
+                    "id": sub.id,
+                    "file_url": sub.file_url,
+                    "submitted_at": sub.submitted_at.isoformat() if sub.submitted_at else None,
+                }
+        result.append({
+            "id": a.id,
+            "title": a.title,
+            "description": a.description,
+            "due_date": a.due_date.isoformat() if a.due_date else None,
+            "created_at": a.created_at.isoformat() if a.created_at else None,
+            "submission_count": submission_count,
+            "my_submission": my_submission,
+        })
+    return result
+
+
+@app.post("/api/assignments/{assignment_id}/submit")
+async def submit_assignment(
+    assignment_id: int,
+    file: UploadFile = File(...),
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    """Student uploads a file for an assignment."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token missing")
+    token = authorization.split(" ", 1)[1]
+    payload = verify_token(token)
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    student = db.query(User).filter(User.id == user_id).first()
+    if not student or student.role != "student":
+        raise HTTPException(status_code=403, detail="Only students can submit")
+
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    # Verify student is enrolled
+    enrolled = db.query(ClassroomStudent).filter(
+        ClassroomStudent.classroom_id == assignment.classroom_id,
+        ClassroomStudent.student_id == user_id,
+    ).first()
+    if not enrolled:
+        raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+
+    # Save file
+    unique_filename = f"{uuid.uuid4()}_{file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    file_url = f"/uploads/{unique_filename}"
+
+    # Upsert: replace previous submission if exists
+    existing = db.query(Submission).filter(
+        Submission.assignment_id == assignment_id,
+        Submission.student_id == user_id,
+    ).first()
+    if existing:
+        existing.file_url = file_url
+        existing.submitted_at = datetime.utcnow()
+    else:
+        db.add(Submission(
+            assignment_id=assignment_id,
+            student_id=user_id,
+            file_url=file_url,
+        ))
+    db.commit()
+
+    return {"message": "Submitted successfully", "file_url": file_url}
+
+
+@app.get("/api/assignments/{assignment_id}/submissions")
+def list_submissions(
+    assignment_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Faculty views all submissions for an assignment."""
+    if user.role != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can view submissions")
+
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    entries = (
+        db.query(Submission, User)
+        .join(User, User.id == Submission.student_id)
+        .filter(Submission.assignment_id == assignment_id)
+        .all()
+    )
+
+    return [
+        {
+            "student_id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "file_url": s.file_url,
+            "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None,
+        }
+        for s, u in entries
+    ]
 
 
 # ================================================================

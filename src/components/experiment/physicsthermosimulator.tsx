@@ -9,24 +9,28 @@ import AbsorbanceGraph from "./AbsorbanceGraph";
 
 type Mode = "boyle" | "charles" | "carnot";
 
+interface BoylePoint { volume: number; pressure: number; pv: number; }
+interface CharlesPoint { temperature: number; volume: number; ratio: number; }
+interface CarnotPoint { hotTemp: number; coldTemp: number; efficiency: number; }
+
 const PhysicsThermoSimulator = () => {
   const [mode, setMode] = useState<Mode>("boyle");
 
   // Boyle
   const [volume, setVolume] = useState(1);
   const pressure = 1 / volume;
-  const [boyleData, setBoyleData] = useState<any[]>([]);
+  const [boyleData, setBoyleData] = useState<BoylePoint[]>([]);
 
   // Charles
   const [temperature, setTemperature] = useState(300);
   const volumeCharles = temperature / 300;
-  const [charlesData, setCharlesData] = useState<any[]>([]);
+  const [charlesData, setCharlesData] = useState<CharlesPoint[]>([]);
 
   // Carnot
   const [hotTemp, setHotTemp] = useState(500);
   const [coldTemp, setColdTemp] = useState(300);
   const efficiency = 1 - coldTemp / hotTemp;
-  const [carnotData, setCarnotData] = useState<any[]>([]);
+  const [carnotData, setCarnotData] = useState<CarnotPoint[]>([]);
 
   const addObservation = () => {
     if (mode === "boyle") {
