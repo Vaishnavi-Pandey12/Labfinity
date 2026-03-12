@@ -7,7 +7,8 @@ import {
   ChevronRight,
   ChevronLeft,
   Sparkles,
-  Lightbulb
+  Lightbulb,
+  Thermometer,
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 
@@ -29,6 +30,16 @@ const experiments = [
     icon: Lightbulb,
     difficulty: "Intermediate",
     duration: "35 min",
+    featured: false,
+  },
+  {
+    id: 3,
+    title: "Gas Laws & Carnot Engine",
+    topic: "Thermodynamics",
+    description: "Investigate gas laws, thermodynamic cycles and the Carnot engine through interactive simulations",
+    icon: Thermometer,
+    difficulty: "Intermediate",
+    duration: "45 min",
     featured: false,
   },
 ];

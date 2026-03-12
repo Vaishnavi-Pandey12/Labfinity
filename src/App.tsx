@@ -51,6 +51,7 @@ const App = () => (
               <Route path="/subjects/chemistry/experiments/7" element={<Experiment7 />} />
               <Route path="/subjects/physics/experiments/1" element={<PhysicsExperiment1 />} />
               <Route path="/subjects/physics/experiments/2" element={<PhysicsExperiment2 />} />
+              <Route path="/subjects/physics/experiments/3" element={<PhysicsExperiment3 />} />
               <Route path="/experiments" element={<Navigate to="/home" replace />} />
               <Route path="/classroom" element={<ClassroomDashboard />} />
               <Route path="/classroom/:classroomId" element={<ClassroomDetail />} />
