@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List, Optional
-from supabase import create_client, Client
+#from supabase import create_client, Client
 import os
 import shutil
 import uuid
@@ -63,12 +63,7 @@ def on_startup():
 # --------------- CORS ---------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:8080",
-        "http://localhost:8081",
-        "http://localhost:3000",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
