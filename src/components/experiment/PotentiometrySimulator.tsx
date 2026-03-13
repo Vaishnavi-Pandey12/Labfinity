@@ -140,8 +140,8 @@ const PotentiometrySimulator = () => {
         baseConc,
         selectedAcid.type,
         selectedBase.type,
-        (selectedAcid as any).Ka,
-        (selectedBase as any).Kb,
+        (selectedAcid as typeof ACIDS[number] & { Ka?: number }).Ka,
+        (selectedBase as typeof BASES[number] & { Kb?: number }).Kb,
       ),
     [selectedAcid, selectedBase],
   );
@@ -304,8 +304,8 @@ const PotentiometrySimulator = () => {
       const data = await resp.json();
       setProcessedTable(data.table);
       setTableMeta({ acid_col: data.acid_col, base_col: data.base_col });
-    } catch (e: any) {
-      setTableError(e.message ?? "Failed to generate table");
+    } catch (e: unknown) {
+      setTableError(e instanceof Error ? e.message : "Failed to generate table");
     } finally {
       setTableLoading(false);
     }

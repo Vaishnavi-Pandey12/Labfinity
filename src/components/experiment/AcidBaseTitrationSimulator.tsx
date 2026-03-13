@@ -276,28 +276,46 @@ const AcidBaseTitrationSimulator = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative h-[500px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner">
+            <div className="relative h-[540px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner select-none">
 
-              {/* Bench surface */}
-              <div className="absolute bottom-0 left-0 right-0 h-4 bg-black/5 dark:bg-white/5 border-t border-border/10" />
+              {/* ── Table surface ── */}
+              <div className="absolute bottom-0 left-0 right-0 h-5 bg-amber-900/15 border-t border-amber-700/20 rounded-b-xl" />
 
-              {/* White tile under flask */}
-              <div className="absolute bottom-[68px] left-[108px] w-52 h-4 bg-white/50 dark:bg-white/10 rounded shadow-sm border border-slate-200/40" />
-
-              {/* Retort stand base */}
-              <div className="absolute bottom-4 left-[76px] w-44 h-3 bg-slate-700 rounded-sm shadow-md" />
+              {/* ══════════════════════════════════
+                  RETORT STAND  (wide base)
+              ══════════════════════════════════ */}
+              {/* Base plate — extra wide */}
+              <div className="absolute bottom-5 left-[20px] w-[280px] h-[18px] bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 rounded shadow-lg border-t border-slate-400/30" />
               {/* Vertical rod */}
-              <div className="absolute bottom-7 left-[146px] w-2 h-[452px] bg-gradient-to-r from-slate-500 to-slate-400 rounded-t shadow-md" />
-              {/* Clamp arm */}
-              <div className="absolute top-[40px] left-[148px] w-28 h-2.5 bg-slate-600 rounded-r shadow-md" />
+              <div
+                className="absolute left-[130px] w-[10px] bg-gradient-to-r from-slate-400 via-slate-300 to-slate-400 rounded-t shadow-md"
+                style={{ bottom: "23px", top: "8px" }}
+              />
 
-              {/* ── Burette ── */}
-              <div className="absolute top-10 left-[162px] flex flex-col items-center">
-                <div className="w-8 h-72 bg-slate-100/15 backdrop-blur-sm border-2 border-slate-400/50 rounded-b-md relative overflow-hidden shadow-xl">
-                  {[...Array(10)].map((_, i) => (
-                    <div key={i} className="absolute right-0 w-2.5 h-px bg-slate-500/50" style={{ top: `${(i + 1) * 9}%` }} />
+              {/* Burette clamp arm (horizontal, near top) */}
+              <div className="absolute top-[22px] left-[130px] w-[72px] h-[10px] bg-gradient-to-r from-slate-500 to-slate-400 rounded-r shadow" />
+              {/* Clamp ring around burette — wraps the burette tube */}
+              <div className="absolute top-[16px] left-[190px] w-[18px] h-[18px] border-[3px] border-slate-500 rounded-sm bg-slate-600/50 shadow z-30" />
+
+              {/* ══════════════════════════════════
+                  BURETTE  (clamped to stand rod)
+                  Centre of burette ≈ left 196px
+              ══════════════════════════════════ */}
+              <div className="absolute top-[8px] left-[183px] flex flex-col items-center z-20">
+                {/* Top cap / funnel rim */}
+                <div className="w-10 h-3 bg-slate-500 rounded-t-md shadow" />
+                {/* Label above burette */}
+                <div className="absolute -top-4 left-0 right-0 text-center text-[8px] font-mono text-slate-500 font-semibold">NaOH</div>
+                {/* Burette tube */}
+                <div className="w-7 h-[260px] bg-white/10 backdrop-blur-sm border-2 border-slate-400/60 relative overflow-hidden shadow-xl">
+                  {/* Graduation marks */}
+                  {[...Array(11)].map((_, i) => (
+                    <div key={i} className="absolute right-0 flex items-center gap-0.5" style={{ top: `${i * 9.1}%` }}>
+                      <span className="text-[6px] text-slate-500 font-mono pr-0.5">{i * 2}</span>
+                      <div className="w-2 h-[1px] bg-slate-500/70" />
+                    </div>
                   ))}
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-500 whitespace-nowrap">0 mL</div>
+                  {/* Liquid fill */}
                   <motion.div
                     className="absolute bottom-0 left-0 right-0 bg-sky-400/40"
                     animate={{ height: `${buretteFillPct}%` }}
@@ -305,13 +323,15 @@ const AcidBaseTitrationSimulator = () => {
                   />
                 </div>
                 {/* Stopcock */}
-                <div className="w-2 h-2 bg-slate-400 mx-auto" />
-                <motion.div
-                  className="w-7 h-2 bg-slate-700 rounded-full mx-auto shadow"
-                  animate={{ rotate: isDropping ? 90 : 0 }}
-                  transition={{ duration: 0.15 }}
-                />
-                <div className="w-1.5 h-7 bg-slate-400 mx-auto rounded-b" />
+                <div className="flex flex-col items-center">
+                  <div className="w-2 h-2 bg-slate-400" />
+                  <motion.div
+                    className="w-9 h-2.5 bg-slate-700 rounded-full shadow"
+                    animate={{ rotate: isDropping ? 90 : 0 }}
+                    transition={{ duration: 0.15 }}
+                  />
+                  <div className="w-2 h-8 bg-slate-400 rounded-b-sm" />
+                </div>
 
                 {/* Drop */}
                 <AnimatePresence>
@@ -319,58 +339,82 @@ const AcidBaseTitrationSimulator = () => {
                     <motion.div
                       key="drop"
                       initial={{ y: 0, opacity: 1, scale: 1 }}
-                      animate={{ y: 95, opacity: 0, scale: 0.3 }}
+                      animate={{ y: 80, opacity: 0, scale: 0.3 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.6, ease: "easeIn" }}
-                      className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 w-2.5 h-3 bg-sky-400/80 rounded-full pointer-events-none"
+                      className="w-2.5 h-3 bg-sky-400/80 rounded-b-full pointer-events-none"
                     />
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* ── Conical Flask ──
-                  Built entirely with divs + CSS clip-path.
-                  The outer wrapper clips to a flask polygon.
-                  The inner fill div grows from the bottom using height.
-                  backgroundColor is set via inline style with CSS transition
-                  so there is no Framer Motion colour interpolation issue.
-              ── */}
-              <div
-                className="absolute bottom-[72px] left-[118px] w-40 h-52"
-                style={{
-                  clipPath: "polygon(38% 0%, 62% 0%, 62% 28%, 98% 88%, 100% 100%, 0% 100%, 2% 88%, 38% 28%)",
-                }}
+              {/* ══════════════════════════════════
+                  CONICAL FLASK — centred under burette tip
+                  Burette centre ≈ 196px
+                  Flask w-[150px] → left = 196 - 75 = 121px
+              ══════════════════════════════════ */}
+              {/* Support platform on stand base */}
+              <div className="absolute bottom-[23px] left-[111px] w-[170px] h-[10px] bg-gradient-to-r from-slate-500 to-slate-400 rounded shadow-md" />
+
+              {/* White tile under flask */}
+              <div className="absolute bottom-[33px] left-[121px] w-[150px] h-[6px] bg-white/60 dark:bg-white/15 rounded shadow-sm border border-slate-300/50" />
+
+              {/* ── Flask outline as SVG for realistic glass look ── */}
+              <svg
+                className="absolute z-10 pointer-events-none"
+                style={{ bottom: "39px", left: "121px", width: "150px", height: "200px" }}
+                viewBox="0 0 150 200"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                {/* Flask glass background */}
-                <div className="absolute inset-0 bg-slate-100/10 border-2 border-slate-400/50" />
+                {/* Define clip path matching flask interior */}
+                <defs>
+                  <clipPath id="flaskClip">
+                    <polygon points="56,0 94,0 94,52 146,174 148,196 2,196 4,174 56,52" />
+                  </clipPath>
+                </defs>
 
-                {/* Liquid fill — grows from bottom, colour via CSS transition */}
-                <div
-                  className="absolute bottom-0 left-0 right-0"
+                {/* Liquid fill — clipped to flask interior */}
+                <rect
+                  x="0" y={200 - (flaskFillPct / 100) * 196}
+                  width="150"
+                  height={(flaskFillPct / 100) * 196}
+                  clipPath="url(#flaskClip)"
                   style={{
-                    height: `${flaskFillPct}%`,
-                    backgroundColor: solutionColor,
-                    transition: "height 0.6s ease-in-out, background-color 0.7s ease-in-out",
+                    fill: solutionColor,
+                    transition: "y 0.6s ease-in-out, height 0.6s ease-in-out, fill 0.7s ease-in-out",
                   }}
-                >
-                  {/* Surface sheen line */}
-                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/25" />
-                </div>
-              </div>
+                />
 
-              {/* Flask neck rim (sits on top of the clip-path div) */}
-              <div
-                className="absolute bg-slate-300/50 rounded-sm"
-                style={{
-                  bottom: "calc(72px + 208px - 4px)",
-                  left: "calc(118px + 40px * 0.38)",
-                  width: "calc(40px * 0.24)",
-                  height: "6px",
-                }}
-              />
+                {/* Liquid surface sheen */}
+                {flaskFillPct > 0 && (
+                  <rect
+                    x="0" y={200 - (flaskFillPct / 100) * 196}
+                    width="150" height="3"
+                    clipPath="url(#flaskClip)"
+                    fill="rgba(255,255,255,0.25)"
+                    style={{ transition: "y 0.6s ease-in-out" }}
+                  />
+                )}
+
+                {/* Flask glass outline — thick and clearly visible */}
+                <polygon
+                  points="56,0 94,0 94,52 146,174 148,196 2,196 4,174 56,52"
+                  stroke="rgba(148,163,184,0.8)"
+                  strokeWidth="2.5"
+                  fill="rgba(226,232,240,0.08)"
+                />
+
+                {/* Neck rim highlight */}
+                <line x1="54" y1="0" x2="96" y2="0" stroke="rgba(148,163,184,0.6)" strokeWidth="4" strokeLinecap="round" />
+
+                {/* Glass reflection highlights */}
+                <line x1="58" y1="8" x2="58" y2="48" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
+                <line x1="10" y1="180" x2="28" y2="120" stroke="rgba(255,255,255,0.10)" strokeWidth="1.5" />
+              </svg>
 
               {/* Flask label */}
-              <div className="absolute bottom-8 left-[118px] w-40 text-center text-xs font-medium text-muted-foreground">
+              <div className="absolute bottom-[14px] left-[121px] w-[150px] text-center text-[11px] font-medium text-muted-foreground z-20">
                 HCl + NaOH
               </div>
 

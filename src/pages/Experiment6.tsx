@@ -14,7 +14,7 @@ const Experiment6 = () => {
       procedure={<AcidBaseTitrationProcedure />}
       simulator={<AcidBaseTitrationSimulator />}
       observations={<ObservationsSection />}
-      quiz={<QuizSection />}
+      quiz={<QuizSection experimentId={2} />}
     />
   );
 };

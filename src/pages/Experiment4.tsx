@@ -14,7 +14,7 @@ const Experiment4 = () => {
       procedure={<UVVisProcedure />}
       simulator={<UVVisSimulator />}
       observations={<ObservationsSection />}
-      quiz={<QuizSection />}
+      quiz={<QuizSection experimentId={5} />}
     />
   );
 };

@@ -2,7 +2,7 @@
   "experiments": [
     {
       "id": 1,
-      "title": "pH Titration",
+      "title": "Potentiometric Titration",
       "questions": [
         {
           "id": 1,
@@ -1222,7 +1222,7 @@
 
     {
       "id": 7,
-      "title": "Electrochemistry - Daniell Cell",
+      "title": "Electrochemistry",
       "questions": [
         {
           "id": 1,

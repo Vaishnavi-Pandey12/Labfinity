@@ -297,35 +297,40 @@ const TitrationPanel = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative h-[460px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner">
+            <div className="relative h-[540px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner select-none">
 
-              {/* Bench */}
-              <div className="absolute bottom-0 left-0 right-0 h-4 bg-black/5 dark:bg-white/5 border-t border-border/10" />
-              {/* White tile */}
-              <div className="absolute bottom-[68px] left-[108px] w-52 h-4 bg-white/50 dark:bg-white/10 rounded shadow-sm border border-slate-200/40" />
+              {/* ── Table surface ── */}
+              <div className="absolute bottom-0 left-0 right-0 h-5 bg-amber-900/15 border-t border-amber-700/20 rounded-b-xl" />
 
-              {/* Stand base */}
-              <div className="absolute bottom-4 left-[78px] w-44 h-3 bg-slate-700 rounded-sm shadow-md" />
+              {/* ═══ RETORT STAND ═══ */}
+              {/* Base plate — extra wide */}
+              <div className="absolute bottom-5 left-[20px] w-[280px] h-[18px] bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 rounded shadow-lg border-t border-slate-400/30" />
               {/* Vertical rod */}
-              <div className="absolute bottom-7 left-[148px] w-2 h-[416px] bg-gradient-to-r from-slate-500 to-slate-400 rounded-t shadow-md" />
-              {/* Clamp arm */}
-              <div className="absolute top-[36px] left-[150px] w-28 h-2.5 bg-slate-600 rounded-r shadow-md" />
+              <div
+                className="absolute left-[130px] w-[10px] bg-gradient-to-r from-slate-400 via-slate-300 to-slate-400 rounded-t shadow-md"
+                style={{ bottom: "23px", top: "8px" }}
+              />
+              {/* Burette clamp arm */}
+              <div className="absolute top-[22px] left-[130px] w-[72px] h-[10px] bg-gradient-to-r from-slate-500 to-slate-400 rounded-r shadow" />
+              {/* Clamp ring around burette */}
+              <div className="absolute top-[16px] left-[190px] w-[18px] h-[18px] border-[3px] border-slate-500 rounded-sm bg-slate-600/50 shadow z-30" />
 
-              {/* Burette label */}
-              <div className="absolute top-[12px] left-[172px] text-[9px] font-mono text-slate-500 whitespace-nowrap">
-                0.01 M EDTA
-              </div>
-
-              {/* Burette */}
-              <div className="absolute top-8 left-[164px] flex flex-col items-center">
-                <div className="w-8 h-64 bg-slate-100/15 backdrop-blur-sm border-2 border-slate-400/50 rounded-b-md relative overflow-hidden shadow-xl">
-                  {[...Array(10)].map((_, i) => (
-                    <div key={i} className="absolute right-0 w-2.5 h-px bg-slate-500/50"
-                      style={{ top: `${(i + 1) * 9}%` }} />
+              {/* ═══ BURETTE ═══ */}
+              <div className="absolute top-[8px] left-[183px] flex flex-col items-center z-20">
+                {/* Top cap / funnel rim */}
+                <div className="w-10 h-3 bg-slate-500 rounded-t-md shadow" />
+                {/* Label above burette */}
+                <div className="absolute -top-4 left-0 right-0 text-center text-[8px] font-mono text-slate-500 font-semibold">EDTA</div>
+                {/* Burette tube */}
+                <div className="w-7 h-[260px] bg-white/10 backdrop-blur-sm border-2 border-slate-400/60 relative overflow-hidden shadow-xl">
+                  {/* Graduation marks */}
+                  {[...Array(11)].map((_, i) => (
+                    <div key={i} className="absolute right-0 flex items-center gap-0.5" style={{ top: `${i * 9.1}%` }}>
+                      <span className="text-[6px] text-slate-500 font-mono pr-0.5">{i * 2}</span>
+                      <div className="w-2 h-[1px] bg-slate-500/70" />
+                    </div>
                   ))}
-                  <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-mono text-slate-500 whitespace-nowrap">
-                    0 mL
-                  </div>
+                  {/* Liquid fill */}
                   <motion.div
                     className="absolute bottom-0 left-0 right-0"
                     style={{ backgroundColor: burretteColor }}
@@ -333,15 +338,16 @@ const TitrationPanel = ({
                     transition={{ duration: 0.4, ease: "easeInOut" }}
                   />
                 </div>
-
                 {/* Stopcock */}
-                <div className="w-2 h-2 bg-slate-400 mx-auto" />
-                <motion.div
-                  className="w-7 h-2 bg-slate-700 rounded-full mx-auto shadow"
-                  animate={{ rotate: isDropping ? 90 : 0 }}
-                  transition={{ duration: 0.15 }}
-                />
-                <div className="w-1.5 h-7 bg-slate-400 mx-auto rounded-b" />
+                <div className="flex flex-col items-center">
+                  <div className="w-2 h-2 bg-slate-400" />
+                  <motion.div
+                    className="w-9 h-2.5 bg-slate-700 rounded-full shadow"
+                    animate={{ rotate: isDropping ? 90 : 0 }}
+                    transition={{ duration: 0.15 }}
+                  />
+                  <div className="w-2 h-8 bg-slate-400 rounded-b-sm" />
+                </div>
 
                 {/* Drop */}
                 <AnimatePresence>
@@ -349,52 +355,92 @@ const TitrationPanel = ({
                     <motion.div
                       key="drop"
                       initial={{ y: 0, opacity: 1, scale: 1 }}
-                      animate={{ y: 90, opacity: 0, scale: 0.3 }}
+                      animate={{ y: 80, opacity: 0, scale: 0.3 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.55, ease: "easeIn" }}
-                      className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 w-2.5 h-3 rounded-full pointer-events-none"
+                      transition={{ duration: 0.6, ease: "easeIn" }}
+                      className="w-2.5 h-3 rounded-b-full pointer-events-none"
                       style={{ backgroundColor: dropColor }}
                     />
                   )}
                 </AnimatePresence>
               </div>
 
+              {/* ═══ CONICAL FLASK ═══ */}
+              {/* Support platform on stand base */}
+              <div className="absolute bottom-[23px] left-[111px] w-[170px] h-[10px] bg-gradient-to-r from-slate-500 to-slate-400 rounded shadow-md" />
+              {/* White tile under flask */}
+              <div className="absolute bottom-[33px] left-[121px] w-[150px] h-[6px] bg-white/60 dark:bg-white/15 rounded shadow-sm border border-slate-300/50" />
+
+              {/* Flask outline as SVG for realistic glass look */}
+              <svg
+                className="absolute z-10 pointer-events-none"
+                style={{ bottom: "39px", left: "121px", width: "150px", height: "200px" }}
+                viewBox="0 0 150 200"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <clipPath id={`flaskClip-${partLabel}`}>
+                    <polygon points="56,0 94,0 94,52 146,174 148,196 2,196 4,174 56,52" />
+                  </clipPath>
+                </defs>
+
+                {/* Liquid fill — clipped to flask interior */}
+                <rect
+                  x="0" y={200 - (flaskFillPct / 100) * 196}
+                  width="150"
+                  height={(flaskFillPct / 100) * 196}
+                  clipPath={`url(#flaskClip-${partLabel})`}
+                  style={{
+                    fill: flaskColor,
+                    transition: "y 0.6s ease-in-out, height 0.6s ease-in-out, fill 1.4s ease-in-out",
+                  }}
+                />
+
+                {/* Liquid surface sheen */}
+                {flaskFillPct > 0 && (
+                  <rect
+                    x="0" y={200 - (flaskFillPct / 100) * 196}
+                    width="150" height="3"
+                    clipPath={`url(#flaskClip-${partLabel})`}
+                    fill="rgba(255,255,255,0.25)"
+                    style={{ transition: "y 0.6s ease-in-out" }}
+                  />
+                )}
+
+                {/* Flask glass outline */}
+                <polygon
+                  points="56,0 94,0 94,52 146,174 148,196 2,196 4,174 56,52"
+                  stroke="rgba(148,163,184,0.8)"
+                  strokeWidth="2.5"
+                  fill="rgba(226,232,240,0.08)"
+                />
+
+                {/* Neck rim highlight */}
+                <line x1="54" y1="0" x2="96" y2="0" stroke="rgba(148,163,184,0.6)" strokeWidth="4" strokeLinecap="round" />
+
+                {/* Glass reflection highlights */}
+                <line x1="58" y1="8" x2="58" y2="48" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
+                <line x1="10" y1="180" x2="28" y2="120" stroke="rgba(255,255,255,0.10)" strokeWidth="1.5" />
+              </svg>
+
+              {/* Flask label */}
+              <div className="absolute bottom-[14px] left-[121px] w-[150px] text-center text-[11px] font-medium text-muted-foreground z-20">
+                {flaskLabel}
+              </div>
+
               {/* Reagent bottles */}
-              <div className="absolute bottom-[72px] right-[28px] flex flex-col items-center gap-0.5">
+              <div className="absolute bottom-[40px] right-[28px] flex flex-col items-center gap-0.5">
                 <div className="w-3 h-4 bg-red-800/60 rounded-t-sm" />
                 <div className="w-8 h-12 bg-red-600/40 border border-red-400/40 rounded-b-md rounded-t-sm flex items-end justify-center pb-1">
                   <span className="text-[6px] text-red-200/90 font-medium text-center leading-tight">Calma-<br />gite</span>
                 </div>
               </div>
-              <div className="absolute bottom-[72px] right-[68px] flex flex-col items-center gap-0.5">
+              <div className="absolute bottom-[40px] right-[68px] flex flex-col items-center gap-0.5">
                 <div className="w-3 h-4 bg-yellow-800/60 rounded-t-sm" />
                 <div className="w-8 h-12 bg-yellow-400/40 border border-yellow-400/40 rounded-b-md rounded-t-sm flex items-end justify-center pb-1">
                   <span className="text-[6px] text-yellow-900/90 dark:text-yellow-100/80 font-medium text-center leading-tight">Buffer<br />pH9-10</span>
                 </div>
-              </div>
-
-              {/* Conical flask */}
-              <div
-                className="absolute bottom-[72px] left-[118px] w-40 h-52 overflow-hidden"
-                style={{ clipPath: "polygon(38% 0%, 62% 0%, 62% 28%, 98% 88%, 100% 100%, 0% 100%, 2% 88%, 38% 28%)" }}
-              >
-                <div className="absolute inset-0 bg-slate-100/10 border-2 border-slate-400/50" />
-                <div
-                  className="absolute bottom-0 left-0 right-0"
-                  style={{
-                    height: `${flaskFillPct}%`,
-                    backgroundColor: flaskColor,
-                    // Long CSS transition for real-life colour change feel
-                    transition: "height 0.5s ease-in-out, background-color 1.4s ease-in-out",
-                  }}
-                >
-                  <div className="absolute top-0 w-full h-1.5 bg-white/20" />
-                </div>
-              </div>
-
-              {/* Flask label */}
-              <div className="absolute bottom-8 left-[118px] w-40 text-center text-xs font-medium text-muted-foreground">
-                {flaskLabel}
               </div>
 
               {/* End-point badge */}
@@ -496,64 +542,145 @@ interface ColumnProps {
 
 const IonExchangeColumn = ({ stage, progress }: ColumnProps) => {
   const spent = stage === "loading" ? progress / 100 : stage === "done" ? 1 : 0;
-  const resinColor = `rgba(${Math.round(220 - spent * 80)}, ${Math.round(130 - spent * 70)}, 50, 0.80)`;
-  const waterInTop = stage === "washing" || stage === "loading";
+  const isFlowing = stage === "washing" || stage === "loading";
+
+  // Resin color darkens as ions are exchanged (amber → dark brown)
+  const resinR = Math.round(210 - spent * 70);
+  const resinG = Math.round(155 - spent * 80);
+  const resinB = Math.round(45 + spent * 15);
 
   return (
-    <div className="flex flex-col items-center gap-1 shrink-0">
-      <p className="text-xs font-semibold text-muted-foreground">Ion Exchange Column</p>
-      <p className="text-[9px] font-mono text-muted-foreground mb-0.5">Amberlite IR-200 Resin</p>
+    <svg
+      width="120" height="320" viewBox="0 0 120 320"
+      className="shrink-0"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        {/* Glass gradient for realistic column look */}
+        <linearGradient id="colGlass" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="rgba(148,163,184,0.25)" />
+          <stop offset="30%" stopColor="rgba(226,232,240,0.08)" />
+          <stop offset="70%" stopColor="rgba(226,232,240,0.08)" />
+          <stop offset="100%" stopColor="rgba(148,163,184,0.25)" />
+        </linearGradient>
+        {/* Resin bead pattern */}
+        <radialGradient id="resinBead">
+          <stop offset="0%" stopColor={`rgba(${resinR + 30},${resinG + 30},${resinB},0.9)`} />
+          <stop offset="70%" stopColor={`rgba(${resinR},${resinG},${resinB},0.85)`} />
+          <stop offset="100%" stopColor={`rgba(${resinR - 20},${resinG - 20},${resinB},0.7)`} />
+        </radialGradient>
+        <clipPath id="colTubeClip">
+          <rect x="32" y="52" width="56" height="200" rx="2" />
+        </clipPath>
+      </defs>
 
-      {/* Funnel top */}
-      <div className="w-10 h-5 border-2 border-slate-400/60 rounded-t-lg bg-slate-100/10 relative overflow-hidden">
-        {waterInTop && (
-          <motion.div className="absolute inset-0 bg-blue-400/30"
-            animate={{ opacity: [0.3, 0.7, 0.3] }}
-            transition={{ duration: 1, repeat: Infinity }} />
+      {/* Label */}
+      <text x="60" y="14" textAnchor="middle" className="text-[10px] font-semibold fill-muted-foreground">Ion Exchange Column</text>
+      <text x="60" y="26" textAnchor="middle" className="text-[8px] font-mono fill-muted-foreground">Amberlite IR-200</text>
+
+      {/* ── Reservoir / Funnel at top ── */}
+      {/* Funnel bowl */}
+      <polygon points="36,35 84,35 78,52 42,52" fill="url(#colGlass)" stroke="rgba(148,163,184,0.6)" strokeWidth="1.5" />
+      {/* Water in funnel */}
+      {isFlowing && (
+        <>
+          <polygon points="40,40 80,40 78,52 42,52" fill={stage === "washing" ? "rgba(147,197,253,0.35)" : "rgba(96,165,250,0.30)"}>
+            <animate attributeName="opacity" values="0.5;0.8;0.5" dur="1.5s" repeatCount="indefinite" />
+          </polygon>
+        </>
+      )}
+
+      {/* ── Glass Column Tube ── */}
+      <rect x="32" y="52" width="56" height="200" rx="2"
+        fill="url(#colGlass)" stroke="rgba(148,163,184,0.7)" strokeWidth="2" />
+
+      {/* Glass reflection highlight */}
+      <line x1="36" y1="56" x2="36" y2="248" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
+
+      {/* ── Column layers inside (clipped to tube) ── */}
+      <g clipPath="url(#colTubeClip)">
+        {/* Top glass wool plug */}
+        <rect x="32" y="55" width="56" height="14" fill="rgba(220,220,220,0.35)" />
+        {/* Glass wool fibers */}
+        {[...Array(8)].map((_, i) => (
+          <line key={`tw${i}`}
+            x1={35 + i * 7} y1={57 + (i % 3) * 3}
+            x2={38 + i * 7} y2={65 - (i % 2) * 2}
+            stroke="rgba(200,200,200,0.5)" strokeWidth="0.8" />
+        ))}
+
+        {/* Resin bed */}
+        <rect x="32" y="72" width="56" height="142"
+          fill={`rgba(${resinR},${resinG},${resinB},0.75)`}
+          style={{ transition: "fill 0.8s ease" }} />
+        {/* Resin beads — arranged as pattern of small circles */}
+        {[...Array(7)].map((_, row) =>
+          [...Array(5)].map((__, col) => (
+            <circle key={`b${row}-${col}`}
+              cx={39 + col * 11 + (row % 2) * 5}
+              cy={80 + row * 19}
+              r="4"
+              fill="url(#resinBead)"
+              style={{ transition: "fill 0.8s ease" }}
+            />
+          ))
         )}
-      </div>
 
-      {/* Column tube */}
-      <div className="relative w-14 h-48 border-2 border-slate-400/60 bg-slate-100/10 overflow-hidden shadow-lg">
-        <div className="absolute top-1 left-0 right-0 text-center text-[8px] text-slate-500 font-mono z-10">IR-200</div>
-        <div className="absolute top-5 left-1 right-1 h-2.5 bg-slate-200/50 rounded z-10" />
-        <div className="absolute left-0 right-0"
-          style={{ top: "30%", height: "52%", backgroundColor: resinColor, transition: "background-color 0.5s ease" }}>
-          {[...Array(12)].map((_, i) => (
-            <div key={i} className="absolute w-2 h-2 rounded-full bg-black/10"
-              style={{ left: `${12 + (i % 4) * 22}%`, top: `${8 + Math.floor(i / 4) * 30}%` }} />
-          ))}
-        </div>
-        <div className="absolute bottom-4 left-1 right-1 h-2.5 bg-slate-200/50 rounded z-10" />
-        {(stage === "washing" || stage === "loading") && (
-          <motion.div
-            className={`absolute left-0 right-0 z-20 ${stage === "washing" ? "bg-blue-300/30" : "bg-blue-500/25"}`}
-            animate={{ top: ["5%", "85%"] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-            style={{ height: "12%" }} />
+        {/* Bottom glass wool plug */}
+        <rect x="32" y="217" width="56" height="14" fill="rgba(220,220,220,0.35)" />
+        {[...Array(8)].map((_, i) => (
+          <line key={`bw${i}`}
+            x1={35 + i * 7} y1={219 + (i % 3) * 3}
+            x2={38 + i * 7} y2={227 - (i % 2) * 2}
+            stroke="rgba(200,200,200,0.5)" strokeWidth="0.8" />
+        ))}
+
+        {/* Sand layer at bottom */}
+        <rect x="32" y="234" width="56" height="10" fill="rgba(194,178,128,0.4)" />
+        {/* Sand dots */}
+        {[...Array(15)].map((_, i) => (
+          <circle key={`s${i}`}
+            cx={36 + (i % 6) * 9} cy={237 + Math.floor(i / 6) * 3}
+            r="1" fill="rgba(160,140,100,0.5)" />
+        ))}
+
+        {/* Flowing water band animation */}
+        {isFlowing && (
+          <rect
+            x="32" width="56" height="28"
+            fill={stage === "washing" ? "rgba(147,197,253,0.30)" : "rgba(96,165,250,0.25)"}
+          >
+            <animate attributeName="y" values="52;224;52" dur="3s" repeatCount="indefinite" />
+          </rect>
         )}
-      </div>
+      </g>
 
-      {/* Exit tip */}
-      <div className="w-2 h-4 bg-slate-400/60 rounded-b" />
+      {/* ── Exit nozzle ── */}
+      <rect x="55" y="252" width="10" height="18" rx="2"
+        fill="rgba(148,163,184,0.5)" stroke="rgba(148,163,184,0.6)" strokeWidth="1" />
 
-      {/* Drip */}
-      <AnimatePresence>
-        {(stage === "washing" || stage === "loading") && (
-          <motion.div key="drip"
-            className={`w-2 h-2.5 rounded-full ${stage === "loading" ? "bg-blue-400/70" : "bg-blue-300/70"}`}
-            animate={{ y: [0, 12, 0], opacity: [1, 0.2, 1] }}
-            transition={{ duration: 0.9, repeat: Infinity }} />
-        )}
-      </AnimatePresence>
+      {/* ── Drip animation ── */}
+      {isFlowing && (
+        <ellipse cx="60" cy="275" rx="3" ry="4"
+          fill={stage === "loading" ? "rgba(96,165,250,0.7)" : "rgba(147,197,253,0.7)"}
+        >
+          <animate attributeName="cy" values="272;292;272" dur="1s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="1;0.2;1" dur="1s" repeatCount="indefinite" />
+        </ellipse>
+      )}
 
-      <p className="text-[9px] text-muted-foreground mt-1 text-center max-w-[90px] leading-tight">
+      {/* ── Clamp on right side ── */}
+      <rect x="88" y="110" width="22" height="8" rx="2" fill="rgba(100,116,139,0.7)" />
+      <rect x="108" y="60" width="6" height="200" rx="1" fill="rgba(148,163,184,0.5)" />
+
+      {/* Status text */}
+      <text x="60" y="310" textAnchor="middle" className="text-[9px] fill-muted-foreground">
         {stage === "idle" && "Ready"}
         {stage === "washing" && "Washing with distilled water..."}
-        {stage === "loading" && `Exchanging ions... ${progress.toFixed(0)}%`}
+        {stage === "loading" && `Exchanging ions… ${progress.toFixed(0)}%`}
         {stage === "done" && "✓ Exchange complete"}
-      </p>
-    </div>
+      </text>
+    </svg>
   );
 };
 

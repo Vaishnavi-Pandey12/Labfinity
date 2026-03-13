@@ -152,7 +152,7 @@ const ElectrochemistrySimulator = () => {
       });
       if (!resp.ok) throw new Error("API error");
       const data = await resp.json();
-      const rows: TableRow[] = (data.table as any[]).map((r: any, i: number) => ({
+      const rows: TableRow[] = (data.table as Record<string, number>[]).map((r, i) => ({
         sNo: i + 1,
         anodeConc: anodeConc,
         cathodeConc: r["Cathode Concentration (M)"],

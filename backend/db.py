@@ -5,7 +5,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
 from dotenv import load_dotenv
 
-load_dotenv()
+# Try to load from the backend directory and the root directory
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 # --------------- Declarative Base ---------------
 class Base(DeclarativeBase):
@@ -28,8 +30,19 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+from sqlalchemy import text
+
+
 def init_db():
-    """Create all tables defined in models that inherit from Base."""
+    """Create all tables defined in models that inherit from Base.
+
+    Also remove the old `students` and `faculties` tables if they still
+    exist, since the new schema consolidates everything into `users`.
+    """
+    # drop legacy tables before creating new ones
+    with engine.begin() as conn:
+        conn.execute(text("DROP TABLE IF EXISTS students CASCADE;"))
+        conn.execute(text("DROP TABLE IF EXISTS faculties CASCADE;"))
     Base.metadata.create_all(bind=engine)
 
 

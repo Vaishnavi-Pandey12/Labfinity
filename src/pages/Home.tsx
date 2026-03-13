@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 import { useAuth } from "@/hooks/useAuth";
+import { ChatBot } from "@/components/ChatBot";
 
 const subjects = [
   {
@@ -101,7 +102,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background particles-bg">
+    <div className="min-h-screen flex flex-col bg-background particles-bg">
       {/* Header */}
       <header className="sticky top-0 z-50 glass-card border-b border-border/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -122,6 +123,11 @@ const Home = () => {
             <Link to="/experiments" className="text-muted-foreground hover:text-primary transition-colors">
               Experiments
             </Link>
+            {user && (
+              <Link to="/classroom" className="text-muted-foreground hover:text-primary transition-colors">
+                Classroom
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-4">
@@ -157,7 +163,7 @@ const Home = () => {
         </div>
       </header>
       {/* Subjects Grid */}
-      <section className="py-16 bg-muted/30">
+      <main className="flex-1 flex flex-col justify-center py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0 }}
@@ -208,9 +214,9 @@ const Home = () => {
             ))}
           </motion.div>
         </div>
-      </section>
+      </main>
 
-
+      <ChatBot />
 
       {/* Footer */}
       <footer className="py-8 border-t border-border/50">

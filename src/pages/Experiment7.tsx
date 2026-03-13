@@ -14,7 +14,7 @@ const Experiment7 = () => {
       procedure={<HardnessProcedure />}
       simulator={<HardnessSimulator />}
       observations={<ObservationsSection />}
-      quiz={<QuizSection />}
+      quiz={<QuizSection experimentId={3} />}
     />
   );
 };

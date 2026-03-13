@@ -17,37 +17,28 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List, Optional
-from sqlalchemy import text
-from sqlalchemy.orm import Session
-
+from supabase import create_client, Client
 import os
 import shutil
 import uuid
-import bcrypt
 import jwt
+import bcrypt
+import random
+import string
 from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 # --------------- Local imports ---------------
-# Support both `uvicorn backend.main:app` (from repo root) and
-# `uvicorn main:app` (from backend/ directory).
-try:
-    from backend.db import engine, get_db, init_db, Base
-    from backend.models import User
-    from backend.chem_tables import (
-        electrochemistry_cell_table,
-        generate_lambda_max_table,
-        generate_concentration_absorbance_table,
-        generate_ph_titration_table,
-    )
-except ImportError:
-    from db import engine, get_db, init_db, Base
-    from models import User
-    from chem_tables import (
-        electrochemistry_cell_table,
-        generate_lambda_max_table,
-        generate_concentration_absorbance_table,
-        generate_ph_titration_table,
-    )
+from db import engine, get_db, init_db, Base
+from models import User, Classroom, ClassroomStudent, Assignment, Submission
+from chem_tables import (
+    electrochemistry_cell_table,
+    generate_lambda_max_table,
+    generate_concentration_absorbance_table,
+    generate_ph_titration_table,
+)
+# from chatbotai import generate_response
 
 # --------------- Environment ---------------
 # Try loading .env from the project root (one level up from backend/)
@@ -75,6 +66,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:8080",
+        "http://localhost:8081",
         "http://localhost:3000",
     ],
     allow_credentials=True,
@@ -129,40 +121,58 @@ class SignUpRequest(BaseModel):
     username: str
     email: str
     password: str
+    role: str = "student"  # one of 'student','faculty'
+    registration_no: Optional[str] = None
 
 
 @app.post("/api/signup")
 def sign_up(req: SignUpRequest, db: Session = Depends(get_db)):
     """Register a new user. Prevents duplicate email or username."""
 
-    # Check duplicate email
+    # ensure role is valid
+    if req.role not in ("student", "faculty"):
+        raise HTTPException(status_code=400, detail="Invalid role")
+
+    # Validate email domain based on role
+    if req.role == "student":
+        if not req.email.endswith("@vitapstudent.ac.in"):
+            raise HTTPException(status_code=400, detail="Invalid domain. Students must use @vitapstudent.ac.in")
+    elif req.role == "faculty":
+        if not req.email.endswith("@vitap.ac.in"):
+            raise HTTPException(status_code=400, detail="Invalid domain. Faculty must use @vitap.ac.in")
+
+
+    # Check duplicate email or username
     existing_email = db.query(User).filter(User.email == req.email).first()
     if existing_email:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Check duplicate username
-    existing_username = db.query(User).filter(User.username == req.username).first()
+    existing_username = db.query(User).filter(User.name == req.username).first()
     if existing_username:
         raise HTTPException(status_code=400, detail="Username already taken")
 
     hashed = bcrypt.hashpw(req.password.encode(), bcrypt.gensalt()).decode()
 
     user = User(
-        username=req.username,
+        name=req.username,
         email=req.email,
-        hashed_password=hashed,
+        password=hashed,
+        role=req.role,
+        registration_no=req.registration_no,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    token = create_access_token({"user_id": user.id, "email": user.email})
+    token = create_access_token({"user_id": user.id, "email": user.email, "role": req.role})
     return {
         "message": "Account created",
         "access_token": token,
         "user_id": user.id,
         "email": user.email,
-        "username": user.username,
+        "username": user.name,
+        "role": req.role,
+        "registration_no": user.registration_no,
     }
 
 
@@ -177,19 +187,20 @@ def sign_in(req: SignInRequest, db: Session = Depends(get_db)):
     """Authenticate a user and return a JWT token."""
 
     user = db.query(User).filter(User.email == req.email).first()
-    if not user or not user.hashed_password:
-        # either the user doesn't exist, or they signed up with Google only
+    if not user or not user.password:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    if not bcrypt.checkpw(req.password.encode(), user.hashed_password.encode()):
+    if not bcrypt.checkpw(req.password.encode(), user.password.encode()):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    token = create_access_token({"user_id": user.id, "email": user.email})
+    token = create_access_token({"user_id": user.id, "email": user.email, "role": user.role})
     return {
         "access_token": token,
         "user_id": user.id,
         "email": user.email,
-        "username": user.username,
+        "username": user.name,
+        "role": user.role,
+        "registration_no": user.registration_no,
     }
 
 
@@ -198,7 +209,7 @@ class GoogleLoginRequest(BaseModel):
     token: str
 
 
-@app.post("/auth/google")
+@app.post("/api/auth/google")
 def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
     """
     Verify a Google ID token, create the user if they don't exist,
@@ -211,14 +222,9 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
         if not GOOGLE_CLIENT_ID:
             raise Exception("GOOGLE_CLIENT_ID not set in environment")
 
-        print(f"[DEBUG] Verifying token with CLIENT_ID: {GOOGLE_CLIENT_ID}")
-        
         idinfo = id_token.verify_oauth2_token(
             req.token, google_requests.Request(), GOOGLE_CLIENT_ID
         )
-
-        print(f"[DEBUG] Token verified successfully. Email: {idinfo.get('email')}")
-        
         google_id = idinfo["sub"]
         email = idinfo.get("email", "")
         name = idinfo.get("name", "")
@@ -226,42 +232,32 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
 
     except Exception as e:
         error_msg = str(e)
-        print(f"[ERROR] Google token verification failed: {error_msg}")
         raise HTTPException(status_code=400, detail=f"Invalid Google token: {error_msg}")
 
-    # Try to find user by google_id first, then by email
-    user = db.query(User).filter(User.google_id == google_id).first()
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        # User already exists
+        pass
+    else:
+        # create new account, default to student role
+        user = User(
+            name=email.split("@")[0] or name,
+            email=email,
+            password="",  # no password for Google-only users
+            role="student",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
-    if not user:
-        user = db.query(User).filter(User.email == email).first()
-        if user:
-            # Link existing account to Google
-            user.google_id = google_id
-            if picture:
-                user.profile_picture = picture
-            db.commit()
-            db.refresh(user)
-        else:
-            # Create brand-new user
-            user = User(
-                username=email.split("@")[0],   # derive username from email
-                email=email,
-                hashed_password=None,              # no password for Google-only users
-                google_id=google_id,
-                profile_picture=picture,
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-
-    token = create_access_token({"user_id": user.id, "email": user.email})
+    token = create_access_token({"user_id": user.id, "email": user.email, "role": user.role})
     return {
         "message": "Login successful",
         "access_token": token,
         "user_id": user.id,
         "email": user.email,
-        "username": user.username,
-        "profile_picture": user.profile_picture,
+        "username": user.name,
+        "role": user.role,
     }
 
 
@@ -276,6 +272,7 @@ def get_me(authorization: Optional[str] = Header(None), db: Session = Depends(ge
     token = authorization.split(" ", 1)[1]
     payload = verify_token(token)
     user_id = payload.get("user_id")
+    role = payload.get("role", "student")  # Default to student for backward compatibility
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
 
@@ -286,8 +283,9 @@ def get_me(authorization: Optional[str] = Header(None), db: Session = Depends(ge
     return {
         "user_id": user.id,
         "email": user.email,
-        "username": user.username,
-        "profile_picture": user.profile_picture,
+        "username": user.name,
+        "role": user.role,
+        "registration_no": user.registration_no,
     }
 
 
@@ -296,6 +294,450 @@ def get_me(authorization: Optional[str] = Header(None), db: Session = Depends(ge
 def sign_out():
     """Client should delete stored token; server just confirms."""
     return {"message": "Signed out successfully"}
+
+
+# ================================================================
+#  Classroom endpoints
+# ================================================================
+
+def generate_join_code(db: Session, length=8):
+    """Generate a random unique join code."""
+    characters = string.ascii_uppercase + string.digits
+    while True:
+        code = ''.join(random.choice(characters) for _ in range(length))
+        existing = db.query(Classroom).filter(Classroom.join_code == code).first()
+        if not existing:
+            return code
+
+class CreateClassroomRequest(BaseModel):
+    class_name: str
+    subject: str
+
+class ClassroomResponse(BaseModel):
+    id: int
+    class_name: str
+    subject: str
+    join_code: str
+    created_at: datetime
+    student_count: int
+
+def get_current_user(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)):
+    """Extract the current user from the Authorization: Bearer <token> header."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token missing or invalid format")
+    token = authorization.split(" ", 1)[1]
+    payload = verify_token(token)
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+@app.post("/api/classrooms")
+def create_classroom(req: CreateClassroomRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if user.role != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can create classrooms")
+    
+    join_code = generate_join_code(db)
+    classroom = Classroom(
+        class_name=req.class_name,
+        subject=req.subject,
+        faculty_id=user.id,
+        join_code=join_code
+    )
+    db.add(classroom)
+    db.commit()
+    db.refresh(classroom)
+    student_count = 0  # newly created classroom has no students yet
+    return {
+        "message": "Classroom created",
+        "classroom": {
+            "id": classroom.id,
+            "class_name": classroom.class_name,
+            "subject": classroom.subject,
+            "join_code": classroom.join_code,
+            "created_at": classroom.created_at.isoformat() if classroom.created_at else None,
+            "student_count": student_count,
+        }
+    }
+
+@app.get("/api/classrooms")
+def get_classrooms(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if user.role == "faculty":
+        classrooms = db.query(Classroom).filter(Classroom.faculty_id == user.id).all()
+    else:
+        # For students, get classrooms they joined
+        classrooms = db.query(Classroom).join(ClassroomStudent).filter(ClassroomStudent.student_id == user.id).all()
+    
+    result = []
+    for c in classrooms:
+        student_count = db.query(ClassroomStudent).filter(ClassroomStudent.classroom_id == c.id).count()
+        faculty_user = db.query(User).filter(User.id == c.faculty_id).first()
+        result.append({
+            "id": c.id,
+            "class_name": c.class_name,
+            "subject": c.subject,
+            "join_code": c.join_code,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "student_count": student_count,
+            "faculty_name": faculty_user.name if faculty_user else "Unknown",
+        })
+    return result
+
+
+class JoinClassroomRequest(BaseModel):
+    join_code: str
+
+
+@app.post("/api/classrooms/join")
+def join_classroom(
+    req: JoinClassroomRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Allow a student to join a classroom by its join code."""
+    if user.role != "student":
+        raise HTTPException(status_code=403, detail="Only students can join classrooms")
+
+    classroom = db.query(Classroom).filter(Classroom.join_code == req.join_code).first()
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Invalid join code – classroom not found")
+
+    # Check if already a member
+    already_joined = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom.id,
+            ClassroomStudent.student_id == user.id,
+        )
+        .first()
+    )
+    if already_joined:
+        raise HTTPException(status_code=400, detail="You have already joined this classroom")
+
+    entry = ClassroomStudent(classroom_id=classroom.id, student_id=user.id)
+    db.add(entry)
+    db.commit()
+    return {
+        "message": f"Successfully joined '{classroom.class_name}'",
+        "classroom_id": classroom.id,
+        "class_name": classroom.class_name,
+        "subject": classroom.subject,
+    }
+
+
+# ================================================================
+#  Classroom student management endpoints
+# ================================================================
+
+class AddStudentsRequest(BaseModel):
+    emails: List[str]
+
+
+@app.post("/api/classrooms/{classroom_id}/add-students")
+def add_students_to_classroom(
+    classroom_id: int,
+    req: AddStudentsRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Faculty can bulk-add students to a classroom by email."""
+    if user.role != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can add students")
+
+    classroom = db.query(Classroom).filter(
+        Classroom.id == classroom_id,
+        Classroom.faculty_id == user.id,
+    ).first()
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found or not yours")
+
+    results = []
+    added_count = 0
+
+    for raw_email in req.emails:
+        email = raw_email.strip().lower()
+        if not email:
+            continue
+
+        student = db.query(User).filter(User.email == email).first()
+        if not student:
+            results.append({"email": email, "status": "not_found"})
+            continue
+        if student.role != "student":
+            results.append({"email": email, "status": "not_a_student"})
+            continue
+
+        existing = db.query(ClassroomStudent).filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == student.id,
+        ).first()
+        if existing:
+            results.append({"email": email, "status": "already_enrolled", "name": student.name})
+            continue
+
+        db.add(ClassroomStudent(classroom_id=classroom_id, student_id=student.id))
+        added_count += 1
+        results.append({"email": email, "status": "added", "name": student.name})
+
+    db.commit()
+
+    student_count = db.query(ClassroomStudent).filter(
+        ClassroomStudent.classroom_id == classroom_id
+    ).count()
+
+    return {
+        "added": added_count,
+        "student_count": student_count,
+        "results": results,
+    }
+
+
+@app.get("/api/classrooms/{classroom_id}/students")
+def get_classroom_students(
+    classroom_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return list of students enrolled in a classroom."""
+    # Faculty: must own the classroom. Student: must be enrolled.
+    if user.role == "faculty":
+        classroom = db.query(Classroom).filter(
+            Classroom.id == classroom_id,
+            Classroom.faculty_id == user.id,
+        ).first()
+        if not classroom:
+            raise HTTPException(status_code=404, detail="Classroom not found or not yours")
+    else:
+        enrolled = db.query(ClassroomStudent).filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == user.id,
+        ).first()
+        if not enrolled:
+            raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+
+    entries = (
+        db.query(ClassroomStudent, User)
+        .join(User, User.id == ClassroomStudent.student_id)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
+    return [
+        {
+            "student_id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "registration_no": u.registration_no,
+            "joined_at": cs.joined_at.isoformat() if cs.joined_at else None,
+        }
+        for cs, u in entries
+    ]
+
+
+# ================================================================
+#  Classwork / Assignment endpoints
+# ================================================================
+
+class CreateAssignmentRequest(BaseModel):
+    title: str
+    description: Optional[str] = None
+    due_date: Optional[str] = None  # ISO date string e.g. "2026-04-01"
+
+
+@app.post("/api/classrooms/{classroom_id}/assignments")
+def create_assignment(
+    classroom_id: int,
+    req: CreateAssignmentRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Faculty creates a new classwork/assignment."""
+    if user.role != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can create assignments")
+
+    classroom = db.query(Classroom).filter(
+        Classroom.id == classroom_id,
+        Classroom.faculty_id == user.id,
+    ).first()
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found or not yours")
+
+    from datetime import date as _date
+    parsed_due = None
+    if req.due_date:
+        try:
+            parsed_due = _date.fromisoformat(req.due_date)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid due_date format. Use YYYY-MM-DD")
+
+    assignment = Assignment(
+        classroom_id=classroom_id,
+        title=req.title,
+        description=req.description,
+        due_date=parsed_due,
+    )
+    db.add(assignment)
+    db.commit()
+    db.refresh(assignment)
+
+    return {
+        "id": assignment.id,
+        "title": assignment.title,
+        "description": assignment.description,
+        "due_date": assignment.due_date.isoformat() if assignment.due_date else None,
+        "created_at": assignment.created_at.isoformat() if assignment.created_at else None,
+    }
+
+
+@app.get("/api/classrooms/{classroom_id}/assignments")
+def list_assignments(
+    classroom_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """List all assignments for a classroom (faculty owner or enrolled student)."""
+    if user.role == "faculty":
+        classroom = db.query(Classroom).filter(
+            Classroom.id == classroom_id,
+            Classroom.faculty_id == user.id,
+        ).first()
+        if not classroom:
+            raise HTTPException(status_code=404, detail="Classroom not found or not yours")
+    else:
+        enrolled = db.query(ClassroomStudent).filter(
+            ClassroomStudent.classroom_id == classroom_id,
+            ClassroomStudent.student_id == user.id,
+        ).first()
+        if not enrolled:
+            raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+
+    assignments = (
+        db.query(Assignment)
+        .filter(Assignment.classroom_id == classroom_id)
+        .order_by(Assignment.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for a in assignments:
+        submission_count = db.query(Submission).filter(Submission.assignment_id == a.id).count()
+        # If student, include their own submission status
+        my_submission = None
+        if user.role == "student":
+            sub = db.query(Submission).filter(
+                Submission.assignment_id == a.id,
+                Submission.student_id == user.id,
+            ).first()
+            if sub:
+                my_submission = {
+                    "id": sub.id,
+                    "file_url": sub.file_url,
+                    "submitted_at": sub.submitted_at.isoformat() if sub.submitted_at else None,
+                }
+        result.append({
+            "id": a.id,
+            "title": a.title,
+            "description": a.description,
+            "due_date": a.due_date.isoformat() if a.due_date else None,
+            "created_at": a.created_at.isoformat() if a.created_at else None,
+            "submission_count": submission_count,
+            "my_submission": my_submission,
+        })
+    return result
+
+
+@app.post("/api/assignments/{assignment_id}/submit")
+async def submit_assignment(
+    assignment_id: int,
+    file: UploadFile = File(...),
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    """Student uploads a file for an assignment."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token missing")
+    token = authorization.split(" ", 1)[1]
+    payload = verify_token(token)
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    student = db.query(User).filter(User.id == user_id).first()
+    if not student or student.role != "student":
+        raise HTTPException(status_code=403, detail="Only students can submit")
+
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    # Verify student is enrolled
+    enrolled = db.query(ClassroomStudent).filter(
+        ClassroomStudent.classroom_id == assignment.classroom_id,
+        ClassroomStudent.student_id == user_id,
+    ).first()
+    if not enrolled:
+        raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+
+    # Save file
+    unique_filename = f"{uuid.uuid4()}_{file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    file_url = f"/uploads/{unique_filename}"
+
+    # Upsert: replace previous submission if exists
+    existing = db.query(Submission).filter(
+        Submission.assignment_id == assignment_id,
+        Submission.student_id == user_id,
+    ).first()
+    if existing:
+        existing.file_url = file_url
+        existing.submitted_at = datetime.utcnow()
+    else:
+        db.add(Submission(
+            assignment_id=assignment_id,
+            student_id=user_id,
+            file_url=file_url,
+        ))
+    db.commit()
+
+    return {"message": "Submitted successfully", "file_url": file_url}
+
+
+@app.get("/api/assignments/{assignment_id}/submissions")
+def list_submissions(
+    assignment_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Faculty views all submissions for an assignment."""
+    if user.role != "faculty":
+        raise HTTPException(status_code=403, detail="Only faculty can view submissions")
+
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    entries = (
+        db.query(Submission, User)
+        .join(User, User.id == Submission.student_id)
+        .filter(Submission.assignment_id == assignment_id)
+        .all()
+    )
+
+    return [
+        {
+            "student_id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "file_url": s.file_url,
+            "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None,
+        }
+        for s, u in entries
+    ]
 
 
 # ================================================================
@@ -496,3 +938,22 @@ async def upload_graph(
         "message": "Upload successful",
         "fileUrl": f"http://localhost:8000/uploads/{unique_filename}",
     }
+
+# ---- Pydantic Models ----
+# class ChatRequest(BaseModel):
+#     message: str
+
+# class ChatResponse(BaseModel):
+#     response: str
+
+# ---- Chatbot Endpoint ----
+# @app.post("/api/chat")
+# async def chat_endpoint(request: ChatRequest):
+#     """
+#     Chat with the AI assistant for experiment help
+#     """
+#     try:
+#         response = generate_response(request.message)
+#         return ChatResponse(response=response)
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
