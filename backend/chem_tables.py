@@ -60,6 +60,60 @@ def generate_ph_titration_table(trials):
 
     return table
 
+def generate_potentiometry_table(trials):
+    """
+    trials = [
+        {"volume": 0, "EMF": 280},
+        {"volume": 2, "EMF": 260},
+        {"volume": 4, "EMF": 240}
+    ]
+    """
+
+    table = []
+    previous_EMF = None
+    previous_volume = None
+
+    max_slope = -1
+    equivalence_index = None
+
+    # First pass to compute values
+    for i, trial in enumerate(trials, start=1):
+        volume = trial["volume"]
+        emf = trial["EMF"]
+
+        if previous_EMF is None:
+            delta_E = "-"
+            delta_V = "-"
+            slope = "-"
+        else:
+            delta_E = round(abs(emf - previous_EMF), 1)
+            delta_V = round(volume - previous_volume, 3)
+            slope = round(delta_E / delta_V, 2) if delta_V != 0 else "-"
+
+            if slope != "-" and slope > max_slope:
+                max_slope = slope
+                equivalence_index = i
+
+        table.append({
+            "S. No.": i,
+            "Addition of NaOH (mL)": volume,  # will be replaced in main.py
+            "Volume of NaOH added (mL)": volume,
+            "EMF measured (mV)": emf,
+            "ΔE": delta_E,
+            "ΔV": delta_V,
+            "ΔE / ΔV": slope,
+            "Remark": ""
+        })
+
+        previous_EMF = emf
+        previous_volume = volume
+
+    # Mark equivalence point
+    if equivalence_index is not None:
+        table[equivalence_index - 1]["Remark"] = "Equivalence Point Region"
+
+    return table
+
 # --------------------------------------------------
 # 2️⃣ Acid–Base Titration (Phenolphthalein)
 # --------------------------------------------------

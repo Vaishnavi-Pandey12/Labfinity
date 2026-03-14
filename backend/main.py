@@ -37,6 +37,7 @@ from chem_tables import (
     generate_lambda_max_table,
     generate_concentration_absorbance_table,
     generate_ph_titration_table,
+    generate_potentiometry_table,
 )
 from chatbotai import generate_response
 
@@ -789,7 +790,7 @@ def get_electrochemistry_table(req: ElectrochemistryTableRequest):
 # ---- Potentiometry ----
 class PotentiometryTrialRow(BaseModel):
     volume: float
-    pH: Optional[float] = None
+    pH: Optional[float] = None  # Frontend still sends field nameds pH, but it holds EMF values
 
 
 class PotentiometryTableRequest(BaseModel):
@@ -802,10 +803,10 @@ class PotentiometryTableRequest(BaseModel):
 @app.post("/api/potentiometry-table")
 def get_potentiometry_table(req: PotentiometryTableRequest):
     trials_input = [
-        {"volume": row.volume, "pH": row.pH if row.pH is not None else 0.0}
+        {"volume": row.volume, "EMF": row.pH if row.pH is not None else 0.0}
         for row in req.trials
     ]
-    table = generate_ph_titration_table(trials_input)
+    table = generate_potentiometry_table(trials_input)
 
     base_col = f"Volume of {req.base} (mL)"
     for row in table:
