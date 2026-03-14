@@ -38,7 +38,7 @@ from chem_tables import (
     generate_concentration_absorbance_table,
     generate_ph_titration_table,
 )
-# from chatbotai import generate_response
+from chatbotai import generate_response
 
 # --------------- Environment ---------------
 # Try loading .env from the project root (one level up from backend/)
@@ -259,6 +259,20 @@ def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
         "username": user.name,
         "role": user.role,
     }
+
+
+# ---- Chatbot ----
+class ChatMessage(BaseModel):
+    message: str
+
+@app.post("/api/chat")
+def chat_endpoint(req: ChatMessage):
+    """Chatbot endpoint for STEM experiment assistance."""
+    try:
+        response_text = generate_response(req.message)
+        return {"response": response_text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ---- Current User ----
