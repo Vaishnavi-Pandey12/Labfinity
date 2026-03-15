@@ -34,49 +34,57 @@ const queryClient = new QueryClient();
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/subjects" element={<Navigate to="/home" replace />} />
-              <Route path="/subjects/chemistry" element={<ChemistrySubject />} />
-              <Route path="/subjects/physics" element={<PhysicsSubject />} />
-              <Route path="/subjects/chemistry/experiments/1" element={<Experiment1 />} />
-              <Route path="/subjects/chemistry/experiments/2" element={<Experiment2 />} />
-              <Route path="/subjects/chemistry/experiments/3" element={<Experiment3 />} />
-              <Route path="/subjects/chemistry/experiments/4" element={<Experiment4 />} />
-              <Route path="/subjects/chemistry/experiments/5" element={<Experiment5 />} />
-              <Route path="/subjects/chemistry/experiments/6" element={<Experiment6 />} />
-              <Route path="/subjects/chemistry/experiments/7" element={<Experiment7 />} />
-              <Route path="/subjects/physics/experiments/1" element={<PhysicsExperiment1 />} />
-              <Route path="/subjects/physics/experiments/2" element={<PhysicsExperiment2 />} />
-              <Route path="/subjects/physics/experiments/3" element={<PhysicsExperiment3 />} />
-              <Route path="/subjects/physics/experiments/4" element={<PhysicsExperiment4 />} />
-              <Route path="/subjects/physics/experiments/5" element={<PhysicsExperiment5 />} />
-              <Route path="/subjects/physics/experiments/6" element={<PhysicsExperiment6 />} />
-              <Route path="/subjects/physics/experiments/7" element={<PhysicsExperiment7 />} />
-              <Route path="/subjects/physics/experiments/8" element={<PhysicsExperiment8 />} />
-              <Route path="/subjects/physics/experiments/9" element={<PhysicsExperiment9 />} />
-              <Route path="/subjects/physics/experiments/10" element={<PhysicsExperiment10 />} />
-              <Route path="/experiments" element={<Navigate to="/home" replace />} />
-              <Route path="/classroom" element={<ClassroomDashboard />} />
-              <Route path="/classroom/:classroomId" element={<ClassroomDetail />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </GoogleOAuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const appContent = (
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/subjects" element={<Navigate to="/home" replace />} />
+            <Route path="/subjects/chemistry" element={<ChemistrySubject />} />
+            <Route path="/subjects/physics" element={<PhysicsSubject />} />
+            <Route path="/subjects/chemistry/experiments/1" element={<Experiment1 />} />
+            <Route path="/subjects/chemistry/experiments/2" element={<Experiment2 />} />
+            <Route path="/subjects/chemistry/experiments/3" element={<Experiment3 />} />
+            <Route path="/subjects/chemistry/experiments/4" element={<Experiment4 />} />
+            <Route path="/subjects/chemistry/experiments/5" element={<Experiment5 />} />
+            <Route path="/subjects/chemistry/experiments/6" element={<Experiment6 />} />
+            <Route path="/subjects/chemistry/experiments/7" element={<Experiment7 />} />
+            <Route path="/subjects/physics/experiments/1" element={<PhysicsExperiment1 />} />
+            <Route path="/subjects/physics/experiments/2" element={<PhysicsExperiment2 />} />
+            <Route path="/subjects/physics/experiments/3" element={<PhysicsExperiment3 />} />
+            <Route path="/subjects/physics/experiments/4" element={<PhysicsExperiment4 />} />
+            <Route path="/subjects/physics/experiments/5" element={<PhysicsExperiment5 />} />
+            <Route path="/subjects/physics/experiments/6" element={<PhysicsExperiment6 />} />
+            <Route path="/subjects/physics/experiments/7" element={<PhysicsExperiment7 />} />
+            <Route path="/subjects/physics/experiments/8" element={<PhysicsExperiment8 />} />
+            <Route path="/subjects/physics/experiments/9" element={<PhysicsExperiment9 />} />
+            <Route path="/subjects/physics/experiments/10" element={<PhysicsExperiment10 />} />
+            <Route path="/experiments" element={<Navigate to="/home" replace />} />
+            <Route path="/classroom" element={<ClassroomDashboard />} />
+            <Route path="/classroom/:classroomId" element={<ClassroomDetail />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {GOOGLE_CLIENT_ID ? (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{appContent}</GoogleOAuthProvider>
+      ) : (
+        appContent
+      )}
+    </QueryClientProvider>
+  );
+};
 
 export default App;

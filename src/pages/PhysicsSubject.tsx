@@ -14,8 +14,7 @@ import {
   Compass,
   Triangle,
   Sun,
-  Clock,
-  Thermometer
+  Clock
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 

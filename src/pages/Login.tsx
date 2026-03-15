@@ -10,6 +10,8 @@ import { FlaskConical, Atom, Microscope, Eye, EyeOff, Beaker, User } from "lucid
 import { useAuth } from "@/hooks/useAuth";
 import { GoogleLogin } from '@react-oauth/google';
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+
 const Login = () => {
   const navigate = useNavigate();
   const { signIn, signUp, googleLogin, user } = useAuth();
@@ -433,15 +435,21 @@ const Login = () => {
                 transition={{ delay: 0.7 }}
                 className="flex justify-center w-full"
               >
-                <div className="w-full max-w-[350px]">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
-                    size="large"
-                    theme="outline"
-                    width="350"
-                  />
-                </div>
+                {GOOGLE_CLIENT_ID ? (
+                  <div className="w-full max-w-[350px]">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      size="large"
+                      theme="outline"
+                      width="350"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center">
+                    Google Sign-In is unavailable because VITE_GOOGLE_CLIENT_ID is not configured.
+                  </p>
+                )}
               </motion.div>
 
               <motion.p
