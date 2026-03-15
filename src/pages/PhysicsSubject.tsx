@@ -4,11 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { 
   Atom,
-  ChevronRight, 
+  ChevronRight,
   ChevronLeft,
   Sparkles,
+  Orbit,
   Lightbulb,
-  Flame
+  Flame,
+  Magnet,
+  Compass,
+  Triangle,
+  Sun,
+  Clock,
+  Thermometer
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 
@@ -39,6 +46,69 @@ const experiments = [
     icon: Flame,
     difficulty: "Advanced",
     duration: "45 min",
+  },
+  {
+    id: 4,
+    title: "Solar Cell - V-I Characteristics and Fill Factor",
+    topic: "Semiconductor Physics",
+    description: "Study V-I characteristics of a solar cell and determine its Fill Factor (FF) using an interactive simulator",
+    icon: Sun,
+    difficulty: "Advanced",
+    duration: "50 min",
+  },
+  {
+    id: 5,
+    title: "Thermistor - Temperature vs Resistance",
+    topic: "Semiconductor Physics",
+    description: "Explore the relationship between temperature and resistance in thermistors using interactive simulations",
+    icon: Thermometer,
+    difficulty: "Intermediate",
+    duration: "40 min",
+  },
+  {
+    id: 6,
+    title: "Hall Effect - Determining Hall Coefficient",
+    topic: "Semiconductor Physics",
+    description: "Determine the Hall coefficient of a semiconductor and identify charge carriers using an interactive simulator",
+    icon: Magnet,
+    difficulty: "Advanced",
+    duration: "45 min",
+  },
+  {
+    id: 7,
+    title: "Biot–Savart Law - Magnetic Field of a Current-Carrying Coil",
+    topic: "Electromagnetism",
+    description: "Verify Biot–Savart law and study the magnetic field produced by a circular current carrying coil",
+    icon: Compass,
+    difficulty: "Intermediate",
+    duration: "40 min",
+  },
+  {
+    id: 8,
+    title: "Thomson's e/m Experiment",
+    topic: "Electron Properties", 
+    description: "Determine the charge to mass ratio (e/m) of an electron using Thomson method with interactive simulations",
+    icon: Orbit,
+    difficulty: "Advanced",
+    duration: "50 min",
+  },
+  {
+    id: 9,
+    title: "Pendulum - Gravitational Acceleration",
+    topic: "Mechanics",   
+    description: "Determine acceleration due to gravity using a simple pendulum and interactive simulations",
+    icon: Clock,
+    difficulty: "Beginner",
+    duration: "30 min",
+  },
+  {
+    id: 10,
+    title: "Inclined Plane - Force vs Angle",
+    topic: "Mechanics",
+    description: "Study motion of a body on an inclined plane and verify the relation between force and angle of inclination using interactive simulations",
+    icon: Triangle,
+    difficulty: "Beginner",
+    duration: "35 min",
   },
 ];
 
