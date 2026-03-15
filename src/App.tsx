@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import ChemistrySubject from "./pages/ChemistrySubject";
@@ -26,26 +27,29 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/subjects" element={<Navigate to="/home" replace />} />
-          <Route path="/subjects/chemistry" element={<ChemistrySubject />} />
-          <Route path="/subjects/physics" element={<PhysicsSubject />} />
-          <Route path="/subjects/chemistry/experiments/1" element={<Experiment1 />} />
-          <Route path="/subjects/chemistry/experiments/2" element={<Experiment2 />} />
-          <Route path="/subjects/chemistry/experiments/3" element={<Experiment3 />} />
-          <Route path="/subjects/chemistry/experiments/4" element={<Experiment4 />} />
-          <Route path="/subjects/chemistry/experiments/5" element={<Experiment5 />} />
+        <AuthProvider>
+          <Routes>
+            {/* All routes are public — login is optional */}
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/subjects" element={<Navigate to="/home" replace />} />
+            <Route path="/subjects/chemistry" element={<ChemistrySubject />} />
+            <Route path="/subjects/physics" element={<PhysicsSubject />} />
+            <Route path="/subjects/chemistry/experiments/1" element={<Experiment1 />} />
+            <Route path="/subjects/chemistry/experiments/2" element={<Experiment2 />} />
+            <Route path="/subjects/chemistry/experiments/3" element={<Experiment3 />} />
+            <Route path="/subjects/chemistry/experiments/4" element={<Experiment4 />} />
+            <Route path="/subjects/chemistry/experiments/5" element={<Experiment5 />} />
           <Route path="/subjects/chemistry/experiments/6" element={<Experiment6 />} />
           <Route path="/subjects/chemistry/experiments/7" element={<Experiment7 />} />
-          <Route path="/subjects/physics/experiments/1" element={<PhysicsExperiment1 />}/>
-          <Route path="/subjects/physics/experiments/2" element={<PhysicsExperiment2 />}/>  
-          <Route path="/experiments" element={<Navigate to="/home" replace />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+          <Route path="/subjects/physics/experiments/1" element={<PhysicsExperiment1 />} />
+            <Route path="/subjects/physics/experiments/2" element={<PhysicsExperiment2 />} />
+            <Route path="/experiments" element={<Navigate to="/home" replace />} />
+            {/* Catch-all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
