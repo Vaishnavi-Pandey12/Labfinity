@@ -2,12 +2,20 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
+import { 
   Atom,
   ChevronRight,
   ChevronLeft,
   Sparkles,
-  Lightbulb
+  Orbit,
+  Lightbulb,
+  Flame,
+  Magnet,
+  Compass,
+  Triangle,
+  Sun,
+  Clock,
+  Thermometer
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 
@@ -30,6 +38,78 @@ const experiments = [
     difficulty: "Intermediate",
     duration: "35 min",
   },
+  {
+    id: 3,
+    title: "Gas Laws & Carnot Engine",
+    topic: "Thermodynamics",
+    description: "Verify Boyle's Law, Charles' Law and analyze Carnot engine efficiency using interactive simulation",
+    icon: Flame,
+    difficulty: "Advanced",
+    duration: "45 min",
+  },
+  {
+    id: 4,
+    title: "Solar Cell - V-I Characteristics and Fill Factor",
+    topic: "Semiconductor Physics",
+    description: "Study V-I characteristics of a solar cell and determine its Fill Factor (FF) using an interactive simulator",
+    icon: Sun,
+    difficulty: "Advanced",
+    duration: "50 min",
+  },
+  {
+    id: 5,
+    title: "Thermistor - Temperature vs Resistance",
+    topic: "Semiconductor Physics",
+    description: "Explore the relationship between temperature and resistance in thermistors using interactive simulations",
+    icon: Thermometer,
+    difficulty: "Intermediate",
+    duration: "40 min",
+  },
+  {
+    id: 6,
+    title: "Hall Effect - Determining Hall Coefficient",
+    topic: "Semiconductor Physics",
+    description: "Determine the Hall coefficient of a semiconductor and identify charge carriers using an interactive simulator",
+    icon: Magnet,
+    difficulty: "Advanced",
+    duration: "45 min",
+  },
+  {
+    id: 7,
+    title: "Biot–Savart Law - Magnetic Field of a Current-Carrying Coil",
+    topic: "Electromagnetism",
+    description: "Verify Biot–Savart law and study the magnetic field produced by a circular current carrying coil",
+    icon: Compass,
+    difficulty: "Intermediate",
+    duration: "40 min",
+  },
+  {
+    id: 8,
+    title: "Thomson's e/m Experiment",
+    topic: "Electron Properties", 
+    description: "Determine the charge to mass ratio (e/m) of an electron using Thomson method with interactive simulations",
+    icon: Orbit,
+    difficulty: "Advanced",
+    duration: "50 min",
+  },
+  {
+    id: 9,
+    title: "Pendulum - Gravitational Acceleration",
+    topic: "Mechanics",   
+    description: "Determine acceleration due to gravity using a simple pendulum and interactive simulations",
+    icon: Clock,
+    difficulty: "Beginner",
+    duration: "30 min",
+  },
+  {
+    id: 10,
+    title: "Inclined Plane - Force vs Angle",
+    topic: "Mechanics",
+    description: "Study motion of a body on an inclined plane and verify the relation between force and angle of inclination using interactive simulations",
+    icon: Triangle,
+    difficulty: "Beginner",
+    duration: "35 min",
+  },
 ];
 
 const containerVariants = {
@@ -48,7 +128,7 @@ const itemVariants = {
 const PhysicsSubject = () => {
   return (
     <div className="min-h-screen bg-background particles-bg">
-
+      
       {/* Header */}
       <header className="sticky top-0 z-50 glass-card border-b border-border/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -134,9 +214,8 @@ const PhysicsSubject = () => {
             {experiments.map((exp) => (
               <motion.div key={exp.id} variants={itemVariants}>
                 <Link to={`/subjects/physics/experiments/${exp.id}`}>
-                  <Card className={`group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative ${exp.featured ? 'ring-2 ring-primary' : ''}`}>
-
-
+                 <Card className="group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative">
+                  
                     <CardHeader className="pb-4">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shrink-0">
