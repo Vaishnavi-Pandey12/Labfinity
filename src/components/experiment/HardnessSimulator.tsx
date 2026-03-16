@@ -83,24 +83,26 @@ const TitrationPanel = ({
   const [completed, setCompleted] = useState(false);
 
   // Stage drives visual state
-  const [stage, setStage] = useState<ReagentStage>(skipHardWaterStep ? "water" : "empty");
+  const [stage, setStage] = useState<ReagentStage>("water");
 
   const volThisTrial = volAdded - trialStart;
   const flaskColor = getFlaskColor(volThisTrial, trueV, stage);
   const colorLabel = getColorLabel(volThisTrial, trueV, stage);
   const atEndPoint = stage === "titrating" && volThisTrial >= trueV * 0.97;
   const buretteFillPct = Math.max(0, (1 - volAdded / MAX_EDTA) * 100);
-  const flaskFillPct = stage === "empty" ? 0 : Math.min(78, 42 + (volThisTrial / (trueV * 3)) * 20);
+  const flaskFillPct = Math.min(78, 42 + (volThisTrial / (trueV * 3)) * 20);
 
   const addTitrant = useCallback((amount: number) => {
-    if (stage !== "titrating" || completed) return;
+    if ((stage !== "indicator" && stage !== "titrating") || completed) return;
+    if (stage === "indicator") setStage("titrating");
     setVolAdded(prev => Math.min(prev + amount, MAX_EDTA));
     setIsDropping(true);
     setTimeout(() => setIsDropping(false), 700);
   }, [stage, completed]);
 
   const handleSlider = useCallback((val: number) => {
-    if (stage !== "titrating" || completed) return;
+    if ((stage !== "indicator" && stage !== "titrating") || completed) return;
+    if (stage === "indicator") setStage("titrating");
     setVolAdded(trialStart + val);
   }, [stage, completed, trialStart]);
 
@@ -112,7 +114,7 @@ const TitrationPanel = ({
     setTrialStart(volAdded);
     setTrial(t => t + 1);
     // Reset per-trial reagents (keep hard water if already added)
-    setStage(skipHardWaterStep ? "water" : "water");
+    setStage("water");
 
     const vols = updated.map(r => r.volume);
     const isConc = vols.length >= 2 && Math.max(...vols) - Math.min(...vols) <= 0.1;
@@ -121,20 +123,20 @@ const TitrationPanel = ({
       setCompleted(true);
       onComplete(avg);
     }
-  }, [atEndPoint, trial, completed, volAdded, trialStart, readings, onComplete, skipHardWaterStep]);
+  }, [atEndPoint, trial, completed, volAdded, trialStart, readings, onComplete]);
 
   const reset = useCallback(() => {
     setVolAdded(0); setTrialStart(0); setTrial(1);
     setReadings([]); setIsDropping(false); setCompleted(false);
-    setStage(skipHardWaterStep ? "water" : "empty");
-  }, [skipHardWaterStep]);
+    setStage("water");
+  }, []);
 
   const vols = readings.map(r => r.volume);
   const avgVol = vols.length ? vols.reduce((a, b) => a + b, 0) / vols.length : 0;
   const hardness = (avgVol * 1000) / VOL_SAMPLE;
   const concordant = vols.length >= 2 && Math.max(...vols) - Math.min(...vols) <= 0.1;
 
-  const canAddEDTA = stage === "titrating" && !completed;
+  const canAddEDTA = (stage === "indicator" || stage === "titrating") && !completed;
   // slider value = vol added THIS trial
   const sliderVal = volThisTrial;
 
@@ -152,25 +154,12 @@ const TitrationPanel = ({
           </CardHeader>
           <CardContent className="space-y-3">
 
-            {/* Step 1: Add Hard Water (only in Part 1) */}
-            {!skipHardWaterStep && (
-              <Button
-                variant={stage !== "empty" ? "secondary" : "outline"}
-                className="w-full gap-2"
-                onClick={() => setStage("water")}
-                disabled={stage !== "empty" || completed}
-              >
-                <Droplets className="w-4 h-4" />
-                {stage !== "empty" ? "Hard Water Added ✓" : `Add Hard Water (${VOL_SAMPLE} mL)`}
-              </Button>
-            )}
-
             {/* Step 2: Add Buffer Solution */}
             <Button
               variant={stage === "buffer" || stage === "indicator" || stage === "titrating" ? "secondary" : "outline"}
               className="w-full gap-2"
               onClick={() => setStage("buffer")}
-              disabled={stage === "empty" || stage === "buffer" || stage === "indicator" || stage === "titrating" || completed}
+              disabled={stage === "buffer" || stage === "indicator" || stage === "titrating" || completed}
             >
               <FlaskConical className="w-4 h-4" />
               {stage === "buffer" || stage === "indicator" || stage === "titrating"
@@ -191,20 +180,9 @@ const TitrationPanel = ({
                 : "Add Calmagite Indicator"}
             </Button>
 
-            {/* Step 4: Enable EDTA — small start-titrating button */}
-            {stage === "indicator" && (
-              <Button
-                className="w-full gap-2 lab-gradient-bg text-primary-foreground"
-                onClick={() => setStage("titrating")}
-              >
-                Start Titrating with EDTA
-              </Button>
-            )}
-
             {/* EDTA controls — slider + quick-add buttons */}
-            {canAddEDTA && (
-              <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between text-sm">
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between text-sm">
                   <span className="font-medium text-muted-foreground">EDTA added (this trial)</span>
                   <span className="font-mono bg-muted px-2 py-0.5 rounded text-foreground">
                     {volThisTrial.toFixed(2)} mL
@@ -238,7 +216,7 @@ const TitrationPanel = ({
                         size="sm"
                         className="text-xs font-mono hover:bg-primary/10 hover:border-primary/40"
                         onClick={() => addTitrant(amt)}
-                        disabled={volAdded >= MAX_EDTA}
+                        disabled={volAdded >= MAX_EDTA || !canAddEDTA}
                       >
                         +{amt}
                       </Button>
@@ -246,7 +224,6 @@ const TitrationPanel = ({
                   </div>
                 </div>
               </div>
-            )}
 
             {/* Record + Reset */}
             <div className="flex gap-3 pt-1">
@@ -380,7 +357,7 @@ const TitrationPanel = ({
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <defs>
-                  <clipPath id={`flaskClip-${partLabel}`}>
+                  <clipPath id={`flaskClip-${partLabel.replace(/\s+/g, '')}`}>
                     <polygon points="56,0 94,0 94,52 146,174 148,196 2,196 4,174 56,52" />
                   </clipPath>
                 </defs>
@@ -390,7 +367,7 @@ const TitrationPanel = ({
                   x="0" y={200 - (flaskFillPct / 100) * 196}
                   width="150"
                   height={(flaskFillPct / 100) * 196}
-                  clipPath={`url(#flaskClip-${partLabel})`}
+                  clipPath={`url(#flaskClip-${partLabel.replace(/\s+/g, '')})`}
                   style={{
                     fill: flaskColor,
                     transition: "y 0.6s ease-in-out, height 0.6s ease-in-out, fill 1.4s ease-in-out",
@@ -402,7 +379,7 @@ const TitrationPanel = ({
                   <rect
                     x="0" y={200 - (flaskFillPct / 100) * 196}
                     width="150" height="3"
-                    clipPath={`url(#flaskClip-${partLabel})`}
+                    clipPath={`url(#flaskClip-${partLabel.replace(/\s+/g, '')})`}
                     fill="rgba(255,255,255,0.25)"
                     style={{ transition: "y 0.6s ease-in-out" }}
                   />

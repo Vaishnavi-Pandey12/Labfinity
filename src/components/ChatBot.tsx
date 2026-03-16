@@ -100,7 +100,7 @@ export const ChatBot = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-6 z-50 w-96 max-h-[600px] glass-card rounded-2xl shadow-2xl border border-border/50 flex flex-col"
+            className="fixed bottom-24 right-6 z-50 w-[500px] h-[80vh] min-h-[500px] max-h-[800px] glass-card rounded-2xl shadow-2xl border border-border/50 flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border/50 rounded-t-2xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
@@ -122,7 +122,7 @@ export const ChatBot = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-96">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((msg) => (
                 <motion.div
                   key={msg.id}

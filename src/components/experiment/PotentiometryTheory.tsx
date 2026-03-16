@@ -26,7 +26,7 @@ const PotentiometryTheory = () => {
         <CardContent>
           <p className="text-muted-foreground leading-relaxed">
             To perform acid-base, redox, and precipitation titrations using potentiometric measurement. 
-            To determine the equivalence point of a titration by measuring pH changes and analyze titration curves.
+            To determine the equivalence point of a titration by measuring potential (EMF) changes and analyze titration curves.
           </p>
         </CardContent>
       </Card>
@@ -67,14 +67,14 @@ const PotentiometryTheory = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2">pH Measurement with Glass Electrode</h4>
+            <h4 className="font-semibold mb-2">EMF Measurement with Glass Electrode</h4>
             <div className="font-mono text-center my-3 p-4 bg-muted rounded-lg">
               E = E° - 0.0592 × pH
             </div>
             <p className="text-sm text-muted-foreground">
               The glass electrode produces a potential that varies linearly with pH. At 25°C, the potential 
               changes by approximately 59 mV per pH unit. This relationship allows direct measurement and 
-              display of pH values.
+              display of potential (EMF) values, which correlate to the pH of the solution.
             </p>
           </div>
 
@@ -82,8 +82,8 @@ const PotentiometryTheory = () => {
             <h4 className="font-semibold mb-2">Potentiometric Titration Curve</h4>
             <p className="text-sm text-muted-foreground">
               The titration curve shows three distinct regions: (1) <strong>Before equivalence point</strong> - 
-              gradual pH change with gentle slope; (2) <strong>Near equivalence point</strong> - rapid pH change 
-              with maximum slope (inflection point); (3) <strong>After equivalence point</strong> - gradual pH change 
+              gradual potential change with gentle slope; (2) <strong>Near equivalence point</strong> - rapid potential change 
+              with maximum slope (inflection point); (3) <strong>After equivalence point</strong> - gradual potential change 
               with gentle slope again. The equivalence point is located at the inflection point where dE/dV is maximum.
             </p>
           </div>
@@ -103,7 +103,7 @@ const PotentiometryTheory = () => {
             {[
               "Glass electrode (indicator electrode)",
               "Reference electrode (Ag/AgCl or calomel)",
-              "pH meter / Digital voltmeter",
+              "Potentiometer / Digital millivoltmeter",
               "Burette (25 mL or 50 mL)",
               "Beaker (100-250 mL)",
               "Magnetic stirrer & stir bar",
@@ -133,7 +133,7 @@ const PotentiometryTheory = () => {
           <div className="bg-muted/50 p-3 rounded-lg">
             <p className="text-sm font-semibold mb-1">Titration Curve Shape</p>
             <p className="text-sm text-muted-foreground">
-              The S-shaped titration curve shows a sharp vertical section at the equivalence point where pH changes rapidly 
+              The S-shaped titration curve shows a sharp vertical section at the equivalence point where potential (EMF) changes rapidly 
               with small additions of titrant.
             </p>
           </div>
@@ -166,7 +166,7 @@ const PotentiometryTheory = () => {
           <ul className="space-y-2 text-muted-foreground">
             <li className="flex items-start gap-2">
               <span className="text-amber-500">•</span>
-              Always calibrate the pH electrode with standard buffers before starting measurements.
+              Always calibrate the potentiometer with standard references before starting measurements.
             </li>
             <li className="flex items-start gap-2">
               <span className="text-amber-500">•</span>
@@ -174,7 +174,7 @@ const PotentiometryTheory = () => {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-amber-500">•</span>
-              Allow sufficient time for the pH reading to stabilize after each titrant addition.
+              Allow sufficient time for the EMF reading to stabilize after each titrant addition.
             </li>
             <li className="flex items-start gap-2">
               <span className="text-amber-500">•</span>
