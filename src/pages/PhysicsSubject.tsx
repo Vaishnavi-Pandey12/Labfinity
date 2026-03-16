@@ -16,11 +16,11 @@ import {
   Sun,
   Clock,
   Thermometer,
-  Zap,
-  CircuitBoard,
-  Cpu,
-  Microscope,
-  ScanLine
+  Magnet,
+  Compass,
+  Triangle,
+  Sun,
+  Clock
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 
@@ -117,44 +117,6 @@ const experiments = [
     difficulty: "Beginner",
     duration: "35 min",
   },
-  { id: 11, title: "Photoelectric Effect", 
-    topic: "Quantum Physics", 
-    description: "Determine Planck's constant by studying the photoelectric effect using colored filters and stopping potential.", 
-    icon: Zap, 
-    difficulty: "Intermediate", 
-    duration: "40 min" 
-  },
-  { id: 12, 
-    title: "LASER Diffraction", 
-    topic: "Optics", 
-    description: "Determine the wavelength of a laser source using a diffraction grating and the grating equation.", 
-    icon: ScanLine, 
-    difficulty: "Intermediate", 
-    duration: "35 min" 
-  },
-  { id: 13, 
-    title: "Heisenberg's Uncertainty Principle", 
-    topic: "Quantum Physics", 
-    description: "Verify the uncertainty principle using single-slit laser diffraction and confirm Δy·Δp ≈ h.", 
-    icon: Microscope, 
-    difficulty: "Advanced", 
-    duration: "45 min" 
-  },
-  { id: 14, 
-    title: "Four Probe Method", 
-    topic: "Semiconductor Physics", 
-    description: "Determine the energy band gap of germanium by studying temperature dependence of resistivity.", 
-    icon: Cpu, 
-    difficulty: "Advanced", 
-    duration: "50 min" 
-  },
-  { id: 15, 
-    title: "PN Junction LED Characteristics", 
-    topic: "Semiconductor Physics", 
-    description: "Study V-I characteristics of LEDs, determine knee voltage, and calculate the wavelength of emitted light.", 
-    icon: CircuitBoard, 
-    difficulty: "Beginner", 
-    duration: "35 min" }
 ];
 
 const containerVariants = {
