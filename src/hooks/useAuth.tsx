@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const googleLogin = useCallback(async (googleToken: string) => {
-        const res = await fetch(`${API}/api/auth/google`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/google`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token: googleToken }),
