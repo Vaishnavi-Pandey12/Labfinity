@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Atom,
   ChevronRight,
   ChevronLeft,
@@ -37,15 +37,17 @@ const experiments = [
     icon: Lightbulb,
     difficulty: "Intermediate",
     duration: "35 min",
+    featured: false,
   },
   {
     id: 3,
     title: "Gas Laws & Carnot Engine",
     topic: "Thermodynamics",
-    description: "Verify Boyle's Law, Charles' Law and analyze Carnot engine efficiency using interactive simulation",
-    icon: Flame,
-    difficulty: "Advanced",
+    description: "Investigate gas laws, thermodynamic cycles and the Carnot engine through interactive simulations",
+    icon: Thermometer,
+    difficulty: "Intermediate",
     duration: "45 min",
+    featured: false,
   },
   {
     id: 4,
@@ -128,7 +130,7 @@ const itemVariants = {
 const PhysicsSubject = () => {
   return (
     <div className="min-h-screen bg-background particles-bg">
-      
+
       {/* Header */}
       <header className="sticky top-0 z-50 glass-card border-b border-border/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -214,8 +216,14 @@ const PhysicsSubject = () => {
             {experiments.map((exp) => (
               <motion.div key={exp.id} variants={itemVariants}>
                 <Link to={`/subjects/physics/experiments/${exp.id}`}>
-                 <Card className="group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative">
-                  
+                  <Card className={`group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative ${exp.featured ? 'ring-2 ring-primary' : ''}`}>
+
+                    {exp.featured && (
+                      <div className="absolute top-4 right-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                        Featured
+                      </div>
+                    )}
+
                     <CardHeader className="pb-4">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shrink-0">

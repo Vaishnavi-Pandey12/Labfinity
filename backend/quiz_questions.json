@@ -1,0 +1,3028 @@
+{
+  "experiments": [
+    {
+      "id": 1,
+      "title": "Potentiometric Titration",
+      "questions": [
+        {
+          "id": 1,
+          "question": "What is the aim of pH titration experiment?",
+          "options": [
+            "To determine molarity of HCl using NaOH",
+            "To find boiling point",
+            "To measure density",
+            "To prepare salt"
+          ],
+          "correct_answer": "To determine molarity of HCl using NaOH"
+        },
+        {
+          "id": 2,
+          "question": "What does pH measure?",
+          "options": [
+            "OH- concentration",
+            "H+ concentration",
+            "Salt content",
+            "Temperature"
+          ],
+          "correct_answer": "H+ concentration"
+        },
+        {
+          "id": 3,
+          "question": "Standard solution used in this experiment is",
+          "options": [
+            "0.1M NaOH",
+            "HCl",
+            "KMnO4",
+            "EDTA"
+          ],
+          "correct_answer": "0.1M NaOH"
+        },
+        {
+          "id": 4,
+          "question": "When NaOH is added to HCl, what is formed?",
+          "options": [
+            "NaCl and H2O",
+            "NaOH2",
+            "HCl2",
+            "CO2"
+          ],
+          "correct_answer": "NaCl and H2O"
+        },
+        {
+          "id": 5,
+          "question": "At equivalence point,",
+          "options": [
+            "All H+ ions are neutralized",
+            "Solution is strongly acidic",
+            "Solution is strongly basic",
+            "No reaction occurs"
+          ],
+          "correct_answer": "All H+ ions are neutralized"
+        },
+        {
+          "id": 6,
+          "question": "Which instrument is used to measure pH?",
+          "options": [
+            "pH meter",
+            "Burette",
+            "Thermometer",
+            "Colorimeter"
+          ],
+          "correct_answer": "pH meter"
+        },
+        {
+          "id": 7,
+          "question": "The titrant used in this experiment is",
+          "options": [
+            "NaOH",
+            "HCl",
+            "Water",
+            "NaCl"
+          ],
+          "correct_answer": "NaOH"
+        },
+        {
+          "id": 8,
+          "question": "The analyte in this experiment is",
+          "options": [
+            "Dilute HCl",
+            "NaOH",
+            "KMnO4",
+            "EDTA"
+          ],
+          "correct_answer": "Dilute HCl"
+        },
+        {
+          "id": 9,
+          "question": "As NaOH is added, the pH of solution",
+          "options": [
+            "Increases",
+            "Decreases",
+            "Remains constant",
+            "Becomes zero"
+          ],
+          "correct_answer": "Increases"
+        },
+        {
+          "id": 10,
+          "question": "At equivalence point for strong acid-strong base titration, pH is approximately",
+          "options": [
+            "7",
+            "1",
+            "14",
+            "3"
+          ],
+          "correct_answer": "7"
+        },
+        {
+          "id": 11,
+          "question": "The reaction between H+ and OH- produces",
+          "options": [
+            "H2O",
+            "NaCl",
+            "CO2",
+            "O2"
+          ],
+          "correct_answer": "H2O"
+        },
+        {
+          "id": 12,
+          "question": "NaOH solution is taken in",
+          "options": [
+            "Burette",
+            "Conical flask",
+            "Beaker",
+            "Test tube"
+          ],
+          "correct_answer": "Burette"
+        },
+        {
+          "id": 13,
+          "question": "HCl solution is taken in",
+          "options": [
+            "Conical flask",
+            "Burette",
+            "Pipette only",
+            "Thermometer"
+          ],
+          "correct_answer": "Conical flask"
+        },
+        {
+          "id": 14,
+          "question": "The endpoint is detected by",
+          "options": [
+            "Sharp change in pH",
+            "Color change",
+            "Temperature rise",
+            "Gas formation"
+          ],
+          "correct_answer": "Sharp change in pH"
+        },
+        {
+          "id": 15,
+          "question": "pH scale ranges from",
+          "options": [
+            "0 to 14",
+            "1 to 7",
+            "0 to 7",
+            "7 to 14"
+          ],
+          "correct_answer": "0 to 14"
+        },
+        {
+          "id": 16,
+          "question": "A solution with pH less than 7 is",
+          "options": [
+            "Acidic",
+            "Basic",
+            "Neutral",
+            "Salt"
+          ],
+          "correct_answer": "Acidic"
+        },
+        {
+          "id": 17,
+          "question": "A solution with pH more than 7 is",
+          "options": [
+            "Basic",
+            "Acidic",
+            "Neutral",
+            "Salt"
+          ],
+          "correct_answer": "Basic"
+        },
+        {
+          "id": 18,
+          "question": "The concentration of NaOH used is",
+          "options": [
+            "0.1 M",
+            "1 M",
+            "0.01 M",
+            "2 M"
+          ],
+          "correct_answer": "0.1 M"
+        },
+        {
+          "id": 19,
+          "question": "During titration, NaOH should be added",
+          "options": [
+            "Slowly",
+            "Quickly",
+            "All at once",
+            "Not added"
+          ],
+          "correct_answer": "Slowly"
+        },
+        {
+          "id": 20,
+          "question": "The graph plotted in pH titration is",
+          "options": [
+            "pH vs Volume of NaOH",
+            "Temperature vs Time",
+            "Mass vs Volume",
+            "Pressure vs Time"
+          ],
+          "correct_answer": "pH vs Volume of NaOH"
+        },
+        {
+          "id": 21,
+          "question": "The equivalence point is also called",
+          "options": [
+            "Stoichiometric point",
+            "Boiling point",
+            "Freezing point",
+            "Melting point"
+          ],
+          "correct_answer": "Stoichiometric point"
+        },
+        {
+          "id": 22,
+          "question": "Before equivalence point, solution is",
+          "options": [
+            "Acidic",
+            "Basic",
+            "Neutral",
+            "Salted"
+          ],
+          "correct_answer": "Acidic"
+        },
+        {
+          "id": 23,
+          "question": "After equivalence point, solution becomes",
+          "options": [
+            "Basic",
+            "Acidic",
+            "Neutral",
+            "Colorless"
+          ],
+          "correct_answer": "Basic"
+        },
+        {
+          "id": 24,
+          "question": "The decrease in H+ concentration causes pH to",
+          "options": [
+            "Increase",
+            "Decrease",
+            "Remain same",
+            "Become zero"
+          ],
+          "correct_answer": "Increase"
+        },
+        {
+          "id": 25,
+          "question": "Strong acid used in this experiment is",
+          "options": [
+            "HCl",
+            "H2SO4",
+            "CH3COOH",
+            "HNO3"
+          ],
+          "correct_answer": "HCl"
+        },
+        {
+          "id": 26,
+          "question": "Strong base used in this experiment is",
+          "options": [
+            "NaOH",
+            "NH4OH",
+            "KCl",
+            "NaCl"
+          ],
+          "correct_answer": "NaOH"
+        },
+        {
+          "id": 27,
+          "question": "The neutralization reaction forms",
+          "options": [
+            "Salt and Water",
+            "Gas only",
+            "Acid only",
+            "Base only"
+          ],
+          "correct_answer": "Salt and Water"
+        },
+        {
+          "id": 28,
+          "question": "pH increases rapidly near",
+          "options": [
+            "Equivalence point",
+            "Start of titration",
+            "Before adding NaOH",
+            "Room temperature"
+          ],
+          "correct_answer": "Equivalence point"
+        },
+        {
+          "id": 29,
+          "question": "HCl is a",
+          "options": [
+            "Strong acid",
+            "Weak acid",
+            "Strong base",
+            "Salt"
+          ],
+          "correct_answer": "Strong acid"
+        },
+        {
+          "id": 30,
+          "question": "NaOH is a",
+          "options": [
+            "Strong base",
+            "Weak base",
+            "Strong acid",
+            "Indicator"
+          ],
+          "correct_answer": "Strong base"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Acid Base Titration - Phenolphthalein",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Phenolphthalein is used as",
+          "options": [
+            "Indicator",
+            "Solvent",
+            "Acid",
+            "Base"
+          ],
+          "correct_answer": "Indicator"
+        },
+        {
+          "id": 2,
+          "question": "Phenolphthalein is pink in",
+          "options": [
+            "Basic medium",
+            "Acidic medium",
+            "Neutral medium",
+            "Salt solution"
+          ],
+          "correct_answer": "Basic medium"
+        },
+        {
+          "id": 3,
+          "question": "Reaction between HCl and NaOH is called",
+          "options": [
+            "Neutralization",
+            "Oxidation",
+            "Reduction",
+            "Combustion"
+          ],
+          "correct_answer": "Neutralization"
+        },
+        {
+          "id": 4,
+          "question": "The standard solution used in this experiment is",
+          "options": [
+            "0.1M NaOH",
+            "Dilute HCl",
+            "KMnO4",
+            "EDTA"
+          ],
+          "correct_answer": "0.1M NaOH"
+        },
+        {
+          "id": 5,
+          "question": "The unknown solution in this experiment is",
+          "options": [
+            "Dilute HCl",
+            "NaOH",
+            "Water",
+            "NaCl"
+          ],
+          "correct_answer": "Dilute HCl"
+        },
+        {
+          "id": 6,
+          "question": "The reaction between HCl and NaOH produces",
+          "options": [
+            "NaCl and H2O",
+            "CO2",
+            "H2 gas",
+            "Na2O"
+          ],
+          "correct_answer": "NaCl and H2O"
+        },
+        {
+          "id": 7,
+          "question": "Phenolphthalein is colorless in",
+          "options": [
+            "Acidic medium",
+            "Basic medium",
+            "Neutral medium",
+            "Salt solution"
+          ],
+          "correct_answer": "Acidic medium"
+        },
+        {
+          "id": 8,
+          "question": "Phenolphthalein turns pink in",
+          "options": [
+            "Basic medium",
+            "Acidic medium",
+            "Neutral medium",
+            "Water"
+          ],
+          "correct_answer": "Basic medium"
+        },
+        {
+          "id": 9,
+          "question": "The endpoint is indicated by",
+          "options": [
+            "Light pink color",
+            "Green color",
+            "Blue color",
+            "Yellow color"
+          ],
+          "correct_answer": "Light pink color"
+        },
+        {
+          "id": 10,
+          "question": "The titration performed is an example of",
+          "options": [
+            "Neutralization reaction",
+            "Redox reaction",
+            "Precipitation reaction",
+            "Decomposition reaction"
+          ],
+          "correct_answer": "Neutralization reaction"
+        },
+        {
+          "id": 11,
+          "question": "NaOH is placed in the",
+          "options": [
+            "Burette",
+            "Conical flask",
+            "Beaker",
+            "Pipette"
+          ],
+          "correct_answer": "Burette"
+        },
+        {
+          "id": 12,
+          "question": "HCl is taken in the",
+          "options": [
+            "Conical flask",
+            "Burette",
+            "Test tube",
+            "Thermometer"
+          ],
+          "correct_answer": "Conical flask"
+        },
+        {
+          "id": 13,
+          "question": "Molarity is defined as",
+          "options": [
+            "Moles per liter of solution",
+            "Mass per liter",
+            "Volume per mole",
+            "Density of solution"
+          ],
+          "correct_answer": "Moles per liter of solution"
+        },
+        {
+          "id": 14,
+          "question": "The equivalence point for strong acid and strong base occurs at pH",
+          "options": [
+            "7",
+            "1",
+            "14",
+            "3"
+          ],
+          "correct_answer": "7"
+        },
+        {
+          "id": 15,
+          "question": "Phenolphthalein is a",
+          "options": [
+            "Weak acid indicator",
+            "Strong acid",
+            "Strong base",
+            "Salt"
+          ],
+          "correct_answer": "Weak acid indicator"
+        },
+        {
+          "id": 16,
+          "question": "In acidic solution, phenolphthalein appears",
+          "options": [
+            "Colorless",
+            "Pink",
+            "Blue",
+            "Green"
+          ],
+          "correct_answer": "Colorless"
+        },
+        {
+          "id": 17,
+          "question": "In basic solution, phenolphthalein appears",
+          "options": [
+            "Pink",
+            "Colorless",
+            "Yellow",
+            "Orange"
+          ],
+          "correct_answer": "Pink"
+        },
+        {
+          "id": 18,
+          "question": "The process of determining concentration by titration is called",
+          "options": [
+            "Volumetric analysis",
+            "Gravimetric analysis",
+            "Filtration",
+            "Distillation"
+          ],
+          "correct_answer": "Volumetric analysis"
+        },
+        {
+          "id": 19,
+          "question": "The balanced reaction between NaOH and HCl is",
+          "options": [
+            "NaOH + HCl → NaCl + H2O",
+            "NaOH + HCl → NaH + ClO",
+            "HCl + HCl → H2Cl2",
+            "NaOH → Na + OH"
+          ],
+          "correct_answer": "NaOH + HCl → NaCl + H2O"
+        },
+        {
+          "id": 20,
+          "question": "The solution in burette should be added",
+          "options": [
+            "Slowly with constant stirring",
+            "All at once",
+            "Without mixing",
+            "Very fast"
+          ],
+          "correct_answer": "Slowly with constant stirring"
+        },
+        {
+          "id": 21,
+          "question": "Before equivalence point, solution is",
+          "options": [
+            "Acidic",
+            "Basic",
+            "Neutral",
+            "Salted"
+          ],
+          "correct_answer": "Acidic"
+        },
+        {
+          "id": 22,
+          "question": "After equivalence point, solution becomes",
+          "options": [
+            "Basic",
+            "Acidic",
+            "Neutral",
+            "Colorless"
+          ],
+          "correct_answer": "Basic"
+        },
+        {
+          "id": 23,
+          "question": "NaOH is classified as a",
+          "options": [
+            "Strong base",
+            "Weak base",
+            "Strong acid",
+            "Indicator"
+          ],
+          "correct_answer": "Strong base"
+        },
+        {
+          "id": 24,
+          "question": "HCl is classified as a",
+          "options": [
+            "Strong acid",
+            "Weak acid",
+            "Salt",
+            "Indicator"
+          ],
+          "correct_answer": "Strong acid"
+        },
+        {
+          "id": 25,
+          "question": "The volume of NaOH used at endpoint is called",
+          "options": [
+            "Titre value",
+            "Density",
+            "Mass",
+            "pH value"
+          ],
+          "correct_answer": "Titre value"
+        },
+        {
+          "id": 26,
+          "question": "The indicator should be added in",
+          "options": [
+            "Small quantity",
+            "Large quantity",
+            "Half beaker",
+            "Full flask"
+          ],
+          "correct_answer": "Small quantity"
+        },
+        {
+          "id": 27,
+          "question": "The color change at endpoint should be",
+          "options": [
+            "Permanent pale pink",
+            "Dark red",
+            "Green",
+            "Blue"
+          ],
+          "correct_answer": "Permanent pale pink"
+        },
+        {
+          "id": 28,
+          "question": "Titration helps to determine",
+          "options": [
+            "Concentration of unknown solution",
+            "Temperature",
+            "Pressure",
+            "Density"
+          ],
+          "correct_answer": "Concentration of unknown solution"
+        },
+        {
+          "id": 29,
+          "question": "The neutralization reaction forms",
+          "options": [
+            "Salt and water",
+            "Gas only",
+            "Acid only",
+            "Base only"
+          ],
+          "correct_answer": "Salt and water"
+        },
+        {
+          "id": 30,
+          "question": "The experiment is an example of strong acid vs",
+          "options": [
+            "Strong base",
+            "Weak base",
+            "Salt",
+            "Metal"
+          ],
+          "correct_answer": "Strong base"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Hardness of Water (EDTA & Ion Exchange)",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Hardness of water is mainly due to",
+          "options": [
+            "Ca2+ and Mg2+",
+            "Na+",
+            "K+",
+            "Cl-"
+          ],
+          "correct_answer": "Ca2+ and Mg2+"
+        },
+        {
+          "id": 2,
+          "question": "EDTA is a",
+          "options": [
+            "Complexing agent",
+            "Acid",
+            "Base",
+            "Salt"
+          ],
+          "correct_answer": "Complexing agent"
+        },
+        {
+          "id": 3,
+          "question": "Buffer maintains pH at",
+          "options": [
+            "9-10",
+            "1-2",
+            "4-5",
+            "12-13"
+          ],
+          "correct_answer": "9-10"
+        },
+        {
+          "id": 4,
+          "question": "Hardness of water is usually expressed in terms of",
+          "options": [
+            "ppm of CaCO3",
+            "pH value",
+            "Molarity of NaCl",
+            "Density"
+          ],
+          "correct_answer": "ppm of CaCO3"
+        },
+        {
+          "id": 5,
+          "question": "EDTA stands for",
+          "options": [
+            "Ethylene Diamine Tetraacetic Acid",
+            "Ethane Diatomic Acid",
+            "Electrolyte Diluted Acid",
+            "Ethyne Dicarboxylic Acid"
+          ],
+          "correct_answer": "Ethylene Diamine Tetraacetic Acid"
+        },
+        {
+          "id": 6,
+          "question": "In hardness estimation, EDTA forms",
+          "options": [
+            "Stable complexes",
+            "Precipitates",
+            "Gases",
+            "Acids"
+          ],
+          "correct_answer": "Stable complexes"
+        },
+        {
+          "id": 7,
+          "question": "The pH is maintained at 9–10 using",
+          "options": [
+            "NH4Cl + NH4OH buffer",
+            "HCl",
+            "NaOH only",
+            "Water"
+          ],
+          "correct_answer": "NH4Cl + NH4OH buffer"
+        },
+        {
+          "id": 8,
+          "question": "Indicator used in EDTA titration is",
+          "options": [
+            "Calmagite",
+            "Phenolphthalein",
+            "Methyl orange",
+            "KMnO4"
+          ],
+          "correct_answer": "Calmagite"
+        },
+        {
+          "id": 9,
+          "question": "Temporary hardness is mainly due to",
+          "options": [
+            "Carbonates of Ca and Mg",
+            "NaCl",
+            "KCl",
+            "HCl"
+          ],
+          "correct_answer": "Carbonates of Ca and Mg"
+        },
+        {
+          "id": 10,
+          "question": "Permanent hardness is due to",
+          "options": [
+            "Chlorides and sulfates of Ca and Mg",
+            "Carbon dioxide",
+            "NaOH",
+            "Oxygen"
+          ],
+          "correct_answer": "Chlorides and sulfates of Ca and Mg"
+        },
+        {
+          "id": 11,
+          "question": "Soft water contains very little",
+          "options": [
+            "Ca2+ and Mg2+",
+            "Na+",
+            "K+",
+            "Cl-"
+          ],
+          "correct_answer": "Ca2+ and Mg2+"
+        },
+        {
+          "id": 12,
+          "question": "Hard water reacts with soap to form",
+          "options": [
+            "Scum",
+            "Foam",
+            "Gas",
+            "Salt crystals"
+          ],
+          "correct_answer": "Scum"
+        },
+        {
+          "id": 13,
+          "question": "EDTA used in experiment is in the form of",
+          "options": [
+            "Disodium salt",
+            "Pure acid",
+            "Gas",
+            "Liquid metal"
+          ],
+          "correct_answer": "Disodium salt"
+        },
+        {
+          "id": 14,
+          "question": "Complexometric titration involves formation of",
+          "options": [
+            "Complex compounds",
+            "Precipitates",
+            "Gases",
+            "Salts only"
+          ],
+          "correct_answer": "Complex compounds"
+        },
+        {
+          "id": 15,
+          "question": "At endpoint of EDTA titration, color changes from",
+          "options": [
+            "Wine red to blue",
+            "Blue to red",
+            "Colorless to pink",
+            "Green to yellow"
+          ],
+          "correct_answer": "Wine red to blue"
+        },
+        {
+          "id": 16,
+          "question": "Ion exchange resin consists of",
+          "options": [
+            "Organic polymer beads",
+            "Metal rods",
+            "Glass particles",
+            "Salt crystals"
+          ],
+          "correct_answer": "Organic polymer beads"
+        },
+        {
+          "id": 17,
+          "question": "Cation exchange resin replaces metal ions with",
+          "options": [
+            "H+ ions",
+            "OH- ions",
+            "NaCl",
+            "O2"
+          ],
+          "correct_answer": "H+ ions"
+        },
+        {
+          "id": 18,
+          "question": "Anion exchange resin replaces ions with",
+          "options": [
+            "OH- ions",
+            "H+ ions",
+            "Na+",
+            "Ca2+"
+          ],
+          "correct_answer": "OH- ions"
+        },
+        {
+          "id": 19,
+          "question": "In ion exchange method, hard water is passed through",
+          "options": [
+            "Resin column",
+            "Beaker",
+            "Burette",
+            "Test tube"
+          ],
+          "correct_answer": "Resin column"
+        },
+        {
+          "id": 20,
+          "question": "The effluent is the solution",
+          "options": [
+            "Coming out of column",
+            "Entering column",
+            "Stored in bottle",
+            "Heated solution"
+          ],
+          "correct_answer": "Coming out of column"
+        },
+        {
+          "id": 21,
+          "question": "Calcium ion has charge",
+          "options": [
+            "+2",
+            "+1",
+            "-1",
+            "-2"
+          ],
+          "correct_answer": "+2"
+        },
+        {
+          "id": 22,
+          "question": "Magnesium ion has charge",
+          "options": [
+            "+2",
+            "+1",
+            "-1",
+            "0"
+          ],
+          "correct_answer": "+2"
+        },
+        {
+          "id": 23,
+          "question": "Hardness estimation is based on",
+          "options": [
+            "Titration method",
+            "Distillation",
+            "Filtration",
+            "Evaporation"
+          ],
+          "correct_answer": "Titration method"
+        },
+        {
+          "id": 24,
+          "question": "The main cause of scaling in pipes is",
+          "options": [
+            "Hard water",
+            "Soft water",
+            "Pure water",
+            "Distilled water"
+          ],
+          "correct_answer": "Hard water"
+        },
+        {
+          "id": 25,
+          "question": "EDTA can form how many coordination bonds?",
+          "options": [
+            "4 or 6",
+            "1 only",
+            "2 only",
+            "8 only"
+          ],
+          "correct_answer": "4 or 6"
+        },
+        {
+          "id": 26,
+          "question": "Buffer solution prevents change in",
+          "options": [
+            "pH",
+            "Temperature",
+            "Pressure",
+            "Color"
+          ],
+          "correct_answer": "pH"
+        },
+        {
+          "id": 27,
+          "question": "Water hardness affects",
+          "options": [
+            "Soap efficiency",
+            "Boiling point only",
+            "Color only",
+            "Smell only"
+          ],
+          "correct_answer": "Soap efficiency"
+        },
+        {
+          "id": 28,
+          "question": "Ion exchange is a type of",
+          "options": [
+            "Chemical equilibrium process",
+            "Physical separation only",
+            "Distillation process",
+            "Filtration method"
+          ],
+          "correct_answer": "Chemical equilibrium process"
+        },
+        {
+          "id": 29,
+          "question": "Hardness of water can be removed by",
+          "options": [
+            "Ion exchange method",
+            "Cooling",
+            "Heating only",
+            "Adding salt"
+          ],
+          "correct_answer": "Ion exchange method"
+        },
+        {
+          "id": 30,
+          "question": "The EDTA titration gives measurement of",
+          "options": [
+            "Total hardness",
+            "pH value",
+            "Temperature",
+            "Density"
+          ],
+          "correct_answer": "Total hardness"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Redox Titration (KMnO4 & Oxalic Acid)",
+      "questions": [
+        {
+          "id": 1,
+          "question": "KMnO4 acts as",
+          "options": [
+            "Oxidizing agent",
+            "Reducing agent",
+            "Catalyst",
+            "Indicator"
+          ],
+          "correct_answer": "Oxidizing agent"
+        },
+        {
+          "id": 2,
+          "question": "Endpoint is indicated by",
+          "options": [
+            "Pale pink color",
+            "Blue color",
+            "Green color",
+            "Yellow color"
+          ],
+          "correct_answer": "Pale pink color"
+        },
+        {
+          "id": 3,
+          "question": "Oxalic acid acts as a",
+          "options": [
+            "Reducing agent",
+            "Oxidizing agent",
+            "Indicator",
+            "Salt"
+          ],
+          "correct_answer": "Reducing agent"
+        },
+        {
+          "id": 4,
+          "question": "KMnO4 is reduced to",
+          "options": [
+            "MnSO4",
+            "MnO2",
+            "MnO",
+            "Mn2O7"
+          ],
+          "correct_answer": "MnSO4"
+        },
+        {
+          "id": 5,
+          "question": "The medium required for this titration is",
+          "options": [
+            "Acidic",
+            "Basic",
+            "Neutral",
+            "Alkaline only"
+          ],
+          "correct_answer": "Acidic"
+        },
+        {
+          "id": 6,
+          "question": "Dilute acid used in this experiment is",
+          "options": [
+            "H2SO4",
+            "HCl",
+            "HNO3",
+            "CH3COOH"
+          ],
+          "correct_answer": "H2SO4"
+        },
+        {
+          "id": 7,
+          "question": "The endpoint is indicated by appearance of",
+          "options": [
+            "Pale pink color",
+            "Blue color",
+            "Green color",
+            "Yellow color"
+          ],
+          "correct_answer": "Pale pink color"
+        },
+        {
+          "id": 8,
+          "question": "KMnO4 acts as a",
+          "options": [
+            "Self-indicator",
+            "External indicator",
+            "Catalyst",
+            "Buffer"
+          ],
+          "correct_answer": "Self-indicator"
+        },
+        {
+          "id": 9,
+          "question": "The titration is performed at temperature",
+          "options": [
+            "60–70°C",
+            "0°C",
+            "25°C",
+            "100°C"
+          ],
+          "correct_answer": "60–70°C"
+        },
+        {
+          "id": 10,
+          "question": "During the reaction, oxalic acid is oxidized to",
+          "options": [
+            "CO2",
+            "CO",
+            "O2",
+            "H2"
+          ],
+          "correct_answer": "CO2"
+        },
+        {
+          "id": 11,
+          "question": "The color of KMnO4 solution is",
+          "options": [
+            "Purple",
+            "Blue",
+            "Green",
+            "Colorless"
+          ],
+          "correct_answer": "Purple"
+        },
+        {
+          "id": 12,
+          "question": "At endpoint, the pink color should be",
+          "options": [
+            "Permanent",
+            "Temporary",
+            "Dark red",
+            "Green"
+          ],
+          "correct_answer": "Permanent"
+        },
+        {
+          "id": 13,
+          "question": "Redox reaction involves",
+          "options": [
+            "Oxidation and Reduction",
+            "Neutralization only",
+            "Precipitation only",
+            "Evaporation"
+          ],
+          "correct_answer": "Oxidation and Reduction"
+        },
+        {
+          "id": 14,
+          "question": "Oxidation is defined as",
+          "options": [
+            "Loss of electrons",
+            "Gain of electrons",
+            "Gain of protons",
+            "Loss of oxygen"
+          ],
+          "correct_answer": "Loss of electrons"
+        },
+        {
+          "id": 15,
+          "question": "Reduction is defined as",
+          "options": [
+            "Gain of electrons",
+            "Loss of electrons",
+            "Gain of oxygen",
+            "Loss of hydrogen"
+          ],
+          "correct_answer": "Gain of electrons"
+        },
+        {
+          "id": 16,
+          "question": "The balanced equation shows electrons exchanged are",
+          "options": [
+            "5",
+            "1",
+            "2",
+            "10"
+          ],
+          "correct_answer": "5"
+        },
+        {
+          "id": 17,
+          "question": "The purpose of heating the solution is to",
+          "options": [
+            "Increase reaction rate",
+            "Cool solution",
+            "Change color",
+            "Stop reaction"
+          ],
+          "correct_answer": "Increase reaction rate"
+        },
+        {
+          "id": 18,
+          "question": "The reaction between KMnO4 and oxalic acid is",
+          "options": [
+            "Redox reaction",
+            "Neutralization",
+            "Precipitation",
+            "Combination"
+          ],
+          "correct_answer": "Redox reaction"
+        },
+        {
+          "id": 19,
+          "question": "KMnO4 is placed in the",
+          "options": [
+            "Burette",
+            "Conical flask",
+            "Beaker",
+            "Test tube"
+          ],
+          "correct_answer": "Burette"
+        },
+        {
+          "id": 20,
+          "question": "Oxalic acid is taken in the",
+          "options": [
+            "Conical flask",
+            "Burette",
+            "Thermometer",
+            "Filter paper"
+          ],
+          "correct_answer": "Conical flask"
+        },
+        {
+          "id": 21,
+          "question": "The strength of KMnO4 is determined by",
+          "options": [
+            "Standard oxalic acid solution",
+            "NaCl",
+            "Water",
+            "NaOH"
+          ],
+          "correct_answer": "Standard oxalic acid solution"
+        },
+        {
+          "id": 22,
+          "question": "The color change at endpoint indicates",
+          "options": [
+            "Completion of reaction",
+            "Start of reaction",
+            "Cooling",
+            "Evaporation"
+          ],
+          "correct_answer": "Completion of reaction"
+        },
+        {
+          "id": 23,
+          "question": "KMnO4 should be standardized because it is",
+          "options": [
+            "Not a primary standard",
+            "Very stable",
+            "Colorless",
+            "Neutral"
+          ],
+          "correct_answer": "Not a primary standard"
+        },
+        {
+          "id": 24,
+          "question": "The molarity of KMnO4 can be calculated using",
+          "options": [
+            "Titration formula M1V1 = M2V2",
+            "Density formula",
+            "pH formula",
+            "Gas law"
+          ],
+          "correct_answer": "Titration formula M1V1 = M2V2"
+        },
+        {
+          "id": 25,
+          "question": "In acidic medium, MnO4- ion changes to",
+          "options": [
+            "Mn2+",
+            "MnO2",
+            "MnO4 2-",
+            "Mn metal"
+          ],
+          "correct_answer": "Mn2+"
+        },
+        {
+          "id": 26,
+          "question": "The reaction produces water and",
+          "options": [
+            "CO2",
+            "O2",
+            "H2",
+            "Cl2"
+          ],
+          "correct_answer": "CO2"
+        },
+        {
+          "id": 27,
+          "question": "The titration should be stopped when solution becomes",
+          "options": [
+            "Light pink",
+            "Dark purple",
+            "Colorless",
+            "Blue"
+          ],
+          "correct_answer": "Light pink"
+        },
+        {
+          "id": 28,
+          "question": "Oxalic acid solution used is",
+          "options": [
+            "0.1M standard solution",
+            "1M NaOH",
+            "Distilled water",
+            "0.5M HCl"
+          ],
+          "correct_answer": "0.1M standard solution"
+        },
+        {
+          "id": 29,
+          "question": "Redox titration measures",
+          "options": [
+            "Oxidation-reduction capacity",
+            "pH only",
+            "Temperature",
+            "Pressure"
+          ],
+          "correct_answer": "Oxidation-reduction capacity"
+        },
+        {
+          "id": 30,
+          "question": "The appearance of pink color is due to excess",
+          "options": [
+            "KMnO4",
+            "Oxalic acid",
+            "H2SO4",
+            "Water"
+          ],
+          "correct_answer": "KMnO4"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Colorimetry",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Beer-Lambert law relates absorbance with",
+          "options": [
+            "Concentration",
+            "Temperature",
+            "Pressure",
+            "Density"
+          ],
+          "correct_answer": "Concentration"
+        },
+        {
+          "id": 2,
+          "question": "Absorbance is denoted by",
+          "options": [
+            "A",
+            "C",
+            "L",
+            "E"
+          ],
+          "correct_answer": "A"
+        },
+        {
+          "id": 3,
+          "question": "Colorimetry is based on which law?",
+          "options": [
+            "Beer-Lambert Law",
+            "Ohm's Law",
+            "Newton's Law",
+            "Boyle's Law"
+          ],
+          "correct_answer": "Beer-Lambert Law"
+        },
+        {
+          "id": 4,
+          "question": "Absorbance is directly proportional to",
+          "options": [
+            "Concentration",
+            "Temperature",
+            "Pressure",
+            "Time"
+          ],
+          "correct_answer": "Concentration"
+        },
+        {
+          "id": 5,
+          "question": "Absorbance is represented by",
+          "options": [
+            "A",
+            "C",
+            "L",
+            "E"
+          ],
+          "correct_answer": "A"
+        },
+        {
+          "id": 6,
+          "question": "In Beer-Lambert law, 'c' represents",
+          "options": [
+            "Concentration",
+            "Color",
+            "Current",
+            "Capacity"
+          ],
+          "correct_answer": "Concentration"
+        },
+        {
+          "id": 7,
+          "question": "In Beer-Lambert law, 'l' represents",
+          "options": [
+            "Path length",
+            "Light color",
+            "Luminosity",
+            "Level"
+          ],
+          "correct_answer": "Path length"
+        },
+        {
+          "id": 8,
+          "question": "When light passes through a solution, its intensity",
+          "options": [
+            "Decreases",
+            "Increases",
+            "Remains same",
+            "Becomes zero"
+          ],
+          "correct_answer": "Decreases"
+        },
+        {
+          "id": 9,
+          "question": "Monochromatic light means",
+          "options": [
+            "Single wavelength light",
+            "White light",
+            "Infrared light",
+            "UV light"
+          ],
+          "correct_answer": "Single wavelength light"
+        },
+        {
+          "id": 10,
+          "question": "The instrument used is called",
+          "options": [
+            "Colorimeter",
+            "Thermometer",
+            "pH meter",
+            "Burette"
+          ],
+          "correct_answer": "Colorimeter"
+        },
+        {
+          "id": 11,
+          "question": "Higher concentration leads to",
+          "options": [
+            "Higher absorbance",
+            "Lower absorbance",
+            "No change",
+            "Zero absorbance"
+          ],
+          "correct_answer": "Higher absorbance"
+        },
+        {
+          "id": 12,
+          "question": "The cuvette is used to hold",
+          "options": [
+            "Sample solution",
+            "Indicator",
+            "Acid",
+            "Base"
+          ],
+          "correct_answer": "Sample solution"
+        },
+        {
+          "id": 13,
+          "question": "Transmittance is related to",
+          "options": [
+            "Intensity of transmitted light",
+            "Temperature",
+            "Density",
+            "Mass"
+          ],
+          "correct_answer": "Intensity of transmitted light"
+        },
+        {
+          "id": 14,
+          "question": "Absorbance increases when transmittance",
+          "options": [
+            "Decreases",
+            "Increases",
+            "Remains same",
+            "Becomes zero"
+          ],
+          "correct_answer": "Decreases"
+        },
+        {
+          "id": 15,
+          "question": "KMnO4 solution appears",
+          "options": [
+            "Purple",
+            "Green",
+            "Blue",
+            "Colorless"
+          ],
+          "correct_answer": "Purple"
+        },
+        {
+          "id": 16,
+          "question": "Color intensity depends on",
+          "options": [
+            "Concentration",
+            "Pressure",
+            "Time",
+            "Volume only"
+          ],
+          "correct_answer": "Concentration"
+        },
+        {
+          "id": 17,
+          "question": "Beer-Lambert law equation is",
+          "options": [
+            "A = εcl",
+            "PV = nRT",
+            "V = IR",
+            "F = ma"
+          ],
+          "correct_answer": "A = εcl"
+        },
+        {
+          "id": 18,
+          "question": "ε in Beer-Lambert law represents",
+          "options": [
+            "Molar absorptivity",
+            "Energy",
+            "Electricity",
+            "Emission"
+          ],
+          "correct_answer": "Molar absorptivity"
+        },
+        {
+          "id": 19,
+          "question": "The unit of path length is usually",
+          "options": [
+            "cm",
+            "mL",
+            "g",
+            "mol"
+          ],
+          "correct_answer": "cm"
+        },
+        {
+          "id": 20,
+          "question": "Calibration curve is a graph of",
+          "options": [
+            "Absorbance vs Concentration",
+            "Temperature vs Time",
+            "Volume vs Pressure",
+            "Mass vs Density"
+          ],
+          "correct_answer": "Absorbance vs Concentration"
+        },
+        {
+          "id": 21,
+          "question": "Colorimetry works in which region of spectrum?",
+          "options": [
+            "Visible region",
+            "Radio waves",
+            "X-rays",
+            "Gamma rays"
+          ],
+          "correct_answer": "Visible region"
+        },
+        {
+          "id": 22,
+          "question": "If concentration doubles, absorbance will",
+          "options": [
+            "Double",
+            "Half",
+            "Remain same",
+            "Become zero"
+          ],
+          "correct_answer": "Double"
+        },
+        {
+          "id": 23,
+          "question": "Blank solution contains",
+          "options": [
+            "Solvent only",
+            "Analyte only",
+            "Indicator only",
+            "Salt only"
+          ],
+          "correct_answer": "Solvent only"
+        },
+        {
+          "id": 24,
+          "question": "The purpose of blank is to",
+          "options": [
+            "Set zero absorbance",
+            "Increase color",
+            "Heat solution",
+            "Change pH"
+          ],
+          "correct_answer": "Set zero absorbance"
+        },
+        {
+          "id": 25,
+          "question": "Light absorption causes electrons to move to",
+          "options": [
+            "Excited state",
+            "Ground state",
+            "Nucleus",
+            "Ion"
+          ],
+          "correct_answer": "Excited state"
+        },
+        {
+          "id": 26,
+          "question": "Ground state refers to",
+          "options": [
+            "Lowest energy level",
+            "Highest energy level",
+            "Neutral ion",
+            "Free electron"
+          ],
+          "correct_answer": "Lowest energy level"
+        },
+        {
+          "id": 27,
+          "question": "The slope of calibration curve represents",
+          "options": [
+            "εl",
+            "Pressure",
+            "Temperature",
+            "Mass"
+          ],
+          "correct_answer": "εl"
+        },
+        {
+          "id": 28,
+          "question": "Colorimeter measures",
+          "options": [
+            "Absorbance of light",
+            "Temperature",
+            "pH",
+            "Weight"
+          ],
+          "correct_answer": "Absorbance of light"
+        },
+        {
+          "id": 29,
+          "question": "More light absorbed means",
+          "options": [
+            "Less light transmitted",
+            "More light transmitted",
+            "No change",
+            "Zero absorbance"
+          ],
+          "correct_answer": "Less light transmitted"
+        },
+        {
+          "id": 30,
+          "question": "The experiment helps to determine",
+          "options": [
+            "Molarity of solution",
+            "Boiling point",
+            "Freezing point",
+            "Density"
+          ],
+          "correct_answer": "Molarity of solution"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Conductance",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Conductance is due to movement of",
+          "options": [
+            "Ions",
+            "Electrons only",
+            "Protons only",
+            "Neutrons"
+          ],
+          "correct_answer": "Ions"
+        },
+        {
+          "id": 2,
+          "question": "Strong electrolytes",
+          "options": [
+            "Fully dissociate",
+            "Partially dissociate",
+            "Do not dissociate",
+            "Evaporate"
+          ],
+          "correct_answer": "Fully dissociate"
+        },
+        {
+          "id": 3,
+          "question": "Conductance in solution is due to movement of",
+          "options": [
+            "Ions",
+            "Electrons only",
+            "Neutrons",
+            "Atoms"
+          ],
+          "correct_answer": "Ions"
+        },
+        {
+          "id": 4,
+          "question": "Strong electrolytes",
+          "options": [
+            "Completely dissociate in water",
+            "Partially dissociate",
+            "Do not dissociate",
+            "Evaporate quickly"
+          ],
+          "correct_answer": "Completely dissociate in water"
+        },
+        {
+          "id": 5,
+          "question": "Weak electrolytes",
+          "options": [
+            "Partially dissociate",
+            "Completely dissociate",
+            "Do not dissolve",
+            "Conduct strongly"
+          ],
+          "correct_answer": "Partially dissociate"
+        },
+        {
+          "id": 6,
+          "question": "Example of strong electrolyte is",
+          "options": [
+            "HCl",
+            "CH3COOH",
+            "NH4OH",
+            "Glucose"
+          ],
+          "correct_answer": "HCl"
+        },
+        {
+          "id": 7,
+          "question": "Example of weak electrolyte is",
+          "options": [
+            "CH3COOH",
+            "NaCl",
+            "HNO3",
+            "KCl"
+          ],
+          "correct_answer": "CH3COOH"
+        },
+        {
+          "id": 8,
+          "question": "The instrument used to measure conductance is",
+          "options": [
+            "Conductometer",
+            "pH meter",
+            "Colorimeter",
+            "Voltmeter"
+          ],
+          "correct_answer": "Conductometer"
+        },
+        {
+          "id": 9,
+          "question": "Conductivity depends on",
+          "options": [
+            "Concentration of ions",
+            "Color of solution",
+            "Smell",
+            "Volume only"
+          ],
+          "correct_answer": "Concentration of ions"
+        },
+        {
+          "id": 10,
+          "question": "Increase in temperature generally",
+          "options": [
+            "Increases conductivity",
+            "Decreases conductivity",
+            "No effect",
+            "Stops conduction"
+          ],
+          "correct_answer": "Increases conductivity"
+        },
+        {
+          "id": 11,
+          "question": "Equivalent conductivity is measured at",
+          "options": [
+            "Infinite dilution",
+            "High pressure",
+            "Low temperature",
+            "Solid state"
+          ],
+          "correct_answer": "Infinite dilution"
+        },
+        {
+          "id": 12,
+          "question": "Unit of conductivity is",
+          "options": [
+            "S/cm",
+            "mol/L",
+            "atm",
+            "g/mL"
+          ],
+          "correct_answer": "S/cm"
+        },
+        {
+          "id": 13,
+          "question": "Conductance is the reciprocal of",
+          "options": [
+            "Resistance",
+            "Voltage",
+            "Current",
+            "Power"
+          ],
+          "correct_answer": "Resistance"
+        },
+        {
+          "id": 14,
+          "question": "Higher ion mobility results in",
+          "options": [
+            "Higher conductivity",
+            "Lower conductivity",
+            "No change",
+            "Zero current"
+          ],
+          "correct_answer": "Higher conductivity"
+        },
+        {
+          "id": 15,
+          "question": "NaCl in water is a",
+          "options": [
+            "Strong electrolyte",
+            "Weak electrolyte",
+            "Non-electrolyte",
+            "Gas"
+          ],
+          "correct_answer": "Strong electrolyte"
+        },
+        {
+          "id": 16,
+          "question": "Glucose solution is a",
+          "options": [
+            "Non-electrolyte",
+            "Strong electrolyte",
+            "Weak electrolyte",
+            "Acid"
+          ],
+          "correct_answer": "Non-electrolyte"
+        },
+        {
+          "id": 17,
+          "question": "Conductometric titration measures",
+          "options": [
+            "Change in conductivity",
+            "Color change",
+            "Temperature change",
+            "Gas evolution"
+          ],
+          "correct_answer": "Change in conductivity"
+        },
+        {
+          "id": 18,
+          "question": "End point in conductometric titration is obtained from",
+          "options": [
+            "Graph of conductivity vs volume",
+            "Color change",
+            "Smell",
+            "Boiling point"
+          ],
+          "correct_answer": "Graph of conductivity vs volume"
+        },
+        {
+          "id": 19,
+          "question": "Conductometric titration can be used for",
+          "options": [
+            "Colored solutions",
+            "Only colorless solutions",
+            "Only gases",
+            "Only solids"
+          ],
+          "correct_answer": "Colored solutions"
+        },
+        {
+          "id": 20,
+          "question": "Strong acids have",
+          "options": [
+            "High dissociation",
+            "Low dissociation",
+            "No ions",
+            "Neutral charge"
+          ],
+          "correct_answer": "High dissociation"
+        },
+        {
+          "id": 21,
+          "question": "Weak acids have",
+          "options": [
+            "Low dissociation",
+            "High dissociation",
+            "Complete ionization",
+            "No water solubility"
+          ],
+          "correct_answer": "Low dissociation"
+        },
+        {
+          "id": 22,
+          "question": "Mobility of ions affects",
+          "options": [
+            "Conductivity",
+            "Color",
+            "Mass",
+            "Density"
+          ],
+          "correct_answer": "Conductivity"
+        },
+        {
+          "id": 23,
+          "question": "Pure distilled water has",
+          "options": [
+            "Very low conductivity",
+            "High conductivity",
+            "No water molecules",
+            "High density"
+          ],
+          "correct_answer": "Very low conductivity"
+        },
+        {
+          "id": 24,
+          "question": "KCl solution is commonly used for",
+          "options": [
+            "Calibration",
+            "Heating",
+            "Cooling",
+            "Color change"
+          ],
+          "correct_answer": "Calibration"
+        },
+        {
+          "id": 25,
+          "question": "Conductance depends on charge of ions",
+          "options": [
+            "Yes",
+            "No",
+            "Sometimes",
+            "Never"
+          ],
+          "correct_answer": "Yes"
+        },
+        {
+          "id": 26,
+          "question": "In neutralization conductometric titration, conductivity initially",
+          "options": [
+            "Decreases then increases",
+            "Always increases",
+            "Always decreases",
+            "Remains constant"
+          ],
+          "correct_answer": "Decreases then increases"
+        },
+        {
+          "id": 27,
+          "question": "Redox reactions generally",
+          "options": [
+            "Cannot be followed by conductance method",
+            "Can always be followed",
+            "Do not involve electrons",
+            "Are colorless"
+          ],
+          "correct_answer": "Cannot be followed by conductance method"
+        },
+        {
+          "id": 28,
+          "question": "Conductivity is higher in",
+          "options": [
+            "Strong electrolyte solution",
+            "Pure water",
+            "Sugar solution",
+            "Oil"
+          ],
+          "correct_answer": "Strong electrolyte solution"
+        },
+        {
+          "id": 29,
+          "question": "The main advantage of conductometric titration is",
+          "options": [
+            "No indicator required",
+            "Needs color change",
+            "Needs heating",
+            "Needs gas formation"
+          ],
+          "correct_answer": "No indicator required"
+        },
+        {
+          "id": 30,
+          "question": "Conductance measurement helps determine",
+          "options": [
+            "Ion concentration",
+            "Boiling point",
+            "Freezing point",
+            "Density only"
+          ],
+          "correct_answer": "Ion concentration"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Electrochemistry",
+      "questions": [
+        {
+          "id": 1,
+          "question": "Oxidation occurs at",
+          "options": [
+            "Anode",
+            "Cathode",
+            "Salt bridge",
+            "Beaker"
+          ],
+          "correct_answer": "Anode"
+        },
+        {
+          "id": 2,
+          "question": "Electrons flow from",
+          "options": [
+            "Zinc to Copper",
+            "Copper to Zinc",
+            "Salt bridge",
+            "Solution"
+          ],
+          "correct_answer": "Zinc to Copper"
+        },
+        {
+          "id": 3,
+          "question": "In a Daniell cell, oxidation occurs at",
+          "options": [
+            "Anode",
+            "Cathode",
+            "Salt bridge",
+            "Electrolyte"
+          ],
+          "correct_answer": "Anode"
+        },
+        {
+          "id": 4,
+          "question": "In a Daniell cell, reduction occurs at",
+          "options": [
+            "Cathode",
+            "Anode",
+            "Salt bridge",
+            "Wire"
+          ],
+          "correct_answer": "Cathode"
+        },
+        {
+          "id": 5,
+          "question": "The anode in Daniell cell is made of",
+          "options": [
+            "Zinc",
+            "Copper",
+            "Silver",
+            "Platinum"
+          ],
+          "correct_answer": "Zinc"
+        },
+        {
+          "id": 6,
+          "question": "The cathode in Daniell cell is made of",
+          "options": [
+            "Copper",
+            "Zinc",
+            "Iron",
+            "Aluminum"
+          ],
+          "correct_answer": "Copper"
+        },
+        {
+          "id": 7,
+          "question": "Electrons flow from",
+          "options": [
+            "Zinc to Copper",
+            "Copper to Zinc",
+            "Salt bridge to anode",
+            "Cathode to salt bridge"
+          ],
+          "correct_answer": "Zinc to Copper"
+        },
+        {
+          "id": 8,
+          "question": "The salt bridge maintains",
+          "options": [
+            "Electrical neutrality",
+            "Temperature",
+            "Pressure",
+            "Color"
+          ],
+          "correct_answer": "Electrical neutrality"
+        },
+        {
+          "id": 9,
+          "question": "Standard EMF of Daniell cell is approximately",
+          "options": [
+            "1.10 V",
+            "0.50 V",
+            "2.0 V",
+            "5.0 V"
+          ],
+          "correct_answer": "1.10 V"
+        },
+        {
+          "id": 10,
+          "question": "The electrolyte used with zinc electrode is",
+          "options": [
+            "ZnSO4",
+            "CuSO4",
+            "NaCl",
+            "HCl"
+          ],
+          "correct_answer": "ZnSO4"
+        },
+        {
+          "id": 11,
+          "question": "The electrolyte used with copper electrode is",
+          "options": [
+            "CuSO4",
+            "ZnSO4",
+            "H2SO4",
+            "NaOH"
+          ],
+          "correct_answer": "CuSO4"
+        },
+        {
+          "id": 12,
+          "question": "The cell reaction in Daniell cell is",
+          "options": [
+            "Zn + Cu2+ → Zn2+ + Cu",
+            "Cu + Zn2+ → Cu2+ + Zn",
+            "Zn + Cu → ZnCu",
+            "Cu2+ + Zn2+ → CuZn"
+          ],
+          "correct_answer": "Zn + Cu2+ → Zn2+ + Cu"
+        },
+        {
+          "id": 13,
+          "question": "At anode, zinc undergoes",
+          "options": [
+            "Oxidation",
+            "Reduction",
+            "Neutralization",
+            "Hydrolysis"
+          ],
+          "correct_answer": "Oxidation"
+        },
+        {
+          "id": 14,
+          "question": "At cathode, copper ions undergo",
+          "options": [
+            "Reduction",
+            "Oxidation",
+            "Combustion",
+            "Sublimation"
+          ],
+          "correct_answer": "Reduction"
+        },
+        {
+          "id": 15,
+          "question": "Anode is negatively charged in",
+          "options": [
+            "Galvanic cell",
+            "Electrolytic cell",
+            "Fuel cell",
+            "Solar cell"
+          ],
+          "correct_answer": "Galvanic cell"
+        },
+        {
+          "id": 16,
+          "question": "Cathode is positively charged in",
+          "options": [
+            "Galvanic cell",
+            "Electrolytic cell",
+            "Dry cell only",
+            "Battery only"
+          ],
+          "correct_answer": "Galvanic cell"
+        },
+        {
+          "id": 17,
+          "question": "EMF stands for",
+          "options": [
+            "Electromotive Force",
+            "Electric Magnetic Field",
+            "Electron Moving Force",
+            "Energy Magnetic Flux"
+          ],
+          "correct_answer": "Electromotive Force"
+        },
+        {
+          "id": 18,
+          "question": "Unit of EMF is",
+          "options": [
+            "Volt",
+            "Ampere",
+            "Ohm",
+            "Watt"
+          ],
+          "correct_answer": "Volt"
+        },
+        {
+          "id": 19,
+          "question": "The Nernst equation is used to calculate",
+          "options": [
+            "Cell potential",
+            "Mass",
+            "Temperature",
+            "Volume"
+          ],
+          "correct_answer": "Cell potential"
+        },
+        {
+          "id": 20,
+          "question": "If concentration increases, EMF",
+          "options": [
+            "Changes according to Nernst equation",
+            "Becomes zero",
+            "Becomes infinite",
+            "Does not change"
+          ],
+          "correct_answer": "Changes according to Nernst equation"
+        },
+        {
+          "id": 21,
+          "question": "A galvanic cell converts",
+          "options": [
+            "Chemical energy to electrical energy",
+            "Electrical to chemical energy",
+            "Heat to light",
+            "Light to heat"
+          ],
+          "correct_answer": "Chemical energy to electrical energy"
+        },
+        {
+          "id": 22,
+          "question": "The salt bridge usually contains",
+          "options": [
+            "KCl or KNO3",
+            "Sugar",
+            "Oil",
+            "Water only"
+          ],
+          "correct_answer": "KCl or KNO3"
+        },
+        {
+          "id": 23,
+          "question": "When zinc electrode dissolves, its mass",
+          "options": [
+            "Decreases",
+            "Increases",
+            "Remains constant",
+            "Doubles"
+          ],
+          "correct_answer": "Decreases"
+        },
+        {
+          "id": 24,
+          "question": "When copper is deposited, its mass",
+          "options": [
+            "Increases",
+            "Decreases",
+            "Remains constant",
+            "Becomes zero"
+          ],
+          "correct_answer": "Increases"
+        },
+        {
+          "id": 25,
+          "question": "Cell notation for Daniell cell is",
+          "options": [
+            "Zn | Zn2+ || Cu2+ | Cu",
+            "Cu | Cu2+ || Zn2+ | Zn",
+            "Zn || Cu",
+            "Cu || Zn"
+          ],
+          "correct_answer": "Zn | Zn2+ || Cu2+ | Cu"
+        },
+        {
+          "id": 26,
+          "question": "Standard electrode potential of Zn is",
+          "options": [
+            "Negative",
+            "Positive",
+            "Zero",
+            "Infinite"
+          ],
+          "correct_answer": "Negative"
+        },
+        {
+          "id": 27,
+          "question": "Standard electrode potential of Cu is",
+          "options": [
+            "Positive",
+            "Negative",
+            "Zero",
+            "Very large negative"
+          ],
+          "correct_answer": "Positive"
+        },
+        {
+          "id": 28,
+          "question": "If salt bridge is removed, the cell",
+          "options": [
+            "Stops working",
+            "Works faster",
+            "Produces more EMF",
+            "Becomes hotter"
+          ],
+          "correct_answer": "Stops working"
+        },
+        {
+          "id": 29,
+          "question": "Current in external circuit flows from",
+          "options": [
+            "Cathode to anode",
+            "Anode to cathode",
+            "Salt bridge to wire",
+            "Electrolyte to electrode"
+          ],
+          "correct_answer": "Cathode to anode"
+        },
+        {
+          "id": 30,
+          "question": "The Daniell cell is an example of",
+          "options": [
+            "Galvanic cell",
+            "Electrolytic cell",
+            "Fuel cell",
+            "Dry cell"
+          ],
+          "correct_answer": "Galvanic cell"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "pH-metry: Determination of Molarity of HCl",
+      "questions": [
+        {
+          "id": 1,
+          "question": "pH is a measure of",
+          "options": [
+            "Hydrogen ion concentration",
+            "Temperature",
+            "Pressure",
+            "Salt concentration"
+          ],
+          "correct_answer": "Hydrogen ion concentration"
+        },
+        {
+          "id": 2,
+          "question": "The pH scale ranges from",
+          "options": [
+            "0–14",
+            "1–10",
+            "0–7",
+            "1–14"
+          ],
+          "correct_answer": "0–14"
+        },
+        {
+          "id": 3,
+          "question": "HCl is classified as a",
+          "options": [
+            "Strong acid",
+            "Weak acid",
+            "Strong base",
+            "Salt"
+          ],
+          "correct_answer": "Strong acid"
+        },
+        {
+          "id": 4,
+          "question": "The base commonly used to titrate HCl in pH-metry is",
+          "options": [
+            "NaOH",
+            "NaCl",
+            "H2SO4",
+            "NH3"
+          ],
+          "correct_answer": "NaOH"
+        },
+        {
+          "id": 5,
+          "question": "The device used to measure pH is called",
+          "options": [
+            "pH meter",
+            "Spectrometer",
+            "Colorimeter",
+            "Thermometer"
+          ],
+          "correct_answer": "pH meter"
+        },
+        {
+          "id": 6,
+          "question": "The pH electrode is usually made of",
+          "options": [
+            "Glass",
+            "Copper",
+            "Iron",
+            "Plastic"
+          ],
+          "correct_answer": "Glass"
+        },
+        {
+          "id": 7,
+          "question": "The endpoint in pH-metric titration is determined from",
+          "options": [
+            "pH vs volume graph",
+            "Temperature graph",
+            "Pressure graph",
+            "Mass graph"
+          ],
+          "correct_answer": "pH vs volume graph"
+        },
+        {
+          "id": 8,
+          "question": "The equivalence point occurs when",
+          "options": [
+            "Moles of acid equal moles of base",
+            "Acid is excess",
+            "Base is excess",
+            "Solution becomes neutral only"
+          ],
+          "correct_answer": "Moles of acid equal moles of base"
+        },
+        {
+          "id": 9,
+          "question": "The pH at equivalence point for strong acid–strong base titration is approximately",
+          "options": [
+            "7",
+            "3",
+            "10",
+            "1"
+          ],
+          "correct_answer": "7"
+        },
+        {
+          "id": 10,
+          "question": "Before measuring pH, the pH meter must be",
+          "options": [
+            "Calibrated",
+            "Heated",
+            "Painted",
+            "Covered"
+          ],
+          "correct_answer": "Calibrated"
+        },
+        {
+          "id": 11,
+          "question": "Standard buffer solutions are used for",
+          "options": [
+            "Calibration",
+            "Heating",
+            "Filtering",
+            "Dilution"
+          ],
+          "correct_answer": "Calibration"
+        },
+        {
+          "id": 12,
+          "question": "The unit of molarity is",
+          "options": [
+            "mol/L",
+            "kg",
+            "Pa",
+            "J"
+          ],
+          "correct_answer": "mol/L"
+        },
+        {
+          "id": 13,
+          "question": "The formula used to calculate molarity in titration is",
+          "options": [
+            "M1V1 = M2V2",
+            "PV = nRT",
+            "F = ma",
+            "E = mc²"
+          ],
+          "correct_answer": "M1V1 = M2V2"
+        },
+        {
+          "id": 14,
+          "question": "The electrode must be rinsed with",
+          "options": [
+            "Distilled water",
+            "Salt water",
+            "Acid",
+            "Oil"
+          ],
+          "correct_answer": "Distilled water"
+        },
+        {
+          "id": 15,
+          "question": "The pH value of a strong acid solution is usually",
+          "options": [
+            "Less than 7",
+            "Greater than 7",
+            "Exactly 7",
+            "14"
+          ],
+          "correct_answer": "Less than 7"
+        },
+        {
+          "id": 16,
+          "question": "The pH value of a base solution is",
+          "options": [
+            "Greater than 7",
+            "Less than 7",
+            "Exactly 7",
+            "Zero"
+          ],
+          "correct_answer": "Greater than 7"
+        },
+        {
+          "id": 17,
+          "question": "During titration, NaOH is added from",
+          "options": [
+            "Burette",
+            "Flask",
+            "Beaker",
+            "Pipette"
+          ],
+          "correct_answer": "Burette"
+        },
+        {
+          "id": 18,
+          "question": "HCl solution is usually taken in the",
+          "options": [
+            "Beaker",
+            "Burette",
+            "Thermometer",
+            "Filter paper"
+          ],
+          "correct_answer": "Beaker"
+        },
+        {
+          "id": 19,
+          "question": "pH decreases when",
+          "options": [
+            "Acid concentration increases",
+            "Base is added",
+            "Temperature decreases",
+            "Water evaporates"
+          ],
+          "correct_answer": "Acid concentration increases"
+        },
+        {
+          "id": 20,
+          "question": "pH increases when",
+          "options": [
+            "Base is added",
+            "Acid increases",
+            "Pressure increases",
+            "Temperature decreases"
+          ],
+          "correct_answer": "Base is added"
+        },
+        {
+          "id": 21,
+          "question": "The steep rise in the titration curve indicates",
+          "options": [
+            "Equivalence point",
+            "Start of reaction",
+            "Cooling",
+            "Dilution"
+          ],
+          "correct_answer": "Equivalence point"
+        },
+        {
+          "id": 22,
+          "question": "The electrode should be stored in",
+          "options": [
+            "Electrode storage solution",
+            "Dry air",
+            "Acid only",
+            "Distilled water always"
+          ],
+          "correct_answer": "Electrode storage solution"
+        },
+        {
+          "id": 23,
+          "question": "pH is mathematically defined as",
+          "options": [
+            "-log[H+]",
+            "log[H+]",
+            "[H+]",
+            "1/[H+]"
+          ],
+          "correct_answer": "-log[H+]"
+        },
+        {
+          "id": 24,
+          "question": "A neutral solution has pH",
+          "options": [
+            "7",
+            "0",
+            "14",
+            "3"
+          ],
+          "correct_answer": "7"
+        },
+        {
+          "id": 25,
+          "question": "The titration curve is plotted between",
+          "options": [
+            "pH and volume of NaOH added",
+            "Temperature and time",
+            "Pressure and volume",
+            "Mass and time"
+          ],
+          "correct_answer": "pH and volume of NaOH added"
+        },
+        {
+          "id": 26,
+          "question": "HCl completely dissociates in water because it is",
+          "options": [
+            "Strong acid",
+            "Weak acid",
+            "Salt",
+            "Buffer"
+          ],
+          "correct_answer": "Strong acid"
+        },
+        {
+          "id": 27,
+          "question": "The purpose of pH-metric titration is to",
+          "options": [
+            "Determine concentration",
+            "Measure temperature",
+            "Find pressure",
+            "Measure density"
+          ],
+          "correct_answer": "Determine concentration"
+        },
+        {
+          "id": 28,
+          "question": "NaOH is considered a",
+          "options": [
+            "Strong base",
+            "Weak base",
+            "Salt",
+            "Acid"
+          ],
+          "correct_answer": "Strong base"
+        },
+        {
+          "id": 29,
+          "question": "At equivalence point the solution contains mainly",
+          "options": [
+            "Salt and water",
+            "Acid only",
+            "Base only",
+            "Gas only"
+          ],
+          "correct_answer": "Salt and water"
+        },
+        {
+          "id": 30,
+          "question": "The molarity of HCl is calculated using",
+          "options": [
+            "Known NaOH concentration",
+            "Temperature",
+            "Pressure",
+            "Density"
+          ],
+          "correct_answer": "Known NaOH concentration"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "UV-Visible Spectroscopy",
+      "questions": [
+        {
+          "id": 1,
+          "question": "UV-Visible spectroscopy measures",
+          "options": [
+            "Absorption of light",
+            "Emission of heat",
+            "Magnetic field",
+            "Pressure changes"
+          ],
+          "correct_answer": "Absorption of light"
+        },
+        {
+          "id": 2,
+          "question": "The wavelength range of UV-Visible spectroscopy is",
+          "options": [
+            "200–800 nm",
+            "100–200 nm",
+            "800–2000 nm",
+            "1–100 nm"
+          ],
+          "correct_answer": "200–800 nm"
+        },
+        {
+          "id": 3,
+          "question": "UV region generally lies between",
+          "options": [
+            "200–400 nm",
+            "400–700 nm",
+            "700–900 nm",
+            "1000–2000 nm"
+          ],
+          "correct_answer": "200–400 nm"
+        },
+        {
+          "id": 4,
+          "question": "Visible region lies between",
+          "options": [
+            "400–800 nm",
+            "100–200 nm",
+            "800–1000 nm",
+            "50–100 nm"
+          ],
+          "correct_answer": "400–800 nm"
+        },
+        {
+          "id": 5,
+          "question": "The instrument used for this experiment is",
+          "options": [
+            "UV-Visible spectrophotometer",
+            "pH meter",
+            "Colorimeter",
+            "Thermometer"
+          ],
+          "correct_answer": "UV-Visible spectrophotometer"
+        },
+        {
+          "id": 6,
+          "question": "The graph obtained in UV spectroscopy is",
+          "options": [
+            "Absorbance vs Wavelength",
+            "Temperature vs Time",
+            "Pressure vs Volume",
+            "Mass vs Time"
+          ],
+          "correct_answer": "Absorbance vs Wavelength"
+        },
+        {
+          "id": 7,
+          "question": "Absorbance is denoted by",
+          "options": [
+            "A",
+            "P",
+            "T",
+            "E"
+          ],
+          "correct_answer": "A"
+        },
+        {
+          "id": 8,
+          "question": "The law relating absorbance and concentration is",
+          "options": [
+            "Beer-Lambert Law",
+            "Boyle's Law",
+            "Charles Law",
+            "Avogadro Law"
+          ],
+          "correct_answer": "Beer-Lambert Law"
+        },
+        {
+          "id": 9,
+          "question": "Beer-Lambert law equation is",
+          "options": [
+            "A = εcl",
+            "PV = nRT",
+            "F = ma",
+            "E = mc²"
+          ],
+          "correct_answer": "A = εcl"
+        },
+        {
+          "id": 10,
+          "question": "The unit of wavelength is",
+          "options": [
+            "Nanometer",
+            "Meter",
+            "Kelvin",
+            "Joule"
+          ],
+          "correct_answer": "Nanometer"
+        },
+        {
+          "id": 11,
+          "question": "The maximum absorption wavelength is called",
+          "options": [
+            "λmax",
+            "λmin",
+            "α",
+            "β"
+          ],
+          "correct_answer": "λmax"
+        },
+        {
+          "id": 12,
+          "question": "Electronic transition occurs when",
+          "options": [
+            "Electrons absorb energy",
+            "Temperature increases",
+            "Pressure decreases",
+            "Mass changes"
+          ],
+          "correct_answer": "Electrons absorb energy"
+        },
+        {
+          "id": 13,
+          "question": "An example of electronic transition is",
+          "options": [
+            "π → π*",
+            "Na → Cl",
+            "H → O",
+            "C → N"
+          ],
+          "correct_answer": "π → π*"
+        },
+        {
+          "id": 14,
+          "question": "Another electronic transition observed is",
+          "options": [
+            "n → π*",
+            "p → n",
+            "n → s",
+            "d → s"
+          ],
+          "correct_answer": "n → π*"
+        },
+        {
+          "id": 15,
+          "question": "The container used for sample measurement is",
+          "options": [
+            "Cuvette",
+            "Test tube",
+            "Beaker",
+            "Flask"
+          ],
+          "correct_answer": "Cuvette"
+        },
+        {
+          "id": 16,
+          "question": "Quartz cuvettes are used for",
+          "options": [
+            "UV region",
+            "IR region",
+            "Only visible light",
+            "Microwaves"
+          ],
+          "correct_answer": "UV region"
+        },
+        {
+          "id": 17,
+          "question": "Glass cuvettes are mainly used for",
+          "options": [
+            "Visible region",
+            "UV region",
+            "X-ray region",
+            "Gamma rays"
+          ],
+          "correct_answer": "Visible region"
+        },
+        {
+          "id": 18,
+          "question": "The blank solution usually contains",
+          "options": [
+            "Solvent only",
+            "Sample only",
+            "Acid",
+            "Salt"
+          ],
+          "correct_answer": "Solvent only"
+        },
+        {
+          "id": 19,
+          "question": "Chromophores are groups that",
+          "options": [
+            "Absorb light",
+            "Emit heat",
+            "Reduce pressure",
+            "Produce gas"
+          ],
+          "correct_answer": "Absorb light"
+        },
+        {
+          "id": 20,
+          "question": "Auxochromes are groups that",
+          "options": [
+            "Modify absorption",
+            "Stop absorption",
+            "Remove electrons",
+            "Change pressure"
+          ],
+          "correct_answer": "Modify absorption"
+        },
+        {
+          "id": 21,
+          "question": "Increase in absorbance indicates",
+          "options": [
+            "Higher concentration",
+            "Lower concentration",
+            "No change",
+            "Zero absorption"
+          ],
+          "correct_answer": "Higher concentration"
+        },
+        {
+          "id": 22,
+          "question": "The detector in a spectrophotometer converts",
+          "options": [
+            "Light into electrical signal",
+            "Heat into sound",
+            "Pressure into light",
+            "Mass into energy"
+          ],
+          "correct_answer": "Light into electrical signal"
+        },
+        {
+          "id": 23,
+          "question": "The source of visible light in spectrophotometer is",
+          "options": [
+            "Tungsten lamp",
+            "LED only",
+            "Mercury lamp",
+            "Laser"
+          ],
+          "correct_answer": "Tungsten lamp"
+        },
+        {
+          "id": 24,
+          "question": "The source for UV radiation is",
+          "options": [
+            "Deuterium lamp",
+            "Tungsten lamp",
+            "Halogen lamp",
+            "LED"
+          ],
+          "correct_answer": "Deuterium lamp"
+        },
+        {
+          "id": 25,
+          "question": "The component that separates wavelengths is",
+          "options": [
+            "Monochromator",
+            "Detector",
+            "Amplifier",
+            "Switch"
+          ],
+          "correct_answer": "Monochromator"
+        },
+        {
+          "id": 26,
+          "question": "Transmittance is defined as",
+          "options": [
+            "Ratio of transmitted light to incident light",
+            "Ratio of heat to pressure",
+            "Energy per mass",
+            "Mass per volume"
+          ],
+          "correct_answer": "Ratio of transmitted light to incident light"
+        },
+        {
+          "id": 27,
+          "question": "Absorbance increases when",
+          "options": [
+            "Concentration increases",
+            "Temperature decreases",
+            "Volume increases",
+            "Pressure decreases"
+          ],
+          "correct_answer": "Concentration increases"
+        },
+        {
+          "id": 28,
+          "question": "The UV-Visible spectrum helps in",
+          "options": [
+            "Identifying compounds",
+            "Measuring temperature",
+            "Measuring pressure",
+            "Determining density"
+          ],
+          "correct_answer": "Identifying compounds"
+        },
+        {
+          "id": 29,
+          "question": "Peak in absorption spectrum indicates",
+          "options": [
+            "Maximum absorption",
+            "Minimum absorption",
+            "No absorption",
+            "Gas formation"
+          ],
+          "correct_answer": "Maximum absorption"
+        },
+        {
+          "id": 30,
+          "question": "UV-Visible spectroscopy is widely used in",
+          "options": [
+            "Chemical analysis",
+            "Mechanical engineering only",
+            "Civil construction",
+            "Astronomy only"
+          ],
+          "correct_answer": "Chemical analysis"
+        }
+      ]
+    }
+  ]
+}

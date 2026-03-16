@@ -1,21 +1,45 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 
-const API = "http://localhost:8000";
+// Use relative paths to leverage Vite proxy for backend requests
+const API = "";
 
 interface User {
-    user_id: string;
+    user_id: number;
     email: string;
-    full_name: string;
+    username: string;
+    profile_picture?: string;
+    role?: string;
+    registration_no?: string | null;
 }
 
 interface AuthContextType {
     user: User | null;
     token: string | null;
     loading: boolean;
-    signUp: (fullName: string, email: string, password: string) => Promise<void>;
+    signUp: (username: string, email: string, password: string, role?: string, registrationNo?: string) => Promise<void>;
     signIn: (email: string, password: string) => Promise<void>;
+    googleLogin: (googleToken: string) => Promise<void>;
     signOut: () => Promise<void>;
 }
+
+type SignupPayload = {
+    username: string;
+    email: string;
+    password: string;
+    role: string;
+    registration_no?: string;
+};
+
+type SignupResponse = {
+    access_token?: string;
+    user_id?: number;
+    email?: string;
+    username?: string;
+    role?: string;
+    registration_no?: string | null;
+    detail?: string;
+    message?: string;
+};
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -60,30 +84,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
         setToken(data.access_token);
-        setUser({ user_id: data.user_id, email: data.email, full_name: data.full_name });
+        setUser({ user_id: data.user_id, email: data.email, username: data.username, role: data.role, registration_no: data.registration_no });
     }, []);
 
-    const signUp = useCallback(async (fullName: string, email: string, password: string) => {
-        const res = await fetch(`${API}/api/signup`, {
+    const signUp = useCallback(async (username: string, email: string, password: string, role: string = "student", registrationNo?: string) => {
+        const body: SignupPayload = { username, email, password, role };
+        if (registrationNo) body.registration_no = registrationNo;
+
+        const signupUser = async (formData: SignupPayload): Promise<SignupResponse> => {
+            try {
+                const response = await fetch("http://localhost:8080/api/auth/signup", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const text = await response.text();
+                let data: SignupResponse = {};
+
+                if (text) {
+                    try {
+                        data = JSON.parse(text) as SignupResponse;
+                    } catch {
+                        data = { message: "Received an invalid response from the server." };
+                    }
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.message || data.detail || "Sign-up failed");
+                }
+
+                return data;
+            } catch (error) {
+                console.error("Signup error:", error);
+                throw error;
+            }
+        };
+
+        const data = await signupUser(body);
+        if (!data.access_token || !data.user_id || !data.email || !data.username) {
+            throw new Error("Signup succeeded but returned incomplete account data.");
+        }
+        localStorage.setItem("labfinity_token", data.access_token);
+        setToken(data.access_token);
+        setUser({ user_id: data.user_id, email: data.email, username: data.username, role: data.role, registration_no: data.registration_no });
+    }, []);
+
+    const googleLogin = useCallback(async (googleToken: string) => {
+        const res = await fetch(`${API}/api/auth/google`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ full_name: fullName, email, password }),
+            body: JSON.stringify({ token: googleToken }),
         });
         if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.detail || "Sign-up failed");
+            throw new Error(err.detail || "Google login failed");
         }
-        // After sign-up, sign them in automatically to get a token
-        const loginRes = await fetch(`${API}/api/signin`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-        if (!loginRes.ok) throw new Error("Auto sign-in after signup failed");
-        const data = await loginRes.json();
+        const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
         setToken(data.access_token);
-        setUser({ user_id: data.user_id, email: data.email, full_name: data.full_name });
+        setUser({
+            user_id: data.user_id,
+            email: data.email,
+            username: data.username,
+            profile_picture: data.profile_picture,
+        });
     }, []);
 
     const signOut = useCallback(async () => {
@@ -100,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, signUp, signIn, signOut }}>
+        <AuthContext.Provider value={{ user, token, loading, signUp, signIn, googleLogin, signOut }}>
             {children}
         </AuthContext.Provider>
     );

@@ -140,13 +140,14 @@ const PotentiometrySimulator = () => {
         baseConc,
         selectedAcid.type,
         selectedBase.type,
-        (selectedAcid as any).Ka,
-        (selectedBase as any).Kb,
+        (selectedAcid as typeof ACIDS[number] & { Ka?: number }).Ka,
+        (selectedBase as typeof BASES[number] & { Kb?: number }).Kb,
       ),
     [selectedAcid, selectedBase],
   );
 
   const currentPH = getPH(volumeAdded);
+  const currentEMF = 414.12 - 59.16 * currentPH;
   const equivalenceVolume = (acidVolume * acidConc * (selectedAcid.type === "diprotic" ? 2 : 1)) / baseConc;
 
   const addTitrant = (amount: number) => {
@@ -157,10 +158,10 @@ const PotentiometrySimulator = () => {
   };
 
   const recordReading = () => {
-    const pH = getPH(volumeAdded);
+    const emf = 414.12 - 59.16 * getPH(volumeAdded);
     setDataPoints(prev => {
       const filtered = prev.filter(p => p.volume !== volumeAdded);
-      return [...filtered, { volume: volumeAdded, pH }].sort((a, b) => a.volume - b.volume);
+      return [...filtered, { volume: volumeAdded, pH: emf }].sort((a, b) => a.volume - b.volume);
     });
   };
 
@@ -216,11 +217,20 @@ const PotentiometrySimulator = () => {
   // ── Observation Table State ──
   const [tableRows, setTableRows] = useState<TableRow[]>([
     { volume: 0, pH: "" },
-    { volume: 5, pH: "" },
+    { volume: 2, pH: "" },
+    { volume: 4, pH: "" },
+    { volume: 6, pH: "" },
+    { volume: 8, pH: "" },
     { volume: 10, pH: "" },
-    { volume: 15, pH: "" },
+    { volume: 12, pH: "" },
+    { volume: 14, pH: "" },
+    { volume: 16, pH: "" },
+    { volume: 18, pH: "" },
     { volume: 20, pH: "" },
-    { volume: 25, pH: "" },
+    { volume: 24, pH: "" },
+    { volume: 28, pH: "" },
+    { volume: 32, pH: "" },
+    { volume: 36, pH: "" },
   ]);
   const [processedTable, setProcessedTable] = useState<ProcessedRow[] | null>(null);
   const [tableLoading, setTableLoading] = useState(false);
@@ -246,10 +256,10 @@ const PotentiometrySimulator = () => {
       "S. No.",
       tableMeta.acid_col,
       tableMeta.base_col,
-      "pH measured",
-      "ΔpH",
+      "EMF measured (mV)",
+      "ΔE",
       "ΔV",
-      "ΔpH / ΔV",
+      "ΔE / ΔV",
       "Remark"
     ];
 
@@ -257,10 +267,10 @@ const PotentiometrySimulator = () => {
       row["S. No."],
       acidVolume.toFixed(1),
       row[tableMeta.base_col] ?? "",
-      row["pH measured"] ?? "",
-      row["ΔpH"] ?? "",
+      row["EMF measured (mV)"] ?? "",
+      row["ΔE"] ?? "",
       row["ΔV"] ?? "",
-      row["ΔpH / ΔV"] ?? "",
+      row["ΔE / ΔV"] ?? "",
       row["Remark"] ?? ""
     ]);
 
@@ -295,8 +305,8 @@ const PotentiometrySimulator = () => {
       const data = await resp.json();
       setProcessedTable(data.table);
       setTableMeta({ acid_col: data.acid_col, base_col: data.base_col });
-    } catch (e: any) {
-      setTableError(e.message ?? "Failed to generate table");
+    } catch (e: unknown) {
+      setTableError(e instanceof Error ? e.message : "Failed to generate table");
     } finally {
       setTableLoading(false);
     }
@@ -403,7 +413,7 @@ const PotentiometrySimulator = () => {
               </Button>
             </div>
 
-            {/* pH display removed — shown on pH Meter in apparatus */}
+            {/* EMF display removed — shown on Potentiometer in apparatus */}
           </CardContent>
         </Card>
 
@@ -555,13 +565,13 @@ const PotentiometrySimulator = () => {
               <div ref={meterRef} className="absolute top-[30px] right-[16px] w-[108px] z-40">
                 {/* Device body */}
                 <div className="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl p-3 flex flex-col items-center gap-2">
-                  <span className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">PH METER</span>
+                  <span className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">POTENTIOMETER</span>
                   {/* LCD */}
                   <div className="w-full bg-green-950 border border-green-800 rounded-md px-2 py-2 text-center shadow-inner">
                     <span className="text-green-400 font-mono text-[22px] font-bold tracking-wider leading-none">
-                      {currentPH.toFixed(2)}
+                      {currentEMF.toFixed(1)}
                     </span>
-                    <span className="text-green-600 text-[10px] ml-1">pH</span>
+                    <span className="text-green-600 text-[10px] ml-1">mV</span>
                   </div>
                   {/* Status LED */}
                   <div className="flex items-center gap-1.5">
@@ -596,7 +606,7 @@ const PotentiometrySimulator = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Enter the volume of <strong>{selectedBase.value}</strong> added and your observed <strong>pH</strong> for each reading, then click <em>Generate Table</em>.
+            Enter the volume of <strong>{selectedBase.value}</strong> added and your observed <strong>EMF (mV)</strong> for each reading, then click <em>Generate Table</em>.
           </p>
 
           {/* Input grid */}
@@ -612,7 +622,7 @@ const PotentiometrySimulator = () => {
                     Volume of {selectedBase.value} (mL)
                   </th>
                   <th className="text-left py-2.5 px-3 font-semibold text-muted-foreground">
-                    Observed pH
+                    Observed EMF (mV)
                   </th>
                 </tr>
               </thead>
@@ -637,14 +647,12 @@ const PotentiometrySimulator = () => {
                         className="w-24 bg-background border border-border rounded-md px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </td>
-                    {/* pH - student enters */}
+                    {/* EMF - student enters */}
                     <td className="py-2 px-3">
                       <input
                         type="number"
-                        min={0}
-                        max={14}
-                        step={0.01}
-                        placeholder="Enter pH"
+                        step={0.1}
+                        placeholder="Enter EMF"
                         value={row.pH}
                         onChange={e => updateTableRow(i, "pH", e.target.value)}
                         className="w-28 bg-background border border-border rounded-md px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/40 placeholder:text-muted-foreground/50"
@@ -698,10 +706,10 @@ const PotentiometrySimulator = () => {
                       "S. No.",
                       tableMeta.acid_col,
                       tableMeta.base_col,
-                      "pH measured",
-                      "ΔpH",
+                      "EMF measured (mV)",
+                      "ΔE",
                       "ΔV",
-                      "ΔpH / ΔV",
+                      "ΔE / ΔV",
                       "Remark",
                     ].map(col => (
                       <th key={col} className="text-left py-2.5 px-3 font-semibold text-muted-foreground whitespace-nowrap border-b border-border">
@@ -721,10 +729,10 @@ const PotentiometrySimulator = () => {
                         <td className="py-2 px-3">{row["S. No."]}</td>
                         <td className="py-2 px-3 font-mono">{acidVolume.toFixed(1)}</td>
                         <td className="py-2 px-3 font-mono">{row[tableMeta.base_col] ?? "-"}</td>
-                        <td className="py-2 px-3 font-mono">{row["pH measured"]}</td>
-                        <td className="py-2 px-3 font-mono">{row["ΔpH"]}</td>
+                        <td className="py-2 px-3 font-mono">{row["EMF measured (mV)"]}</td>
+                        <td className="py-2 px-3 font-mono">{row["ΔE"]}</td>
                         <td className="py-2 px-3 font-mono">{row["ΔV"]}</td>
-                        <td className="py-2 px-3 font-mono">{row["ΔpH / ΔV"]}</td>
+                        <td className="py-2 px-3 font-mono">{row["ΔE / ΔV"]}</td>
                         <td className="py-2 px-3">
                           {isEquiv ? (
                             <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold">

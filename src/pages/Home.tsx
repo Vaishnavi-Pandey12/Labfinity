@@ -14,10 +14,14 @@ import {
   Users,
   BookOpen,
   LogOut,
-  UserCircle
+  UserCircle,
+  Mail,
+  IdCard
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
 import { useAuth } from "@/hooks/useAuth";
+import { ChatBot } from "@/components/ChatBot";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const subjects = [
   {
@@ -101,7 +105,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background particles-bg">
+    <div className="min-h-screen flex flex-col bg-background particles-bg">
       {/* Header */}
       <header className="sticky top-0 z-50 glass-card border-b border-border/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -122,6 +126,11 @@ const Home = () => {
             <Link to="/experiments" className="text-muted-foreground hover:text-primary transition-colors">
               Experiments
             </Link>
+            {user && (
+              <Link to="/classroom" className="text-muted-foreground hover:text-primary transition-colors">
+                Classroom
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-4">
@@ -132,18 +141,50 @@ const Home = () => {
             />
             {user ? (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/40">
-                  <UserCircle className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">{user.full_name}</span>
-                </div>
-                <Button
-                  onClick={handleLogout}
-                  variant="outline"
-                  className="font-semibold px-4 py-2 rounded-lg flex items-center gap-2 border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border/40 hover:bg-muted/80 transition-colors">
+                      <UserCircle className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium text-foreground">{user.username}</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-72 p-0 overflow-hidden">
+                    <div className="bg-muted/50 p-4 border-b border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <UserCircle className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                          <p className="font-semibold text-foreground truncate">{user.username}</p>
+                          <p className="text-xs text-muted-foreground capitalize">Role: {user.role || "student"}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className="text-foreground truncate" title={user.email}>{user.email}</span>
+                      </div>
+                      {user.registration_no && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <IdCard className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <span className="text-foreground truncate" title={user.registration_no}>{user.registration_no}</span>
+                        </div>
+                      )}
+                      
+                      <div className="pt-2 mt-2 border-t border-border/50">
+                        <Button
+                          onClick={handleLogout}
+                          variant="ghost"
+                          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             ) : (
               <Link to="/login">
@@ -157,7 +198,7 @@ const Home = () => {
         </div>
       </header>
       {/* Subjects Grid */}
-      <section className="py-16 bg-muted/30">
+      <main className="flex-1 flex flex-col justify-center py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0 }}
@@ -208,9 +249,9 @@ const Home = () => {
             ))}
           </motion.div>
         </div>
-      </section>
+      </main>
 
-
+      <ChatBot />
 
       {/* Footer */}
       <footer className="py-8 border-t border-border/50">
