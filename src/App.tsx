@@ -31,6 +31,8 @@ import PhysicsExperiment12 from "./pages/PhysicsExperiment12";
 import PhysicsExperiment13 from "./pages/PhysicsExperiment13";
 import PhysicsExperiment14 from "./pages/PhysicsExperiment14";
 import PhysicsExperiment15 from "./pages/PhysicsExperiment15";
+import Classroom from "./pages/Classroom";
+import ClassroomDetail from "./pages/ClassroomDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +74,8 @@ const App = () => (
             <Route path="/subjects/physics/experiments/13" element={<PhysicsExperiment13 />} />
             <Route path="/subjects/physics/experiments/14" element={<PhysicsExperiment14 />} />
             <Route path="/subjects/physics/experiments/15" element={<PhysicsExperiment15 />} />
+            <Route path="/classroom" element={<Classroom />} />
+            <Route path="/classroom/:classroomId" element={<ClassroomDetail />} />
             <Route path="/experiments" element={<Navigate to="/home" replace />} />
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
@@ -83,4 +87,3 @@ const App = () => (
 );
 
 export default App;
-
