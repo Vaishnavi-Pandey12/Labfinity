@@ -26,7 +26,12 @@ import PhysicsExperiment7 from "./pages/PhysicsExperiment7";
 import PhysicsExperiment8 from "./pages/PhysicsExperiment8";
 import PhysicsExperiment9 from "./pages/PhysicsExperiment9";
 import PhysicsExperiment10 from "./pages/PhysicsExperiment10";
-import ClassroomDashboard from "./pages/ClassroomDashboard";
+import PhysicsExperiment11 from "./pages/PhysicsExperiment11";
+import PhysicsExperiment12 from "./pages/PhysicsExperiment12";
+import PhysicsExperiment13 from "./pages/PhysicsExperiment13";
+import PhysicsExperiment14 from "./pages/PhysicsExperiment14";
+import PhysicsExperiment15 from "./pages/PhysicsExperiment15";
+import Classroom from "./pages/Classroom";
 import ClassroomDetail from "./pages/ClassroomDetail";
 import NotFound from "./pages/NotFound";
 
@@ -36,12 +41,13 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 const App = () => {
   const appContent = (
-    <AuthProvider>
-      <TooltipProvider>
+    <TooltipProvider>
+      <AuthProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* All routes are public - login is optional */}
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -65,15 +71,20 @@ const App = () => {
             <Route path="/subjects/physics/experiments/8" element={<PhysicsExperiment8 />} />
             <Route path="/subjects/physics/experiments/9" element={<PhysicsExperiment9 />} />
             <Route path="/subjects/physics/experiments/10" element={<PhysicsExperiment10 />} />
-            <Route path="/experiments" element={<Navigate to="/home" replace />} />
-            <Route path="/classroom" element={<ClassroomDashboard />} />
+            <Route path="/subjects/physics/experiments/11" element={<PhysicsExperiment11 />} />
+            <Route path="/subjects/physics/experiments/12" element={<PhysicsExperiment12 />} />
+            <Route path="/subjects/physics/experiments/13" element={<PhysicsExperiment13 />} />
+            <Route path="/subjects/physics/experiments/14" element={<PhysicsExperiment14 />} />
+            <Route path="/subjects/physics/experiments/15" element={<PhysicsExperiment15 />} />
+            <Route path="/classroom" element={<Classroom />} />
             <Route path="/classroom/:classroomId" element={<ClassroomDetail />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/experiments" element={<Navigate to="/home" replace />} />
+            {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </TooltipProvider>
   );
 
   return (
