@@ -126,7 +126,7 @@ Length: {length} m
 
 <div className="bg-white rounded-xl border p-4 md:p-6">
   <div className="flex flex-col items-center justify-center gap-6">
-    <div className="w-44 h-3 rounded-full bg-slate-700" />
+    <div className="w-44 h-3 rounded-full bg-slate-700 mb-0" />
 
     <div className="relative w-64 h-[320px] flex justify-center items-start">
       <motion.div
@@ -138,7 +138,7 @@ Length: {length} m
           className="w-[2px] bg-black"
           style={{ height: `${length * 150}px` }}
         />
-        <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-slate-500 border-2 border-slate-700 -bottom-4" />
+        <div className="w-8 h-8 rounded-full bg-slate-500 border-2 border-slate-700 mt-[-4px]" />
       </motion.div>
     </div>
   </div>
