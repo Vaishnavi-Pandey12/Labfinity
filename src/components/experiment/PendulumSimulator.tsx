@@ -131,7 +131,7 @@ Length: {length} m
     <div className="relative w-64 h-[320px] flex justify-center items-start">
       <motion.div
         className="relative flex flex-col items-center origin-top"
-        animate={running ? { x: [-80, 80, -80] } : { x: 0 }}
+        animate={running ? { rotate: [-25, 25, -25] } : { rotate: 0 }}
         transition={{ repeat: Infinity, duration: 2 }}
       >
         <div
