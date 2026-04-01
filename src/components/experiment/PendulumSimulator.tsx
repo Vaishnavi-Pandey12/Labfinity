@@ -128,20 +128,18 @@ Length: {length} m
   <div className="flex flex-col items-center justify-center gap-6">
     <div className="w-44 h-3 rounded-full bg-slate-700" />
 
-    <div className="relative w-64 h-[320px] flex items-start justify-center">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-full bg-slate-200 rounded-full" />
-
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] bg-black origin-top"
-        style={{ height: `${length * 150}px` }}
-      />
-
+    <div className="relative w-64 h-[320px] flex justify-center items-start">
       <motion.div
-        className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-slate-500 border-2 border-slate-700"
-        style={{ top: `${length * 150 - 16}px` }}
+        className="relative flex flex-col items-center origin-top"
         animate={running ? { x: [-80, 80, -80] } : { x: 0 }}
         transition={{ repeat: Infinity, duration: 2 }}
-      />
+      >
+        <div
+          className="w-[2px] bg-black"
+          style={{ height: `${length * 150}px` }}
+        />
+        <div className="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-slate-500 border-2 border-slate-700 -bottom-4" />
+      </motion.div>
     </div>
   </div>
 </div>
