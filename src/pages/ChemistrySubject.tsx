@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,8 @@ const experiments = [
     topic: "Electrochemistry",
     description: "Measure EMF of electrochemical cells using Daniell cell, verify Nernst equation",
     icon: Sparkles,
+    standard: "Class 12",
+    type: "Practical",
 
   },
   {
@@ -29,6 +32,8 @@ const experiments = [
     topic: "Colorimetry",
     description: "Verify Beer-Lambert law by measuring absorbance at different concentrations",
     icon: TestTube2,
+    standard: "Class 11",
+    type: "Analytical",
 
   },
   {
@@ -37,6 +42,8 @@ const experiments = [
     topic: "Potentiometry",
     description: "Perform acid-base, redox, and precipitation titrations",
     icon: Beaker,
+    standard: "Class 12",
+    type: "Titration",
 
   },
   {
@@ -45,6 +52,8 @@ const experiments = [
     topic: "Spectroscopy",
     description: "Study electronic transitions and absorption spectra of compounds",
     icon: Lightbulb,
+    standard: "Class 12",
+    type: "Instrumental",
   },
   {
   id: 5,
@@ -52,6 +61,8 @@ const experiments = [
   topic: "pH-Metry",
   description: "Determine the molarity of HCl by pH-metry using standard NaOH solution and plot the titration curve",
   icon: FlaskConical,
+  standard: "Class 11",
+  type: "Practical",
 },
 {
   id: 6,
@@ -59,11 +70,15 @@ const experiments = [
   topic: "Volumetric Analysis",
   description: "Determine the molarity of dilute HCl using standard NaOH with phenolphthalein indicator",
   icon: FlaskConical,
+  standard: "Class 11",
+  type: "Titration",
 },
 { id: 7, title: "Hardness of Water — EDTA & Ion Exchange", 
   topic: "Water Analysis",
   description: "Estimate total hardness by EDTA titration and purify using ion-exchange resin column",
   icon: Droplets,
+  standard: "Class 12",
+  type: "Water Analysis",
 },
 ];
 
@@ -81,6 +96,20 @@ const itemVariants = {
 };
 
 const ChemistrySubject = () => {
+  const [selectedTopic, setSelectedTopic] = useState("All");
+  const [selectedStandard, setSelectedStandard] = useState("All");
+  const [selectedType, setSelectedType] = useState("All");
+
+  const topics = useMemo(() => ["All", ...new Set(experiments.map((e) => e.topic))], []);
+  const standards = useMemo(() => ["All", ...new Set(experiments.map((e) => e.standard))], []);
+  const types = useMemo(() => ["All", ...new Set(experiments.map((e) => e.type))], []);
+
+  const filteredExperiments = experiments.filter((exp) =>
+    (selectedTopic === "All" || exp.topic === selectedTopic) &&
+    (selectedStandard === "All" || exp.standard === selectedStandard) &&
+    (selectedType === "All" || exp.type === selectedType),
+  );
+
   return (
     <div className="min-h-screen bg-background particles-bg">
       {/* Header */}
@@ -154,6 +183,17 @@ const ChemistrySubject = () => {
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-display font-bold mb-6">Select Experiment</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            <select className="rounded-md border bg-background px-3 py-2 text-sm" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)}>
+              {topics.map((topic) => <option key={topic} value={topic}>{topic === "All" ? "All Topics" : topic}</option>)}
+            </select>
+            <select className="rounded-md border bg-background px-3 py-2 text-sm" value={selectedStandard} onChange={(e) => setSelectedStandard(e.target.value)}>
+              {standards.map((standard) => <option key={standard} value={standard}>{standard === "All" ? "All Standards" : standard}</option>)}
+            </select>
+            <select className="rounded-md border bg-background px-3 py-2 text-sm" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
+              {types.map((type) => <option key={type} value={type}>{type === "All" ? "All Experiment Types" : type}</option>)}
+            </select>
+          </div>
 
           <motion.div
             variants={containerVariants}
@@ -161,7 +201,7 @@ const ChemistrySubject = () => {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            {experiments.map((exp) => (
+            {filteredExperiments.map((exp) => (
               <motion.div key={exp.id} variants={itemVariants}>
                 <Link to={`/subjects/chemistry/experiments/${exp.id}`}>
                   <Card className="group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative">
