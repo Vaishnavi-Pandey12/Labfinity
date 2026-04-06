@@ -1,11 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import {
     Dialog,
     DialogContent,
@@ -28,9 +35,11 @@ import {
     CalendarDays,
     FileText,
     Clock,
+    ExternalLink,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiUrl } from "@/lib/api";
+import { findExperimentBySubjectAndTitle, getExperimentsBySubjectName } from "@/lib/experiments";
 
 type TabType = "classwork" | "quiz" | "people" | "grades";
 
@@ -63,6 +72,8 @@ interface AssignmentItem {
     created_at: string | null;
     submission_count: number;
     my_submission: MySubmission | null;
+    experimentPath?: string;
+    experimentTopic?: string;
 }
 
 /* ── Component ── */
@@ -84,7 +95,7 @@ const ClassroomDetail = () => {
     const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
     const [loadingAssignments, setLoadingAssignments] = useState(false);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
-    const [newTitle, setNewTitle] = useState("");
+    const [selectedExperimentTitle, setSelectedExperimentTitle] = useState("");
     const [newDueDate, setNewDueDate] = useState("");
     const [creatingAssignment, setCreatingAssignment] = useState(false);
 
@@ -99,6 +110,8 @@ const ClassroomDetail = () => {
     const [emailsInput, setEmailsInput] = useState("");
     const [addingStudents, setAddingStudents] = useState(false);
     const [addResults, setAddResults] = useState<AddResult[] | null>(null);
+    const availableExperiments = getExperimentsBySubjectName(classroomSubject);
+    const selectedExperiment = availableExperiments.find((experiment) => experiment.title === selectedExperimentTitle);
 
     const tabs: { key: TabType; label: string; icon: React.ReactNode; show: boolean }[] = [
         { key: "classwork", label: "Classwork", icon: <BookOpen className="w-4 h-4" />, show: true },
@@ -121,7 +134,19 @@ const ClassroomDetail = () => {
             const res = await fetch(apiUrl(`/api/classrooms/${classroomId}/assignments`), {
                 headers: { Authorization: `Bearer ${token()}` },
             });
-            if (res.ok) setAssignments(await res.json());
+            if (res.ok) {
+                const data = await res.json();
+                setAssignments(
+                    data.map((assignment: AssignmentItem) => {
+                        const experiment = findExperimentBySubjectAndTitle(classroomSubject, assignment.title);
+                        return {
+                            ...assignment,
+                            experimentPath: experiment?.path,
+                            experimentTopic: experiment?.topic,
+                        };
+                    }),
+                );
+            }
         } catch {
             toast({ title: "Error", description: "Failed to load classwork", variant: "destructive" });
         } finally {
@@ -145,8 +170,8 @@ const ClassroomDetail = () => {
 
     /* ── Create Assignment (faculty) ── */
     const handleCreateAssignment = async () => {
-        if (!newTitle.trim()) {
-            toast({ title: "Error", description: "Please enter a title", variant: "destructive" });
+        if (!selectedExperiment) {
+            toast({ title: "Error", description: "Please choose an experiment", variant: "destructive" });
             return;
         }
         setCreatingAssignment(true);
@@ -154,12 +179,16 @@ const ClassroomDetail = () => {
             const res = await fetch(apiUrl(`/api/classrooms/${classroomId}/assignments`), {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
-                body: JSON.stringify({ title: newTitle.trim(), due_date: newDueDate || null }),
+                body: JSON.stringify({
+                    title: selectedExperiment.title,
+                    description: selectedExperiment.description,
+                    due_date: newDueDate || null,
+                }),
             });
             if (res.ok) {
                 toast({ title: "Success", description: "Classwork created" });
                 setCreateDialogOpen(false);
-                setNewTitle("");
+                setSelectedExperimentTitle("");
                 setNewDueDate("");
                 fetchAssignments();
             } else {
@@ -290,7 +319,7 @@ const ClassroomDetail = () => {
                         {/* Faculty: Create button */}
                         {isFaculty && (
                             <div className="flex justify-end">
-                                <Button onClick={() => { setNewTitle(""); setNewDueDate(""); setCreateDialogOpen(true); }}>
+                                <Button onClick={() => { setSelectedExperimentTitle(""); setNewDueDate(""); setCreateDialogOpen(true); }}>
                                     <Plus className="w-4 h-4 mr-2" />
                                     Create Classwork
                                 </Button>
@@ -307,7 +336,7 @@ const ClassroomDetail = () => {
                                         <p className="text-lg font-medium">No classwork yet</p>
                                         <p className="text-sm mt-1">
                                             {isFaculty
-                                                ? "Create an assignment to get started."
+                                                ? "Assign an experiment to get started."
                                                 : "Your teacher hasn't posted any classwork yet."}
                                         </p>
                                     </div>
@@ -324,6 +353,9 @@ const ClassroomDetail = () => {
                                                         <FileText className="w-5 h-5 text-primary" />
                                                         <h3 className="font-semibold text-lg">{a.title}</h3>
                                                     </div>
+                                                    {a.experimentTopic && (
+                                                        <p className="text-xs font-medium text-primary ml-7 mb-1">{a.experimentTopic}</p>
+                                                    )}
                                                     {a.description && (
                                                         <p className="text-sm text-muted-foreground ml-7 mb-2">{a.description}</p>
                                                     )}
@@ -341,9 +373,19 @@ const ClassroomDetail = () => {
                                                     </div>
                                                 </div>
 
+                                                <div className="flex-shrink-0 flex flex-col items-end">
+                                                    {a.experimentPath && (
+                                                        <Button asChild variant="outline" size="sm" className="mb-2">
+                                                            <Link to={a.experimentPath}>
+                                                                <ExternalLink className="w-4 h-4 mr-1" />
+                                                                Open Experiment
+                                                            </Link>
+                                                        </Button>
+                                                    )}
+
                                                 {/* Student: upload / status */}
                                                 {!isFaculty && (
-                                                    <div className="flex-shrink-0">
+                                                    <>
                                                         {a.my_submission ? (
                                                             <div className="text-right">
                                                                 <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
@@ -400,8 +442,9 @@ const ClassroomDetail = () => {
                                                                 />
                                                             </div>
                                                         )}
-                                                    </div>
+                                                    </>
                                                 )}
+                                                </div>
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -506,17 +549,35 @@ const ClassroomDetail = () => {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Create New Classwork</DialogTitle>
-                        <DialogDescription>Enter a title and optional due date for the assignment.</DialogDescription>
+                        <DialogDescription>Choose an experiment from the linked subject and optionally set a due date.</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="assignmentTitle">Title</Label>
-                            <Input
-                                id="assignmentTitle"
-                                value={newTitle}
-                                onChange={(e) => setNewTitle(e.target.value)}
-                                placeholder="e.g. Lab Report – Experiment 3"
-                            />
+                            <Label htmlFor="assignmentExperiment">Experiment</Label>
+                            <Select value={selectedExperimentTitle} onValueChange={setSelectedExperimentTitle}>
+                                <SelectTrigger id="assignmentExperiment" className="mt-2">
+                                    <SelectValue placeholder={`Select a ${classroomSubject || "subject"} experiment`} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableExperiments.map((experiment) => (
+                                        <SelectItem key={`${experiment.subjectId}-${experiment.id}`} value={experiment.title}>
+                                            {`Experiment ${experiment.id} - ${experiment.title}`}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {selectedExperiment && (
+                                <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+                                    <p className="text-sm font-medium">{selectedExperiment.title}</p>
+                                    <p className="text-xs text-primary mt-1">{selectedExperiment.topic}</p>
+                                    <p className="text-sm text-muted-foreground mt-2">{selectedExperiment.description}</p>
+                                </div>
+                            )}
+                            {availableExperiments.length === 0 && (
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    No experiments are configured yet for {classroomSubject || "this subject"}.
+                                </p>
+                            )}
                         </div>
                         <div>
                             <Label htmlFor="assignmentDue">Due Date</Label>
@@ -527,14 +588,18 @@ const ClassroomDetail = () => {
                                 onChange={(e) => setNewDueDate(e.target.value)}
                             />
                         </div>
-                        <Button onClick={handleCreateAssignment} disabled={creatingAssignment} className="w-full">
-                            {creatingAssignment ? "Creating..." : "Create Classwork"}
+                        <Button
+                            onClick={handleCreateAssignment}
+                            disabled={creatingAssignment || availableExperiments.length === 0}
+                            className="w-full"
+                        >
+                            {creatingAssignment ? "Creating..." : "Assign Experiment"}
                         </Button>
                     </div>
                 </DialogContent>
             </Dialog>
 
-            {/* ── Add Students Dialog ── */}
+            {/* Add Students Dialog */}
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
@@ -565,10 +630,10 @@ const ClassroomDetail = () => {
                                         <span className="font-mono text-xs flex-1 truncate">{r.email}</span>
                                         <span
                                             className={`text-xs font-medium ${r.status === "added"
-                                                    ? "text-green-600"
-                                                    : r.status === "already_enrolled"
-                                                        ? "text-yellow-600"
-                                                        : "text-red-500"
+                                                ? "text-green-600"
+                                                : r.status === "already_enrolled"
+                                                    ? "text-yellow-600"
+                                                    : "text-red-500"
                                                 }`}
                                         >
                                             {statusLabel(r.status)}

@@ -4,11 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
   FlaskConical,
-  Atom,
-  Microscope,
-  Calculator,
-  Cpu,
-  Bot,
   ChevronRight,
   GraduationCap,
   Users,
@@ -22,57 +17,7 @@ import vitapLogo from "@/assets/vitap-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { ChatBot } from "@/components/ChatBot";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-
-const subjects = [
-  {
-    id: "chemistry",
-    name: "Chemistry",
-    icon: FlaskConical,
-    color: "from-blue-500 to-cyan-500",
-    description: "Electrochemistry, Colorimetry, Spectroscopy",
-    experiments: 25,
-  },
-  {
-    id: "physics",
-    name: "Physics",
-    icon: Atom,
-    color: "from-purple-500 to-pink-500",
-    description: "Mechanics, Optics, Modern Physics",
-    experiments: 30,
-  },
-  {
-    id: "biology",
-    name: "Biology",
-    icon: Microscope,
-    color: "from-green-500 to-emerald-500",
-    description: "Microbiology, Genetics, Ecology",
-    experiments: 20,
-  },
-  {
-    id: "maths",
-    name: "Mathematics",
-    icon: Calculator,
-    color: "from-orange-500 to-yellow-500",
-    description: "Calculus, Statistics, Algebra",
-    experiments: 15,
-  },
-  {
-    id: "electronics",
-    name: "Electronics",
-    icon: Cpu,
-    color: "from-red-500 to-orange-500",
-    description: "Circuits, Digital Logic, Microcontrollers",
-    experiments: 18,
-  },
-  {
-    id: "robotics",
-    name: "Robotics",
-    icon: Bot,
-    color: "from-indigo-500 to-purple-500",
-    description: "Automation, Control Systems, AI",
-    experiments: 12,
-  },
-];
+import { subjects } from "@/lib/subjects";
 
 const stats = [
   { icon: BookOpen, value: "120+", label: "Experiments" },

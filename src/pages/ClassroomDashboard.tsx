@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -14,9 +21,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Users, Plus, Eye, UserPlus, CheckCircle2, XCircle, AlertCircle, Home } from "lucide-react";
+import { Users, Plus, UserPlus, CheckCircle2, XCircle, AlertCircle, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiUrl } from "@/lib/api";
+import { subjects } from "@/lib/subjects";
 
 interface Classroom {
   id: number;
@@ -291,7 +299,18 @@ const ClassroomDashboard = () => {
                   </div>
                   <div>
                     <Label htmlFor="subject">Subject</Label>
-                    <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Enter subject" />
+                    <Select value={subject} onValueChange={setSubject}>
+                      <SelectTrigger id="subject" className="mt-2">
+                        <SelectValue placeholder="Select a subject" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subjects.map((subjectOption) => (
+                          <SelectItem key={subjectOption.id} value={subjectOption.name}>
+                            {subjectOption.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Button onClick={createClassroom} disabled={creating} className="w-full">
                     {creating ? "Creating..." : "Create Classroom"}
