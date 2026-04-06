@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Pause, Play, RotateCcw, SkipBack, SkipForward, Triangle } from "lucide-react";
 
 type SimState = { t: number; v: number; s: number };
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -28,6 +29,9 @@ const InclinedPlaneSimulator = () => {
   const [muK, setMuK] = useState(0.3);
   const [initialVelocity, setInitialVelocity] = useState(0);
   const [vectorScale, setVectorScale] = useState(6);
+  const [step, setStep] = useState<Step>(1);
+  const [hangerMass, setHangerMass] = useState(1.5);
+  const [measurements, setMeasurements] = useState<Array<{ angle: number; mass: number; force: number; acceleration: number }>>([]);
 
   const [running, setRunning] = useState(false);
   const [showFBD, setShowFBD] = useState(true);
@@ -45,6 +49,15 @@ const InclinedPlaneSimulator = () => {
   const pxPerMeter = 110;
   const maxDisplacement = Math.max((planeLengthPx - blockSize - 10) / pxPerMeter, 0);
   const slopeOrigin = { x: 145, y: 320 };
+
+  const isStepReady = {
+    1: true,
+    2: step >= 2,
+    3: step >= 3,
+    4: step >= 4,
+    5: step >= 5,
+    6: step >= 6,
+  };
 
   useEffect(() => {
     setMuK((prev) => Math.min(prev, muS));
@@ -89,6 +102,9 @@ const InclinedPlaneSimulator = () => {
   const reset = useCallback(() => {
     setRunning(false);
     setSim({ t: 0, v: initialVelocity, s: 0 });
+    setStep(1);
+    setHangerMass(1.5);
+    setMeasurements([]);
     historyRef.current = [];
     lastRef.current = null;
   }, [initialVelocity]);
@@ -164,6 +180,8 @@ const InclinedPlaneSimulator = () => {
   }, []);
 
   const forces = useMemo(() => computeForces(sim.v), [computeForces, sim.v]);
+  const labAcceleration = ((hangerMass * gravity) - (mass * gravity * Math.sin(theta))) / (mass + hangerMass);
+  const hangingY = 250 + sim.s * 90;
   const blockProgressPx = sim.s * pxPerMeter;
   const blockXLocal = planeLengthPx - blockSize - 6 - blockProgressPx;
   const blockCenterBeforeRotate = {
@@ -217,11 +235,25 @@ const InclinedPlaneSimulator = () => {
                 </defs>
 
                 <line x1="80" y1="320" x2="720" y2="320" stroke="#94a3b8" strokeDasharray="6 6" strokeWidth="1.5" />
+                <rect x="80" y="320" width="620" height="20" rx="3" fill="#78716c" opacity="0.55" />
+                <rect x="620" y="320" width="80" height="80" fill="#a8a29e" opacity="0.4" />
 
                 <g transform={`rotate(${-angle} ${slopeOrigin.x} ${slopeOrigin.y})`}>
                   <rect x={slopeOrigin.x} y={slopeOrigin.y - 18} width={planeLengthPx} height={18} rx="4" fill="#b45309" />
-                  <rect x={slopeOrigin.x + blockXLocal} y={slopeOrigin.y - blockSize} width={blockSize} height={blockSize} rx="5" fill="#64748b" stroke="#334155" strokeWidth="2" />
+                  {isStepReady[2] && (
+                    <rect x={slopeOrigin.x + blockXLocal} y={slopeOrigin.y - blockSize} width={blockSize} height={blockSize} rx="5" fill="#64748b" stroke="#334155" strokeWidth="2" />
+                  )}
                 </g>
+
+                {isStepReady[3] && (
+                  <>
+                    <circle cx="565" cy="160" r="20" fill="#e2e8f0" stroke="#475569" strokeWidth="3" />
+                    <line x1={blockCenter.x} y1={blockCenter.y} x2="565" y2="160" stroke="#1f2937" strokeWidth="2" />
+                    <line x1="565" y1="160" x2="565" y2={hangingY} stroke="#1f2937" strokeWidth="2" />
+                    <rect x="548" y={hangingY} width="34" height="26" rx="4" fill="#475569" />
+                    <text x="565" y={hangingY + 17} textAnchor="middle" fontSize="10" fill="white">{hangerMass.toFixed(1)}kg</text>
+                  </>
+                )}
 
                 {showAngle && (
                   <>
@@ -261,8 +293,8 @@ const InclinedPlaneSimulator = () => {
             <Card className="border">
               <CardContent className="pt-6 space-y-4">
                 <div className="grid grid-cols-2 gap-2">
-                  <Button onClick={() => setRunning(true)}><Play className="w-4 h-4 mr-2" />Start</Button>
-                  <Button variant="outline" onClick={() => setRunning(false)}><Pause className="w-4 h-4 mr-2" />Pause</Button>
+                  <Button onClick={() => setRunning(true)} disabled={step < 4}><Play className="w-4 h-4 mr-2" />Start</Button>
+                  <Button variant="outline" onClick={() => setRunning(false)} disabled={step < 4}><Pause className="w-4 h-4 mr-2" />Pause</Button>
                   <Button variant="outline" onClick={stepBackward}><SkipBack className="w-4 h-4 mr-2" />Back</Button>
                   <Button variant="outline" onClick={stepForward}><SkipForward className="w-4 h-4 mr-2" />Step</Button>
                 </div>
@@ -272,11 +304,15 @@ const InclinedPlaneSimulator = () => {
 
                 <div>
                   <Label>Angle: {angle}°</Label>
-                  <Slider value={[angle]} min={0} max={45} step={1} onValueChange={([v]) => setAngle(v)} />
+                  <Slider value={[angle]} min={0} max={45} step={1} disabled={step !== 1} onValueChange={([v]) => setAngle(v)} />
                 </div>
                 <div>
                   <Label>Mass: {mass.toFixed(2)} kg</Label>
-                  <Slider value={[mass]} min={0.5} max={10} step={0.1} onValueChange={([v]) => setMass(v)} />
+                  <Slider value={[mass]} min={0.5} max={10} step={0.1} disabled={step < 2} onValueChange={([v]) => setMass(v)} />
+                </div>
+                <div>
+                  <Label>Hanging Mass: {hangerMass.toFixed(2)} kg</Label>
+                  <Slider value={[hangerMass]} min={0.5} max={5} step={0.1} disabled={step !== 4} onValueChange={([v]) => setHangerMass(v)} />
                 </div>
                 <div>
                   <Label>μs: {muS.toFixed(2)}</Label>
@@ -305,8 +341,36 @@ const InclinedPlaneSimulator = () => {
                 <div className="text-sm space-y-1 border rounded-lg p-3 bg-muted/20">
                   <p>N = mg cosθ = {forces.normal.toFixed(2)} N</p>
                   <p>F∥ = mg sinθ = {forces.parallel.toFixed(2)} N</p>
+                  <p>Tension = m₂g = {(hangerMass * gravity).toFixed(2)} N</p>
                   <p>Ff = {Math.abs(forces.friction).toFixed(2)} N</p>
-                  <p>a = (F∥ - Ff) / m = {forces.acceleration.toFixed(2)} m/s²</p>
+                  <p>a = (m₂g - m₁g sinθ)/(m₁+m₂) = {labAcceleration.toFixed(2)} m/s²</p>
+                </div>
+
+                <div className="border rounded-lg p-3 space-y-2 text-sm">
+                  {[
+                    "1. Set the incline",
+                    "2. Place the block",
+                    "3. Attach pulley",
+                    "4. Adjust weight",
+                    "5. Record readings",
+                    "6. Repeat",
+                  ].map((label, i) => {
+                    const s = (i + 1) as Step;
+                    const active = step === s;
+                    return <p key={label} className={active ? "font-semibold text-primary" : "text-muted-foreground"}>{label}</p>;
+                  })}
+                  <div className="flex gap-2 pt-2">
+                    <Button size="sm" variant="outline" disabled={step === 1} onClick={() => setStep((s) => (Math.max(1, (s - 1)) as Step))}>Prev Step</Button>
+                    <Button size="sm" disabled={step === 6} onClick={() => setStep((s) => (Math.min(6, (s + 1)) as Step))}>Next Step</Button>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={step !== 5}
+                    onClick={() => setMeasurements((prev) => [...prev, { angle, mass: hangerMass, force: forces.parallel, acceleration: labAcceleration }])}
+                  >
+                    Record
+                  </Button>
                 </div>
 
                 <div className="space-y-2">
