@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-
-// Use relative paths to leverage Vite proxy for backend requests
-const API = "";
+import { apiUrl } from "@/lib/api";
 
 interface User {
     user_id: number;
@@ -41,6 +39,18 @@ type SignupResponse = {
     message?: string;
 };
 
+async function readErrorMessage(res: Response, fallback: string) {
+    const text = await res.text();
+    if (!text) return fallback;
+
+    try {
+        const data = JSON.parse(text) as { detail?: string; message?: string };
+        return data.detail || data.message || fallback;
+    } catch {
+        return fallback;
+    }
+}
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -52,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const savedToken = localStorage.getItem("labfinity_token");
         if (savedToken) {
-            fetch(`${API}/api/me`, {
+            fetch(apiUrl("/api/me"), {
                 headers: { Authorization: `Bearer ${savedToken}` },
             })
                 .then((res) => (res.ok ? res.json() : null))
@@ -72,14 +82,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const signIn = useCallback(async (email: string, password: string) => {
-        const res = await fetch(`${API}/api/signin`, {
+        const res = await fetch(apiUrl("/api/signin"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
         });
         if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.detail || "Sign-in failed");
+            throw new Error(await readErrorMessage(res, "Sign-in failed"));
         }
         const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
@@ -93,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const signupUser = async (formData: SignupPayload): Promise<SignupResponse> => {
             try {
-                const response = await fetch("http://localhost:8080/api/auth/signup", {
+                const response = await fetch(apiUrl("/api/signup"), {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -133,14 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const googleLogin = useCallback(async (googleToken: string) => {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/google`, {
+        const res = await fetch(apiUrl("/api/auth/google"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token: googleToken }),
         });
         if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.detail || "Google login failed");
+            throw new Error(await readErrorMessage(res, "Google login failed"));
         }
         const data = await res.json();
         localStorage.setItem("labfinity_token", data.access_token);
@@ -156,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const signOut = useCallback(async () => {
         const savedToken = localStorage.getItem("labfinity_token");
         if (savedToken) {
-            await fetch(`${API}/api/signout`, {
+            await fetch(apiUrl("/api/signout"), {
                 method: "POST",
                 headers: { Authorization: `Bearer ${savedToken}` },
             }).catch(() => { });

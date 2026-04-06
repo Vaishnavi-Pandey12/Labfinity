@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Users, Plus, Eye, UserPlus, CheckCircle2, XCircle, AlertCircle, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiUrl } from "@/lib/api";
 
 interface Classroom {
   id: number;
@@ -80,7 +81,7 @@ const ClassroomDashboard = () => {
   const fetchClassrooms = async () => {
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch("/api/classrooms", {
+      const response = await fetch(apiUrl("/api/classrooms"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
@@ -104,7 +105,7 @@ const ClassroomDashboard = () => {
     setCreating(true);
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch("/api/classrooms", {
+      const response = await fetch(apiUrl("/api/classrooms"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ class_name: className, subject }),
@@ -134,7 +135,7 @@ const ClassroomDashboard = () => {
     setJoining(true);
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch("/api/classrooms/join", {
+      const response = await fetch(apiUrl("/api/classrooms/join"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ join_code: joinCode }),
@@ -181,7 +182,7 @@ const ClassroomDashboard = () => {
     setAddResults(null);
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch(`/api/classrooms/${addStudentsClassroomId}/add-students`, {
+      const response = await fetch(apiUrl(`/api/classrooms/${addStudentsClassroomId}/add-students`), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ emails }),
@@ -215,7 +216,7 @@ const ClassroomDashboard = () => {
     setLoadingStudents(true);
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch(`/api/classrooms/${classroomId}/students`, {
+      const response = await fetch(apiUrl(`/api/classrooms/${classroomId}/students`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {

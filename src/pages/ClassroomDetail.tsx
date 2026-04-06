@@ -30,6 +30,7 @@ import {
     Clock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiUrl } from "@/lib/api";
 
 type TabType = "classwork" | "quiz" | "people" | "grades";
 
@@ -117,7 +118,7 @@ const ClassroomDetail = () => {
     const fetchAssignments = async () => {
         setLoadingAssignments(true);
         try {
-            const res = await fetch(`/api/classrooms/${classroomId}/assignments`, {
+            const res = await fetch(apiUrl(`/api/classrooms/${classroomId}/assignments`), {
                 headers: { Authorization: `Bearer ${token()}` },
             });
             if (res.ok) setAssignments(await res.json());
@@ -131,7 +132,7 @@ const ClassroomDetail = () => {
     const fetchStudents = async () => {
         setLoadingStudents(true);
         try {
-            const res = await fetch(`/api/classrooms/${classroomId}/students`, {
+            const res = await fetch(apiUrl(`/api/classrooms/${classroomId}/students`), {
                 headers: { Authorization: `Bearer ${token()}` },
             });
             if (res.ok) setStudents(await res.json());
@@ -150,7 +151,7 @@ const ClassroomDetail = () => {
         }
         setCreatingAssignment(true);
         try {
-            const res = await fetch(`/api/classrooms/${classroomId}/assignments`, {
+            const res = await fetch(apiUrl(`/api/classrooms/${classroomId}/assignments`), {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
                 body: JSON.stringify({ title: newTitle.trim(), due_date: newDueDate || null }),
@@ -178,7 +179,7 @@ const ClassroomDetail = () => {
         const formData = new FormData();
         formData.append("file", file);
         try {
-            const res = await fetch(`/api/assignments/${assignmentId}/submit`, {
+            const res = await fetch(apiUrl(`/api/assignments/${assignmentId}/submit`), {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token()}` },
                 body: formData,
@@ -205,7 +206,7 @@ const ClassroomDetail = () => {
         setAddingStudents(true);
         setAddResults(null);
         try {
-            const res = await fetch(`/api/classrooms/${classroomId}/add-students`, {
+            const res = await fetch(apiUrl(`/api/classrooms/${classroomId}/add-students`), {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
                 body: JSON.stringify({ emails }),
