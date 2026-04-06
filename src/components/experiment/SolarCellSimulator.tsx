@@ -160,76 +160,63 @@ Virtual Solar Cell Setup
 
 <CardContent>
 
-<div className="bg-white border rounded-xl p-4">
+<div className="bg-white border rounded-xl p-4 md:p-6">
+  <div className="w-full overflow-x-auto">
+    <div className="min-w-[760px] flex items-center justify-center gap-8 md:gap-12">
+      <div className="flex flex-col items-center justify-center gap-3 w-36 h-36">
+        <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-yellow-400 border-4 border-yellow-300 shadow-inner">
+          {connected && [...Array(6)].map((_, i) => (
+            <motion.span
+              key={i}
+              className="absolute w-1.5 h-1.5 rounded-full bg-yellow-200"
+              initial={{ x: -12, y: -20 + i * 6, opacity: 0.2 }}
+              animate={{ x: 18, opacity: 1 }}
+              transition={{ duration: 1.3, repeat: Infinity, delay: i * 0.2 }}
+            />
+          ))}
+        </div>
+        <p className="text-sm font-medium text-center">Lamp</p>
+      </div>
 
-<svg viewBox="0 0 800 350" className="w-full">
+      <div className="h-0.5 w-12 md:w-16 bg-slate-400 shrink-0" />
 
-{/* lamp */}
-<circle cx="120" cy="100" r="40" fill="#facc15"/>
-<text x="120" y="160" textAnchor="middle">Lamp</text>
+      <div className="flex flex-col items-center justify-center gap-3 w-36 h-36">
+        <div className="w-28 h-20 rounded-md bg-blue-900 border-4 border-blue-700 shadow-md" />
+        <p className="text-sm font-medium text-center">Solar Cell</p>
+      </div>
 
-{/* photon animation */}
+      <div className="h-0.5 w-12 md:w-16 bg-slate-400 shrink-0" />
 
-{connected && [...Array(6)].map((_,i)=>(
-<motion.circle
-key={i}
-cx="160"
-cy={90+i*10}
-r="3"
-fill="#facc15"
-initial={{x:0}}
-animate={{x:200}}
-transition={{duration:1.5,repeat:Infinity,delay:i*0.3}}
-/>
-))}
+      <div className="flex flex-col items-center justify-center gap-3 w-36 h-36">
+        <div className="relative flex items-center justify-center w-28 h-8 rounded bg-slate-400 border border-slate-500">
+          {connected && [...Array(4)].map((_, i) => (
+            <motion.span
+              key={i}
+              className="absolute w-1.5 h-1.5 rounded-full bg-blue-600"
+              initial={{ x: -48, opacity: 0.3 }}
+              animate={{ x: 48, opacity: 1 }}
+              transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.3 }}
+            />
+          ))}
+        </div>
+        <p className="text-sm font-medium text-center">Rheostat</p>
+      </div>
 
-{/* solar panel */}
+      <div className="h-0.5 w-12 md:w-16 bg-slate-400 shrink-0" />
 
-<rect x="350" y="120" width="120" height="80" fill="#1e3a8a"/>
-<text x="410" y="220" textAnchor="middle">Solar Cell</text>
-
-{/* wire */}
-
-<line x1="470" y1="160" x2="520" y2="160" stroke="black"/>
-
-{/* rheostat */}
-
-<rect x="520" y="150" width="60" height="20" fill="#9ca3af"/>
-<text x="550" y="185" textAnchor="middle" fontSize="10">
-Rheostat
-</text>
-
-{/* electron animation */}
-
-{connected && [...Array(4)].map((_,i)=>(
-<motion.circle
-key={i}
-cx="470"
-cy="160"
-r="3"
-fill="blue"
-initial={{x:0}}
-animate={{x:180}}
-transition={{duration:2,repeat:Infinity,delay:i*0.4}}
-/>
-))}
-
-{/* ammeter */}
-
-<circle cx="650" cy="160" r="25" fill="white" stroke="black"/>
-<text x="650" y="165" textAnchor="middle" fontSize="11">
-{connected?`${current} mA`:"0"}
-</text>
-
-{/* voltmeter */}
-
-<circle cx="550" cy="70" r="25" fill="white" stroke="black"/>
-<text x="550" y="75" textAnchor="middle" fontSize="11">
-{connected?`${voltage} V`:"0"}
-</text>
-
-</svg>
-
+      <div className="flex flex-col items-center justify-center gap-3 w-44 h-36">
+        <div className="flex items-center justify-center gap-4">
+          <div className="w-16 h-16 rounded-full border-2 border-black bg-white flex items-center justify-center text-[11px] font-medium">
+            {connected ? `${voltage} V` : "0 V"}
+          </div>
+          <div className="w-16 h-16 rounded-full border-2 border-black bg-white flex items-center justify-center text-[11px] font-medium">
+            {connected ? `${current} mA` : "0 mA"}
+          </div>
+        </div>
+        <p className="text-sm font-medium text-center">Meters</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 </CardContent>

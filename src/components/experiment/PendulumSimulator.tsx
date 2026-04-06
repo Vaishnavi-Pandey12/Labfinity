@@ -97,7 +97,7 @@ Pendulum Controls
 </CardTitle>
 </CardHeader>
 
-<CardContent>
+<CardContent className="space-y-3">
 
 <Slider
 value={[length]}
@@ -124,23 +124,24 @@ Length: {length} m
 
 <CardContent>
 
-<div className="bg-white rounded-xl border p-4">
+<div className="bg-white rounded-xl border p-4 md:p-6">
+  <div className="flex flex-col items-center justify-center gap-6">
+    <div className="w-44 h-3 rounded-full bg-slate-700 mb-0" />
 
-<svg viewBox="0 0 800 350" className="w-full">
-
-<line x1="400" y1="40" x2="400" y2="40+length*150" stroke="black"/>
-
-<motion.circle
-cx="400"
-cy={40+length*150}
-r="15"
-fill="gray"
-animate={running ? {x:[-80,80,-80]} : {}}
-transition={{repeat:Infinity,duration:2}}
-/>
-
-</svg>
-
+    <div className="relative w-64 h-[320px] flex justify-center items-start">
+      <motion.div
+        className="relative flex flex-col items-center origin-top"
+        animate={running ? { rotate: [-25, 25, -25] } : { rotate: 0 }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <div
+          className="w-[2px] bg-black"
+          style={{ height: `${length * 150}px` }}
+        />
+        <div className="w-8 h-8 rounded-full bg-slate-500 border-2 border-slate-700 mt-[-4px]" />
+      </motion.div>
+    </div>
+  </div>
 </div>
 
 </CardContent>
@@ -156,10 +157,14 @@ transition={{repeat:Infinity,duration:2}}
 
 <CardContent>
 
-<div className="flex gap-3 mb-4">
+<div className="flex flex-wrap items-center justify-center gap-4 mb-4">
 
 <Button onClick={start}>
 Start
+</Button>
+
+<Button variant="outline" disabled>
+Stop
 </Button>
 
 <Button variant="outline" onClick={reset}>
@@ -176,9 +181,11 @@ Record
 CSV
 </Button>
 
-</div>
+<p className="text-sm font-medium px-3 py-2 rounded-md bg-muted">
+Time: {time} s
+</p>
 
-<p>Time: {time} s</p>
+</div>
 
 <table className="w-full text-sm mt-4">
 
