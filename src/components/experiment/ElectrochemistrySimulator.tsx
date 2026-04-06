@@ -70,7 +70,7 @@ const METALS: Record<string, MetalInfo> = {
 };
 
 const METAL_KEYS = Object.keys(METALS);
-const CATHODE_CONCENTRATIONS = [0.01, 0.05, 0.10, 0.50, 1.00];
+const CATHODE_CONCENTRATIONS = [0.001, 0.01, 0.05, 0.10, 0.50, 1.00, 2.00];
 const API_BASE = "http://localhost:8000";
 
 const calculateEMF = (anodeMetal: string, cathodeMetal: string, anodeConc: number, cathodeConc: number): number => {
@@ -92,6 +92,14 @@ interface TableRow {
   emfObserved: string;    // user types this
 }
 
+interface StudentRow {
+  sNo: number;
+  znConc: string;
+  cuConc: string;
+  ratio: string;
+  emf: string;
+}
+
 const ElectrochemistrySimulator = () => {
   const [anodeMetal, setAnodeMetal] = useState("Zn");
   const [cathodeMetal, setCathodeMetal] = useState("Cu");
@@ -104,6 +112,9 @@ const ElectrochemistrySimulator = () => {
 
   // Table state
   const [tableRows, setTableRows] = useState<TableRow[]>([]);
+  const [studentRows, setStudentRows] = useState<StudentRow[]>(
+    Array.from({ length: 6 }, (_, i) => ({ sNo: i + 1, znConc: "", cuConc: "", ratio: "", emf: "" })),
+  );
   const [tableLoading, setTableLoading] = useState(false);
   const [tableError, setTableError] = useState("");
 
@@ -128,7 +139,7 @@ const ElectrochemistrySimulator = () => {
   const handleAnodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAnodeInputStr(e.target.value);
     const parsed = parseFloat(e.target.value);
-    if (!isNaN(parsed) && parsed >= 0.01 && parsed <= 2.0) {
+    if (!isNaN(parsed) && parsed >= 0.001 && parsed <= 2.0) {
       setAnodeConcentration(parsed);
     }
   };
@@ -204,8 +215,8 @@ const ElectrochemistrySimulator = () => {
   const connectCell = useCallback(() => {
     setIsConnected(true);
     setElectronFlow(true);
-    // Generate a random unknown concentration between 0.1 and 2.0 M
-    const randomConc = parseFloat((Math.random() * 1.9 + 0.1).toFixed(2));
+    // Generate a random unknown concentration between 0.001 and 2.0 M
+    const randomConc = parseFloat((Math.random() * 1.999 + 0.001).toFixed(3));
     setGeneratedUnknownConc(randomConc);
     setUnknownEmfFromBackend(null);
     setUnknownConcObserved("");
@@ -227,8 +238,12 @@ const ElectrochemistrySimulator = () => {
     setUnknownConcVerified(null);
   }, []);
 
-  const handleAnodeChange = (value: string) => { if (value !== cathodeMetal) setAnodeMetal(value); };
-  const handleCathodeChange = (value: string) => { if (value !== anodeMetal) setCathodeMetal(value); };
+  const handleAnodeChange = (value: string) => { setAnodeMetal(value); };
+  const handleCathodeChange = (value: string) => { setCathodeMetal(value); };
+
+  const updateStudentRow = (index: number, patch: Partial<StudentRow>) => {
+    setStudentRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+  };
 
   const handleEmfObservedChange = (index: number, value: string) => {
     setTableRows(prev => prev.map((row, i) => i === index ? { ...row, emfObserved: value } : row));
@@ -344,7 +359,7 @@ const ElectrochemistrySimulator = () => {
                   <SelectTrigger><SelectValue placeholder="Select anode" /></SelectTrigger>
                   <SelectContent>
                     {METAL_KEYS.map(key => (
-                      <SelectItem key={key} value={key} disabled={key === cathodeMetal}>
+                      <SelectItem key={key} value={key}>
                         {METALS[key].name} ({METALS[key].symbol}) — E° = {METALS[key].E0.toFixed(2)} V
                       </SelectItem>
                     ))}
@@ -357,7 +372,7 @@ const ElectrochemistrySimulator = () => {
                   <SelectTrigger><SelectValue placeholder="Select cathode" /></SelectTrigger>
                   <SelectContent>
                     {METAL_KEYS.map(key => (
-                      <SelectItem key={key} value={key} disabled={key === anodeMetal}>
+                      <SelectItem key={key} value={key}>
                         {METALS[key].name} ({METALS[key].symbol}) — E° = {METALS[key].E0.toFixed(2)} V
                       </SelectItem>
                     ))}
@@ -378,9 +393,9 @@ const ElectrochemistrySimulator = () => {
                 <label className="text-sm font-medium">{anode.solution} Concentration (M)</label>
                 <Input
                   type="number"
-                  min={0.01}
+                  min={0.001}
                   max={2.0}
-                  step={0.01}
+                  step={0.001}
                   value={anodeInputStr}
                   onChange={handleAnodeInputChange}
                   className="w-24 text-center font-mono h-8 text-sm"
@@ -389,9 +404,9 @@ const ElectrochemistrySimulator = () => {
               <Slider
                 value={[anodeConcentration]}
                 onValueChange={([v]) => handleAnodeSlider(v)}
-                min={0.01}
+                min={0.001}
                 max={2.0}
-                step={0.01}
+                step={0.001}
                 className="py-2"
               />
             </div>
@@ -407,9 +422,9 @@ const ElectrochemistrySimulator = () => {
               <Slider
                 value={[cathodeConcentration]}
                 onValueChange={([v]) => setCathodeConcentration(v)}
-                min={0.01}
+                min={0.001}
                 max={2.0}
-                step={0.01}
+                step={0.001}
                 className="py-2"
               />
             </div>
@@ -422,7 +437,7 @@ const ElectrochemistrySimulator = () => {
                 disabled={isConnected || E0cell <= 0}
               >
                 <Battery className="w-4 h-4" />
-                {isConnected ? "Connected ✓" : "Connect Cell"}
+                {isConnected ? "Measured ✓" : "Measure"}
               </Button>
             </div>
             <Button variant="outline" size="sm" onClick={resetExperiment} className="w-full gap-2">
@@ -634,6 +649,39 @@ const ElectrochemistrySimulator = () => {
               </div>
             ) : (
               <>
+                <div className="overflow-x-auto mb-6">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b-2 border-primary/30 bg-muted/50">
+                        <th className="text-center py-3 px-3 font-semibold">S.No</th>
+                        <th className="text-center py-3 px-3 font-semibold">Zn²⁺</th>
+                        <th className="text-center py-3 px-3 font-semibold">Cu²⁺</th>
+                        <th className="text-center py-3 px-3 font-semibold">Zn²⁺/Cu²⁺</th>
+                        <th className="text-center py-3 px-3 font-semibold">EMF</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentRows.map((row, index) => (
+                        <tr key={row.sNo} className="border-b border-border/50">
+                          <td className="text-center py-2 px-2">{row.sNo}</td>
+                          <td className="py-2 px-2">
+                            <Input value={row.znConc} onChange={(e) => updateStudentRow(index, { znConc: e.target.value })} placeholder="Enter Zn²⁺" className="text-center h-8" />
+                          </td>
+                          <td className="py-2 px-2">
+                            <Input value={row.cuConc} onChange={(e) => updateStudentRow(index, { cuConc: e.target.value })} placeholder="Enter Cu²⁺" className="text-center h-8" />
+                          </td>
+                          <td className="py-2 px-2">
+                            <Input value={row.ratio} onChange={(e) => updateStudentRow(index, { ratio: e.target.value })} placeholder="Zn²⁺/Cu²⁺" className="text-center h-8" />
+                          </td>
+                          <td className="py-2 px-2">
+                            <Input value={row.emf} onChange={(e) => updateStudentRow(index, { emf: e.target.value })} placeholder="Enter EMF" className="text-center h-8" />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
                 {tableError && (
                   <div className="mb-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
                     ⚠ {tableError} — using local calculation as fallback.
