@@ -8,6 +8,55 @@ import { Pause, Play, RotateCcw, Rocket } from "lucide-react";
 
 type Point = { x: number; y: number };
 
+const ProjectileDiagram = () => {
+  return (
+    <div className="mt-8 p-4 md:p-6 bg-white rounded-xl border">
+      <h3 className="text-sm font-semibold text-slate-700 mb-3">Projectile Motion Reference Diagram</h3>
+      <svg width="100%" height="300" viewBox="0 0 600 300">
+        <defs>
+          <marker id="arrow-ref" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <polygon points="0 0, 6 3, 0 6" fill="black" />
+          </marker>
+        </defs>
+
+        <line x1="50" y1="250" x2="550" y2="250" stroke="black" />
+        <line x1="50" y1="250" x2="50" y2="50" stroke="black" />
+        <text x="560" y="254" fontSize="12">X</text>
+        <text x="44" y="44" fontSize="12">Y</text>
+
+        <path d="M50 250 Q300 50 550 250" stroke="green" fill="none" strokeWidth="2.5" />
+
+        <circle cx="50" cy="250" r="4" fill="black" />
+        <text x="40" y="270" fontSize="12">O</text>
+
+        <circle cx="300" cy="50" r="4" fill="green" />
+        <text x="290" y="40" fontSize="12">A</text>
+
+        <circle cx="550" cy="250" r="4" fill="black" />
+        <text x="540" y="270" fontSize="12">B</text>
+
+        <line x1="50" y1="250" x2="120" y2="180" stroke="green" markerEnd="url(#arrow-ref)" />
+        <text x="124" y="176" fill="green" fontSize="12">u</text>
+
+        <line x1="50" y1="250" x2="120" y2="250" stroke="blue" markerEnd="url(#arrow-ref)" />
+        <text x="87" y="266" fill="blue" fontSize="12">ux = u cosθ</text>
+
+        <line x1="50" y1="250" x2="50" y2="180" stroke="red" markerEnd="url(#arrow-ref)" />
+        <text x="56" y="202" fill="red" fontSize="12">uy = u sinθ</text>
+
+        <line x1="300" y1="50" x2="300" y2="250" stroke="black" strokeDasharray="4 4" />
+        <text x="306" y="154" fontSize="12">H</text>
+
+        <line x1="50" y1="260" x2="550" y2="260" stroke="black" />
+        <text x="272" y="282" fontSize="12">Range (R)</text>
+
+        <path d="M50 250 A30 30 0 0 1 80 230" stroke="black" fill="none" />
+        <text x="70" y="245" fontSize="12">θ</text>
+      </svg>
+    </div>
+  );
+};
+
 const ProjectileMotionSimulator = () => {
   const [u, setU] = useState(28);
   const [angle, setAngle] = useState(42);
@@ -18,6 +67,7 @@ const ProjectileMotionSimulator = () => {
   const [showVelocityVector, setShowVelocityVector] = useState(true);
   const [showComponents, setShowComponents] = useState(true);
   const [slowMotion, setSlowMotion] = useState(false);
+  const [vectorScale, setVectorScale] = useState(1);
 
   const [running, setRunning] = useState(false);
   const [time, setTime] = useState(0);
@@ -40,6 +90,9 @@ const ProjectileMotionSimulator = () => {
   const tPeak = uy / gravity;
   const yPeak = height + uy * tPeak - 0.5 * gravity * tPeak * tPeak;
   const xPeak = ux * tPeak;
+  const flightTime = (uy + Math.sqrt(uy * uy + 2 * gravity * height)) / gravity;
+  const estimatedRange = ux * flightTime;
+  const estimatedHMax = (uy * uy) / (2 * gravity) + height;
 
   const reset = useCallback(() => {
     setRunning(false);
@@ -89,7 +142,11 @@ const ProjectileMotionSimulator = () => {
   }, [running, ux, uy, gravity, height, speedScale]);
 
   const sim = useMemo(() => {
-    const scale = 8;
+    const canvasWidth = 760;
+    const canvasHeight = 430;
+    const scaleX = (canvasWidth - 140) / (estimatedRange + 50);
+    const scaleY = (canvasHeight - 140) / (estimatedHMax + 50);
+    const scale = Math.max(2.5, Math.min(scaleX, scaleY));
     const originX = 80;
     const groundY = 360;
     const ballX = originX + x * scale;
@@ -100,7 +157,7 @@ const ProjectileMotionSimulator = () => {
       .join(" ");
 
     return { scale, originX, groundY, ballX, ballY, points };
-  }, [x, y, trajectory]);
+  }, [x, y, trajectory, estimatedRange, estimatedHMax]);
 
   return (
     <Card className="glass-card border-0">
@@ -129,6 +186,14 @@ const ProjectileMotionSimulator = () => {
                 </defs>
 
                 <line x1="40" y1={sim.groundY} x2="740" y2={sim.groundY} stroke="#166534" strokeWidth="2" />
+                <rect
+                  x={sim.originX - 6}
+                  y={sim.groundY - height * sim.scale}
+                  width={12}
+                  height={height * sim.scale}
+                  fill="#475569"
+                  rx="3"
+                />
                 <circle cx={sim.originX} cy={sim.groundY - height * sim.scale} r="6" fill="#1e293b" />
 
                 <line
@@ -171,13 +236,13 @@ const ProjectileMotionSimulator = () => {
                     <line
                       x1={sim.ballX}
                       y1={sim.ballY}
-                      x2={sim.ballX + (ux * 0.85)}
-                      y2={sim.ballY - (vy * 0.85)}
+                      x2={sim.ballX + ux * vectorScale}
+                      y2={sim.ballY - vy * vectorScale}
                       stroke="#dc2626"
-                      strokeWidth="2.5"
+                      strokeWidth="3"
                       markerEnd="url(#arrow-projectile)"
                     />
-                    <text x={sim.ballX + ux * 0.85 + 6} y={sim.ballY - vy * 0.85} fill="#dc2626" fontSize="12">
+                    <text x={sim.ballX + ux * vectorScale + 6} y={sim.ballY - vy * vectorScale} fill="#dc2626" fontSize="13" fontWeight="700">
                       v
                     </text>
                   </>
@@ -185,10 +250,10 @@ const ProjectileMotionSimulator = () => {
 
                 {showComponents && (
                   <>
-                    <line x1={sim.ballX} y1={sim.ballY} x2={sim.ballX + ux * 0.85} y2={sim.ballY} stroke="#16a34a" strokeWidth="2" markerEnd="url(#arrow-projectile)" />
-                    <line x1={sim.ballX} y1={sim.ballY} x2={sim.ballX} y2={sim.ballY - vy * 0.85} stroke="#9333ea" strokeWidth="2" markerEnd="url(#arrow-projectile)" />
-                    <text x={sim.ballX + ux * 0.85 + 4} y={sim.ballY - 4} fill="#15803d" fontSize="12">vx</text>
-                    <text x={sim.ballX + 4} y={sim.ballY - vy * 0.85 - 4} fill="#7e22ce" fontSize="12">vy</text>
+                    <line x1={sim.ballX} y1={sim.ballY} x2={sim.ballX + ux * vectorScale} y2={sim.ballY} stroke="#2563eb" strokeWidth="3" markerEnd="url(#arrow-projectile)" />
+                    <line x1={sim.ballX} y1={sim.ballY} x2={sim.ballX} y2={sim.ballY - vy * vectorScale} stroke="#ef4444" strokeWidth="3" markerEnd="url(#arrow-projectile)" />
+                    <text x={sim.ballX + ux * vectorScale + 6} y={sim.ballY - 4} fill="#1d4ed8" fontSize="13" fontWeight="700">vx</text>
+                    <text x={sim.ballX + 4} y={sim.ballY - vy * vectorScale - 6} fill="#b91c1c" fontSize="13" fontWeight="700">vy</text>
                   </>
                 )}
 
@@ -229,6 +294,10 @@ const ProjectileMotionSimulator = () => {
                   <Label>Launch height: {height.toFixed(1)} m</Label>
                   <Slider value={[height]} min={0} max={20} step={0.5} onValueChange={([v]) => setHeight(v)} />
                 </div>
+                <div>
+                  <Label>Vector scale: {vectorScale.toFixed(2)}</Label>
+                  <Slider value={[vectorScale]} min={0.3} max={1.6} step={0.05} onValueChange={([v]) => setVectorScale(v)} />
+                </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between border rounded-lg p-2">
@@ -259,6 +328,7 @@ const ProjectileMotionSimulator = () => {
             </Card>
           </aside>
         </div>
+        <ProjectileDiagram />
       </CardContent>
     </Card>
   );
