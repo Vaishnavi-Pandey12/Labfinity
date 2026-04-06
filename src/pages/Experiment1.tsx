@@ -9,7 +9,7 @@ const Experiment1 = () => {
   return (
     <ExperimentLayout
       subjectLabel="Experiment 1 • Electrochemistry"
-      title="EMF Measurement - Daniell Cell"
+      title="EMF Measurement"
       theory={<ElectrochemistryTheory />}
       procedure={<ElectrochemistryProcedure />}
       simulator={<ElectrochemistrySimulator />}

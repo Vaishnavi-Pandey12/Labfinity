@@ -25,8 +25,8 @@ const ElectrochemistryTheory = () => {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground leading-relaxed">
-            To construct a Daniell cell and measure its Electromotive Force (EMF). 
-            To verify the Nernst equation by studying the effect of concentration on cell potential.
+            To assemble an electrochemical cell with zinc and copper electrodes and measure its Electromotive Force (EMF).
+            To verify the Nernst equation by studying how concentration changes affect the cell potential.
           </p>
         </CardContent>
       </Card>
@@ -43,9 +43,9 @@ const ElectrochemistryTheory = () => {
           <div>
             <h4 className="font-semibold mb-2">Electrochemical Cell</h4>
             <p className="text-muted-foreground leading-relaxed">
-              An electrochemical cell converts chemical energy into electrical energy through 
-              spontaneous redox reactions. The Daniell cell is a classic example consisting of 
-              a zinc electrode in ZnSO₄ solution and a copper electrode in CuSO₄ solution.
+              An electrochemical cell converts chemical energy into electrical energy through
+              spontaneous redox reactions. In this experiment, zinc and copper electrodes are used
+              in ZnSO₄ and CuSO₄ solutions to study how concentration changes affect EMF.
             </p>
           </div>
 

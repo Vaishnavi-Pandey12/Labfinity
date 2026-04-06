@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef, type DragEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,38 @@ const MAX_EDTA = 25;   // mL burette range
 
 const TRUE_V1 = 6.0;   // Part 1 endpoint (mL EDTA)
 const TRUE_V2 = 0.3;   // Part 2 endpoint (mL EDTA)
+
+const APPARATUS_SCENE_HEIGHT = 540;
+const APPARATUS = {
+  standBaseLeft: 18,
+  standBaseWidth: 292,
+  standBaseBottom: 20,
+  rodLeft: 106,
+  rodTop: 8,
+  rodBottom: 23,
+  clampArmLeft: 106,
+  clampArmTop: 22,
+  clampArmWidth: 96,
+  clampRingLeft: 190,
+  clampRingTop: 16,
+  buretteLeft: 183,
+  buretteTop: 8,
+  platformLeft: 111,
+  platformWidth: 170,
+  platformBottom: 23,
+  tileLeft: 121,
+  tileWidth: 150,
+  tileBottom: 33,
+  flaskLeft: 121,
+  flaskWidth: 150,
+  flaskHeight: 200,
+  flaskBottom: 39,
+  flaskMouthInsetTop: 14,
+} as const;
+
+const SAMPLE_FILL_PCT = 42;
+const BUFFER_FILL_BOOST = 6;
+const INDICATOR_FILL_BOOST = 3;
 
 /* ─── Colour helpers ─────────────────────────────────────────────────────── */
 // Returns RGBA string; all transitions are handled purely with CSS transition on backgroundColor
@@ -81,16 +113,59 @@ const TitrationPanel = ({
   const [readings, setReadings] = useState<Reading[]>([]);
   const [isDropping, setIsDropping] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [isFlaskHover, setIsFlaskHover] = useState(false);
 
-  // Stage drives visual state
   const [stage, setStage] = useState<ReagentStage>("water");
+
+  // Pouring animation states
+  const [isPouringBuffer, setIsPouringBuffer] = useState(false);
+  const [isPouringIndicator, setIsPouringIndicator] = useState(false);
+  const apparatusRef = useRef<HTMLDivElement | null>(null);
+  const bufferBottleRef = useRef<HTMLDivElement | null>(null);
+  const indicatorBottleRef = useRef<HTMLDivElement | null>(null);
+  const [pourPaths, setPourPaths] = useState({ buffer: "", indicator: "" });
+  const panelId = useMemo(
+    () => partLabel.replace(/[^a-z0-9]+/gi, "").toLowerCase(),
+    [partLabel],
+  );
 
   const volThisTrial = volAdded - trialStart;
   const flaskColor = getFlaskColor(volThisTrial, trueV, stage);
   const colorLabel = getColorLabel(volThisTrial, trueV, stage);
   const atEndPoint = stage === "titrating" && volThisTrial >= trueV * 0.97;
   const buretteFillPct = Math.max(0, (1 - volAdded / MAX_EDTA) * 100);
-  const flaskFillPct = Math.min(78, 42 + (volThisTrial / (trueV * 3)) * 20);
+  const flaskFillPct = useMemo(() => {
+    if (stage === "empty") return 0;
+
+    const bufferBoost =
+      stage === "buffer" || stage === "indicator" || stage === "titrating"
+        ? BUFFER_FILL_BOOST
+        : 0;
+    const indicatorBoost =
+      stage === "indicator" || stage === "titrating" ? INDICATOR_FILL_BOOST : 0;
+    const titrationBoost =
+      stage === "titrating" ? (volThisTrial / (trueV * 3)) * 18 : 0;
+
+    return Math.min(
+      78,
+      SAMPLE_FILL_PCT + bufferBoost + indicatorBoost + titrationBoost,
+    );
+  }, [stage, volThisTrial, trueV]);
+
+  // Calculate pouring fill animation
+  const pouringFillPct = useMemo(() => {
+    if (isPouringBuffer) {
+      return Math.min(78, flaskFillPct + BUFFER_FILL_BOOST);
+    }
+    if (isPouringIndicator) {
+      return Math.min(78, flaskFillPct + INDICATOR_FILL_BOOST);
+    }
+    return flaskFillPct;
+  }, [isPouringBuffer, isPouringIndicator, flaskFillPct]);
+  const displayFillPct =
+    isPouringBuffer || isPouringIndicator ? pouringFillPct : flaskFillPct;
+  const liquidSurfaceY = 200 - (displayFillPct / 100) * 196;
+  const rippleY = Math.min(170, Math.max(74, liquidSurfaceY + 18));
 
   const addTitrant = useCallback((amount: number) => {
     if ((stage !== "indicator" && stage !== "titrating") || completed) return;
@@ -129,7 +204,95 @@ const TitrationPanel = ({
     setVolAdded(0); setTrialStart(0); setTrial(1);
     setReadings([]); setIsDropping(false); setCompleted(false);
     setStage("water");
+    setIsFlaskHover(false);
   }, []);
+
+  const handleReagentDrop = useCallback((reagent: "buffer" | "indicator") => {
+    if (completed) return;
+    if (reagent === "buffer" && stage === "water") {
+      setIsPouringBuffer(true);
+      // Animate pouring for 2 seconds, then change stage
+      setTimeout(() => {
+        setIsPouringBuffer(false);
+        setStage("buffer");
+      }, 2000);
+    }
+    if (reagent === "indicator" && stage === "buffer") {
+      setIsPouringIndicator(true);
+      // Animate pouring for 1.5 seconds, then change stage
+      setTimeout(() => {
+        setIsPouringIndicator(false);
+        setStage("indicator");
+      }, 1500);
+    }
+  }, [stage, completed]);
+
+  const handleFlaskDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsFlaskHover(true);
+  }, []);
+
+  const handleFlaskDragLeave = useCallback(() => setIsFlaskHover(false), []);
+
+  const handleFlaskDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const reagent = event.dataTransfer.getData("text/plain") as "buffer" | "indicator" | "";
+    if (reagent === "buffer" || reagent === "indicator") {
+      handleReagentDrop(reagent);
+    }
+    setIsFlaskHover(false);
+  }, [handleReagentDrop]);
+
+  const updatePourPaths = useCallback(() => {
+    if (!apparatusRef.current) return;
+
+    const containerRect = apparatusRef.current.getBoundingClientRect();
+    const flaskMouthX = APPARATUS.flaskLeft + APPARATUS.flaskWidth / 2;
+    const flaskMouthY =
+      APPARATUS_SCENE_HEIGHT -
+      APPARATUS.flaskBottom -
+      APPARATUS.flaskHeight +
+      APPARATUS.flaskMouthInsetTop;
+
+    const buildPath = (
+      sourceEl: HTMLDivElement | null,
+      neckLift: number,
+      horizontalBend: number,
+    ) => {
+      if (!sourceEl) return "";
+
+      const sourceRect = sourceEl.getBoundingClientRect();
+      const startX =
+        sourceRect.left - containerRect.left + sourceRect.width * 0.52;
+      const startY = sourceRect.top - containerRect.top + 10;
+      const control1X = startX - 18;
+      const control1Y = startY + 36;
+      const control2X = flaskMouthX + horizontalBend;
+      const control2Y = flaskMouthY - neckLift;
+
+      return [
+        `M ${startX.toFixed(1)} ${startY.toFixed(1)}`,
+        `C ${control1X.toFixed(1)} ${control1Y.toFixed(1)},`,
+        `${control2X.toFixed(1)} ${control2Y.toFixed(1)},`,
+        `${flaskMouthX.toFixed(1)} ${flaskMouthY.toFixed(1)}`,
+      ].join(" ");
+    };
+
+    setPourPaths({
+      buffer: buildPath(bufferBottleRef.current, 62, 48),
+      indicator: buildPath(indicatorBottleRef.current, 68, 34),
+    });
+  }, []);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(updatePourPaths);
+    window.addEventListener("resize", updatePourPaths);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updatePourPaths);
+    };
+  }, [updatePourPaths, isPouringBuffer, isPouringIndicator]);
 
   const vols = readings.map(r => r.volume);
   const avgVol = vols.length ? vols.reduce((a, b) => a + b, 0) / vols.length : 0;
@@ -156,26 +319,30 @@ const TitrationPanel = ({
 
             {/* Step 2: Add Buffer Solution */}
             <Button
-              variant={stage === "buffer" || stage === "indicator" || stage === "titrating" ? "secondary" : "outline"}
+              variant={isPouringBuffer || stage === "buffer" || stage === "indicator" || stage === "titrating" ? "secondary" : "outline"}
               className="w-full gap-2"
-              onClick={() => setStage("buffer")}
-              disabled={stage === "buffer" || stage === "indicator" || stage === "titrating" || completed}
+              onClick={() => handleReagentDrop("buffer")}
+              disabled={stage !== "water" || completed || isPouringBuffer || isPouringIndicator}
             >
               <FlaskConical className="w-4 h-4" />
-              {stage === "buffer" || stage === "indicator" || stage === "titrating"
+              {isPouringBuffer
+                ? "Pouring Buffer Solution..."
+                : stage === "buffer" || stage === "indicator" || stage === "titrating"
                 ? "Buffer Solution Added ✓"
                 : "Add Buffer Solution (pH 9–10)"}
             </Button>
 
             {/* Step 3: Add Calmagite Indicator */}
             <Button
-              variant={stage === "indicator" || stage === "titrating" ? "secondary" : "outline"}
+              variant={isPouringIndicator || stage === "indicator" || stage === "titrating" ? "secondary" : "outline"}
               className="w-full gap-2"
-              onClick={() => setStage("indicator")}
-              disabled={stage !== "buffer" || completed}
+              onClick={() => handleReagentDrop("indicator")}
+              disabled={stage !== "buffer" || completed || isPouringBuffer || isPouringIndicator}
             >
               <Droplets className="w-4 h-4" />
-              {stage === "indicator" || stage === "titrating"
+              {isPouringIndicator
+                ? "Pouring Calmagite Indicator..."
+                : stage === "indicator" || stage === "titrating"
                 ? "Calmagite Indicator Added ✓"
                 : "Add Calmagite Indicator"}
             </Button>
@@ -274,26 +441,64 @@ const TitrationPanel = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative h-[540px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner select-none">
+            <div
+              ref={apparatusRef}
+              className={`relative h-[540px] bg-gradient-to-b from-background to-muted/30 rounded-xl overflow-hidden shadow-inner select-none ${isFlaskHover ? "ring-2 ring-primary/60 ring-offset-2 ring-offset-background" : ""}`}
+              onDragOver={handleFlaskDragOver}
+              onDragLeave={handleFlaskDragLeave}
+              onDrop={handleFlaskDrop}
+            >
+              <div className="absolute -top-10 left-6 h-36 w-36 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+              <div className="absolute top-32 right-8 h-28 w-28 rounded-full bg-amber-300/10 blur-3xl pointer-events-none" />
 
               {/* ── Table surface ── */}
               <div className="absolute bottom-0 left-0 right-0 h-5 bg-amber-900/15 border-t border-amber-700/20 rounded-b-xl" />
 
               {/* ═══ RETORT STAND ═══ */}
               {/* Base plate — extra wide */}
-              <div className="absolute bottom-5 left-[20px] w-[280px] h-[18px] bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 rounded shadow-lg border-t border-slate-400/30" />
+              <div
+                className="absolute h-[18px] bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 rounded shadow-lg border-t border-slate-400/30"
+                style={{
+                  bottom: `${APPARATUS.standBaseBottom}px`,
+                  left: `${APPARATUS.standBaseLeft}px`,
+                  width: `${APPARATUS.standBaseWidth}px`,
+                }}
+              />
               {/* Vertical rod */}
               <div
-                className="absolute left-[130px] w-[10px] bg-gradient-to-r from-slate-400 via-slate-300 to-slate-400 rounded-t shadow-md"
-                style={{ bottom: "23px", top: "8px" }}
+                className="absolute w-[10px] bg-gradient-to-r from-slate-400 via-slate-300 to-slate-400 rounded-t shadow-md"
+                style={{
+                  left: `${APPARATUS.rodLeft}px`,
+                  bottom: `${APPARATUS.rodBottom}px`,
+                  top: `${APPARATUS.rodTop}px`,
+                }}
               />
               {/* Burette clamp arm */}
-              <div className="absolute top-[22px] left-[130px] w-[72px] h-[10px] bg-gradient-to-r from-slate-500 to-slate-400 rounded-r shadow" />
+              <div
+                className="absolute h-[10px] bg-gradient-to-r from-slate-500 to-slate-400 rounded-r shadow"
+                style={{
+                  top: `${APPARATUS.clampArmTop}px`,
+                  left: `${APPARATUS.clampArmLeft}px`,
+                  width: `${APPARATUS.clampArmWidth}px`,
+                }}
+              />
               {/* Clamp ring around burette */}
-              <div className="absolute top-[16px] left-[190px] w-[18px] h-[18px] border-[3px] border-slate-500 rounded-sm bg-slate-600/50 shadow z-30" />
+              <div
+                className="absolute w-[18px] h-[18px] border-[3px] border-slate-500 rounded-sm bg-slate-600/50 shadow z-30"
+                style={{
+                  top: `${APPARATUS.clampRingTop}px`,
+                  left: `${APPARATUS.clampRingLeft}px`,
+                }}
+              />
 
               {/* ═══ BURETTE ═══ */}
-              <div className="absolute top-[8px] left-[183px] flex flex-col items-center z-20">
+              <div
+                className="absolute flex flex-col items-center z-20"
+                style={{
+                  top: `${APPARATUS.buretteTop}px`,
+                  left: `${APPARATUS.buretteLeft}px`,
+                }}
+              >
                 {/* Top cap / funnel rim */}
                 <div className="w-10 h-3 bg-slate-500 rounded-t-md shadow" />
                 {/* Label above burette */}
@@ -344,44 +549,75 @@ const TitrationPanel = ({
 
               {/* ═══ CONICAL FLASK ═══ */}
               {/* Support platform on stand base */}
-              <div className="absolute bottom-[23px] left-[111px] w-[170px] h-[10px] bg-gradient-to-r from-slate-500 to-slate-400 rounded shadow-md" />
+              <div
+                className="absolute h-[10px] bg-gradient-to-r from-slate-500 to-slate-400 rounded shadow-md"
+                style={{
+                  bottom: `${APPARATUS.platformBottom}px`,
+                  left: `${APPARATUS.platformLeft}px`,
+                  width: `${APPARATUS.platformWidth}px`,
+                }}
+              />
               {/* White tile under flask */}
-              <div className="absolute bottom-[33px] left-[121px] w-[150px] h-[6px] bg-white/60 dark:bg-white/15 rounded shadow-sm border border-slate-300/50" />
+              <div
+                className="absolute rounded-full bg-slate-900/10 blur-md"
+                style={{
+                  bottom: `${APPARATUS.tileBottom - 2}px`,
+                  left: `${APPARATUS.tileLeft + 8}px`,
+                  width: `${APPARATUS.tileWidth - 16}px`,
+                  height: "18px",
+                }}
+              />
+              <div
+                className="absolute h-[6px] bg-white/60 dark:bg-white/15 rounded shadow-sm border border-slate-300/50"
+                style={{
+                  bottom: `${APPARATUS.tileBottom}px`,
+                  left: `${APPARATUS.tileLeft}px`,
+                  width: `${APPARATUS.tileWidth}px`,
+                }}
+              />
 
               {/* Flask outline as SVG for realistic glass look */}
               <svg
                 className="absolute z-10 pointer-events-none"
-                style={{ bottom: "39px", left: "121px", width: "150px", height: "200px" }}
+                style={{
+                  bottom: `${APPARATUS.flaskBottom}px`,
+                  left: `${APPARATUS.flaskLeft}px`,
+                  width: `${APPARATUS.flaskWidth}px`,
+                  height: `${APPARATUS.flaskHeight}px`,
+                  filter: "drop-shadow(0 16px 18px rgba(15, 23, 42, 0.08))",
+                }}
                 viewBox="0 0 150 200"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <defs>
-                  <clipPath id={`flaskClip-${partLabel.replace(/\s+/g, '')}`}>
+                  <clipPath id={`flaskClip-${panelId}`}>
                     <polygon points="56,0 94,0 94,52 146,174 148,196 2,196 4,174 56,52" />
                   </clipPath>
                 </defs>
 
                 {/* Liquid fill — clipped to flask interior */}
                 <rect
-                  x="0" y={200 - (flaskFillPct / 100) * 196}
+                  x="0" y={liquidSurfaceY}
                   width="150"
-                  height={(flaskFillPct / 100) * 196}
-                  clipPath={`url(#flaskClip-${partLabel.replace(/\s+/g, '')})`}
+                  height={(displayFillPct / 100) * 196}
+                  clipPath={`url(#flaskClip-${panelId})`}
                   style={{
                     fill: flaskColor,
-                    transition: "y 0.6s ease-in-out, height 0.6s ease-in-out, fill 1.4s ease-in-out",
+                    transition: isPouringBuffer || isPouringIndicator ? "none" : "y 0.6s ease-in-out, height 0.6s ease-in-out, fill 1.4s ease-in-out",
                   }}
                 />
 
                 {/* Liquid surface sheen */}
-                {flaskFillPct > 0 && (
+                {(displayFillPct > 0 || isPouringBuffer || isPouringIndicator) && (
                   <rect
-                    x="0" y={200 - (flaskFillPct / 100) * 196}
+                    x="0" y={liquidSurfaceY}
                     width="150" height="3"
-                    clipPath={`url(#flaskClip-${partLabel.replace(/\s+/g, '')})`}
+                    clipPath={`url(#flaskClip-${panelId})`}
                     fill="rgba(255,255,255,0.25)"
-                    style={{ transition: "y 0.6s ease-in-out" }}
+                    style={{
+                      transition: isPouringBuffer || isPouringIndicator ? "none" : "y 0.6s ease-in-out"
+                    }}
                   />
                 )}
 
@@ -402,23 +638,246 @@ const TitrationPanel = ({
               </svg>
 
               {/* Flask label */}
-              <div className="absolute bottom-[14px] left-[121px] w-[150px] text-center text-[11px] font-medium text-muted-foreground z-20">
+              <div
+                className="absolute text-center text-[11px] font-medium text-muted-foreground z-20"
+                style={{
+                  bottom: "14px",
+                  left: `${APPARATUS.flaskLeft}px`,
+                  width: `${APPARATUS.flaskWidth}px`,
+                }}
+              >
                 {flaskLabel}
               </div>
 
+              {/* Pouring progress indicator */}
+              <AnimatePresence>
+                {(isPouringBuffer || isPouringIndicator) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute z-30"
+                    style={{
+                      bottom: "25px",
+                      left: `${APPARATUS.flaskLeft}px`,
+                      width: `${APPARATUS.flaskWidth}px`,
+                    }}
+                  >
+                    <div className="bg-background/80 backdrop-blur-sm rounded-lg px-3 py-1 border border-border/50">
+                      <div className="flex items-center justify-center gap-2">
+                        <motion.div
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: isPouringBuffer ? "#FACC15" : "#EF4444" }}
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 0.5, repeat: Infinity }}
+                        />
+                        <span className="text-xs font-medium text-foreground">
+                          {isPouringBuffer ? "Adding Buffer Solution..." : "Adding Calmagite Indicator..."}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Reagent bottles */}
-              <div className="absolute bottom-[40px] right-[28px] flex flex-col items-center gap-0.5">
+              <motion.div
+                ref={indicatorBottleRef}
+                className="absolute top-[190px] right-[34px] z-40 flex flex-col items-center gap-0.5 cursor-grab"
+                draggable={!completed && !isPouringBuffer && !isPouringIndicator}
+                onDragStart={e => e.dataTransfer.setData("text/plain", "indicator")}
+                title="Drag Calmagite indicator into the flask"
+                style={{ transformOrigin: "50% 0%" }}
+                animate={isPouringIndicator ? { rotate: -62, x: -22, y: -18 } : { rotate: 0, x: 0, y: 0 }}
+                transition={{ duration: 0.35 }}
+              >
                 <div className="w-3 h-4 bg-red-800/60 rounded-t-sm" />
-                <div className="w-8 h-12 bg-red-600/40 border border-red-400/40 rounded-b-md rounded-t-sm flex items-end justify-center pb-1">
+                <div className="relative w-8 h-14 bg-gradient-to-b from-red-300/60 via-red-400/45 to-red-600/45 border border-red-400/40 rounded-b-md rounded-t-sm flex items-end justify-center pb-1 shadow-md">
+                  <div className="absolute left-[5px] top-[5px] h-8 w-[3px] rounded-full bg-white/35" />
                   <span className="text-[6px] text-red-200/90 font-medium text-center leading-tight">Calma-<br />gite</span>
                 </div>
-              </div>
-              <div className="absolute bottom-[40px] right-[68px] flex flex-col items-center gap-0.5">
+              </motion.div>
+              <motion.div
+                ref={bufferBottleRef}
+                className="absolute top-[210px] right-[74px] z-40 flex flex-col items-center gap-0.5 cursor-grab"
+                draggable={!completed && !isPouringBuffer && !isPouringIndicator}
+                onDragStart={e => e.dataTransfer.setData("text/plain", "buffer")}
+                title="Drag buffer solution into the flask"
+                style={{ transformOrigin: "50% 0%" }}
+                animate={isPouringBuffer ? { rotate: -58, x: -18, y: -14 } : { rotate: 0, x: 0, y: 0 }}
+                transition={{ duration: 0.35 }}
+              >
                 <div className="w-3 h-4 bg-yellow-800/60 rounded-t-sm" />
-                <div className="w-8 h-12 bg-yellow-400/40 border border-yellow-400/40 rounded-b-md rounded-t-sm flex items-end justify-center pb-1">
+                <div className="relative w-8 h-14 bg-gradient-to-b from-amber-100/85 via-yellow-300/60 to-yellow-500/45 border border-yellow-400/50 rounded-b-md rounded-t-sm flex items-end justify-center pb-1 shadow-md">
+                  <div className="absolute left-[5px] top-[5px] h-8 w-[3px] rounded-full bg-white/40" />
                   <span className="text-[6px] text-yellow-900/90 dark:text-yellow-100/80 font-medium text-center leading-tight">Buffer<br />pH9-10</span>
                 </div>
-              </div>
+              </motion.div>
+
+              {/* Pouring animations */}
+              <svg className="absolute inset-0 z-30 pointer-events-none overflow-visible">
+                <defs>
+                  <linearGradient id={`${panelId}-bufferStream`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(250, 204, 21, 0.95)" />
+                    <stop offset="100%" stopColor="rgba(250, 204, 21, 0.28)" />
+                  </linearGradient>
+                  <linearGradient id={`${panelId}-indicatorStream`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(239, 68, 68, 0.92)" />
+                    <stop offset="100%" stopColor="rgba(239, 68, 68, 0.30)" />
+                  </linearGradient>
+                </defs>
+
+                <AnimatePresence>
+                  {isPouringBuffer && pourPaths.buffer && (
+                    <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <motion.path
+                        d={pourPaths.buffer}
+                        stroke={`url(#${panelId}-bufferStream)`}
+                        strokeWidth="6"
+                        fill="none"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                      />
+                      <motion.path
+                        d={pourPaths.buffer}
+                        stroke="rgba(255,255,255,0.32)"
+                        strokeWidth="1.8"
+                        fill="none"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 0.7 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                      />
+                      {[...Array(3)].map((_, i) => (
+                        <circle key={`buffer-droplet-${i}`} r="2.1" fill="rgba(250, 204, 21, 0.95)" opacity="0">
+                          <animateMotion
+                            dur="1.1s"
+                            begin={`${i * 0.18}s`}
+                            repeatCount="indefinite"
+                            path={pourPaths.buffer}
+                          />
+                          <animate
+                            attributeName="opacity"
+                            values="0;1;0"
+                            dur="1.1s"
+                            begin={`${i * 0.18}s`}
+                            repeatCount="indefinite"
+                          />
+                        </circle>
+                      ))}
+                    </motion.g>
+                  )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                  {isPouringIndicator && pourPaths.indicator && (
+                    <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <motion.path
+                        d={pourPaths.indicator}
+                        stroke={`url(#${panelId}-indicatorStream)`}
+                        strokeWidth="6"
+                        fill="none"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                      />
+                      <motion.path
+                        d={pourPaths.indicator}
+                        stroke="rgba(255,255,255,0.26)"
+                        strokeWidth="1.6"
+                        fill="none"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 0.65 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                      />
+                      {[...Array(3)].map((_, i) => (
+                        <circle key={`indicator-droplet-${i}`} r="2.1" fill="rgba(239, 68, 68, 0.95)" opacity="0">
+                          <animateMotion
+                            dur="1.05s"
+                            begin={`${i * 0.16}s`}
+                            repeatCount="indefinite"
+                            path={pourPaths.indicator}
+                          />
+                          <animate
+                            attributeName="opacity"
+                            values="0;1;0"
+                            dur="1.05s"
+                            begin={`${i * 0.16}s`}
+                            repeatCount="indefinite"
+                          />
+                        </circle>
+                      ))}
+                    </motion.g>
+                  )}
+                </AnimatePresence>
+              </svg>
+
+              {/* Pouring ripples in flask */}
+              <AnimatePresence>
+                {(isPouringBuffer || isPouringIndicator) && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute z-20"
+                    style={{
+                      bottom: `${APPARATUS.flaskBottom}px`,
+                      left: `${APPARATUS.flaskLeft}px`,
+                    }}
+                  >
+                    <svg width="150" height="200" viewBox="0 0 150 200" className="absolute">
+                      {/* Ripples emanating from pour point */}
+                      {[...Array(3)].map((_, i) => (
+                        <motion.circle
+                          key={i}
+                          cx="75"
+                          cy={rippleY}
+                          r="0"
+                          stroke={isPouringBuffer ? "rgba(250, 204, 21, 0.6)" : "rgba(239, 68, 68, 0.6)"}
+                          strokeWidth="2"
+                          fill="none"
+                          initial={{ r: 0, opacity: 0.8 }}
+                          animate={{ r: 40, opacity: 0 }}
+                          transition={{
+                            duration: 1.5,
+                            delay: i * 0.3,
+                            repeat: Infinity,
+                            ease: "easeOut"
+                          }}
+                        />
+                      ))}
+                      {/* Small bubbles rising */}
+                      {[...Array(5)].map((_, i) => (
+                        <motion.circle
+                          key={`bubble-${i}`}
+                          r="1"
+                          fill={isPouringBuffer ? "rgba(250, 204, 21, 0.8)" : "rgba(239, 68, 68, 0.8)"}
+                          initial={{ cx: 66 + (i * 4), cy: rippleY + 10, opacity: 0 }}
+                          animate={{
+                            cx: 66 + (i * 4) + (i % 2 === 0 ? 6 : -6),
+                            cy: rippleY - 38,
+                            opacity: [0, 1, 0]
+                          }}
+                          transition={{
+                            duration: 2,
+                            delay: i * 0.2,
+                            repeat: Infinity,
+                            ease: "easeOut"
+                          }}
+                        />
+                      ))}
+                    </svg>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* End-point badge */}
               <AnimatePresence>

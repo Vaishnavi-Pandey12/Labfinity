@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -71,7 +71,6 @@ const METALS: Record<string, MetalInfo> = {
 
 const METAL_KEYS = Object.keys(METALS);
 const CATHODE_CONCENTRATIONS = [0.01, 0.05, 0.10, 0.50, 1.00];
-const API_BASE = "http://localhost:8000";
 
 const calculateEMF = (anodeMetal: string, cathodeMetal: string, anodeConc: number, cathodeConc: number): number => {
   const anode = METALS[anodeMetal];
@@ -85,11 +84,10 @@ const calculateEMF = (anodeMetal: string, cathodeMetal: string, anodeConc: numbe
 
 interface TableRow {
   sNo: number;
-  anodeConc: number;
-  cathodeConc: number;
-  logRatio: number;
-  emfCalculated: number;  // from backend
-  emfObserved: string;    // user types this
+  anodeConc: string;
+  cathodeConc: string;
+  logRatio: string;
+  emfObserved: string;
 }
 
 const ElectrochemistrySimulator = () => {
@@ -102,17 +100,7 @@ const ElectrochemistrySimulator = () => {
   const [emf, setEmf] = useState(0);
   const [electronFlow, setElectronFlow] = useState(false);
 
-  // Table state
   const [tableRows, setTableRows] = useState<TableRow[]>([]);
-  const [tableLoading, setTableLoading] = useState(false);
-  const [tableError, setTableError] = useState("");
-
-  // Unknown row state
-  const [generatedUnknownConc, setGeneratedUnknownConc] = useState<number | null>(null);
-  const [unknownEmfFromBackend, setUnknownEmfFromBackend] = useState<number | null>(null);
-  const [unknownEmfLoading, setUnknownEmfLoading] = useState(false);
-  const [unknownConcObserved, setUnknownConcObserved] = useState("");
-  const [unknownConcVerified, setUnknownConcVerified] = useState<boolean | null>(null);
 
   const anode = METALS[anodeMetal];
   const cathode = METALS[cathodeMetal];
@@ -133,54 +121,15 @@ const ElectrochemistrySimulator = () => {
     }
   };
 
-  // Fetch table from backend when connected
-  const fetchTable = useCallback(async (anodeMet: string, cathodeMet: string, anodeConc: number) => {
-    setTableLoading(true);
-    setTableError("");
-    try {
-      const resp = await fetch(`${API_BASE}/api/electrochemistry-table`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          anode_metal: anodeMet,
-          cathode_metal: cathodeMet,
-          anode_concentration: anodeConc,
-          cathode_concentrations: CATHODE_CONCENTRATIONS,
-          unknown_concentration: null,
-          n: 2,
-        }),
-      });
-      if (!resp.ok) throw new Error("API error");
-      const data = await resp.json();
-      const rows: TableRow[] = (data.table as Record<string, number>[]).map((r, i) => ({
-        sNo: i + 1,
-        anodeConc: anodeConc,
-        cathodeConc: r["Cathode Concentration (M)"],
-        logRatio: r["log([Anode]/[Cathode])"],
-        emfCalculated: r["EMF (V)"],
-        emfObserved: "",
-      }));
-      setTableRows(rows);
-    } catch {
-      setTableError("Could not connect to the backend. Is the Python server running?");
-      // Fallback: generate table locally
-      const rows: TableRow[] = CATHODE_CONCENTRATIONS.map((cc, i) => {
-        const logRatio = Math.log10(anodeConc / cc);
-        const emfCalc = Math.max(0, (METALS[cathodeMet].E0 - METALS[anodeMet].E0) - (0.0591 / 2) * logRatio);
-        return {
-          sNo: i + 1,
-          anodeConc,
-          cathodeConc: cc,
-          logRatio: parseFloat(logRatio.toFixed(4)),
-          emfCalculated: parseFloat(emfCalc.toFixed(4)),
-          emfObserved: "",
-        };
-      });
-      setTableRows(rows);
-    } finally {
-      setTableLoading(false);
-    }
-  }, []);
+  const createDefaultRows = (): TableRow[] => {
+    return CATHODE_CONCENTRATIONS.map((_, i) => ({
+      sNo: i + 1,
+      anodeConc: "",
+      cathodeConc: "",
+      logRatio: "",
+      emfObserved: "",
+    }));
+  };
 
   // Live EMF in voltmeter
   useEffect(() => {
@@ -195,23 +144,13 @@ const ElectrochemistrySimulator = () => {
     setEmf(0);
     setElectronFlow(false);
     setTableRows([]);
-    setGeneratedUnknownConc(null);
-    setUnknownEmfFromBackend(null);
-    setUnknownConcObserved("");
-    setUnknownConcVerified(null);
   }, [anodeMetal, cathodeMetal]);
 
   const connectCell = useCallback(() => {
     setIsConnected(true);
     setElectronFlow(true);
-    // Generate a random unknown concentration between 0.1 and 2.0 M
-    const randomConc = parseFloat((Math.random() * 1.9 + 0.1).toFixed(2));
-    setGeneratedUnknownConc(randomConc);
-    setUnknownEmfFromBackend(null);
-    setUnknownConcObserved("");
-    setUnknownConcVerified(null);
-    fetchTable(anodeMetal, cathodeMetal, anodeConcentration);
-  }, [anodeMetal, cathodeMetal, anodeConcentration, fetchTable]);
+    setTableRows(createDefaultRows());
+  }, []);
 
   const resetExperiment = useCallback(() => {
     setIsConnected(false);
@@ -221,10 +160,6 @@ const ElectrochemistrySimulator = () => {
     setAnodeInputStr("1.00");
     setCathodeConcentration(1.0);
     setTableRows([]);
-    setGeneratedUnknownConc(null);
-    setUnknownEmfFromBackend(null);
-    setUnknownConcObserved("");
-    setUnknownConcVerified(null);
   }, []);
 
   const handleAnodeChange = (value: string) => { if (value !== cathodeMetal) setAnodeMetal(value); };
@@ -234,79 +169,28 @@ const ElectrochemistrySimulator = () => {
     setTableRows(prev => prev.map((row, i) => i === index ? { ...row, emfObserved: value } : row));
   };
 
-  // Fetch EMF for the auto-generated unknown concentration
-  const getUnknownEmf = useCallback(async () => {
-    if (!generatedUnknownConc) return;
-    setUnknownEmfFromBackend(null);
-    setUnknownConcObserved("");
-    setUnknownConcVerified(null);
-    setUnknownEmfLoading(true);
-    try {
-      const resp = await fetch(`${API_BASE}/api/electrochemistry-table`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          anode_metal: anodeMetal,
-          cathode_metal: cathodeMetal,
-          anode_concentration: anodeConcentration,
-          cathode_concentrations: CATHODE_CONCENTRATIONS,
-          unknown_concentration: generatedUnknownConc,
-          n: 2,
-        }),
-      });
-      const data = await resp.json();
-      setUnknownEmfFromBackend(data.unknown_emf);
-    } catch {
-      // fallback calculation
-      const logRatio = Math.log10(anodeConcentration / generatedUnknownConc);
-      const emf = Math.max(0, E0cell - (0.0591 / 2) * logRatio);
-      setUnknownEmfFromBackend(parseFloat(emf.toFixed(4)));
-    } finally {
-      setUnknownEmfLoading(false);
-    }
-  }, [generatedUnknownConc, anodeMetal, cathodeMetal, anodeConcentration, E0cell]);
-
-  const verifyUnknownConc = () => {
-    if (!generatedUnknownConc || !unknownConcObserved) return;
-    const entered = parseFloat(unknownConcObserved);
-    // Allow ±0.05 M tolerance
-    setUnknownConcVerified(Math.abs(entered - generatedUnknownConc) <= 0.05);
+  const handleTableCellChange = (index: number, field: keyof Omit<TableRow, 'sNo'>, value: string) => {
+    setTableRows(prev => prev.map((row, i) => i === index ? { ...row, [field]: value } : row));
   };
 
   const downloadTableCSV = () => {
     if (tableRows.length === 0) return;
 
-    // Headers
     const headers = [
       "S.No",
       "Anode Conc (M)",
       "Cathode Conc (M)",
       "logRatio",
-      "Calculated EMF (V)",
-      "Observed EMF (V)"
+      "EMF Observed (V)"
     ];
 
-    // Rows
     const csvRows = tableRows.map(row => [
       row.sNo,
-      row.anodeConc.toFixed(2),
-      row.cathodeConc.toFixed(2),
-      row.logRatio.toFixed(4),
-      row.emfCalculated.toFixed(4),
+      row.anodeConc,
+      row.cathodeConc,
+      row.logRatio,
       row.emfObserved || ""
     ]);
-
-    // Add unknown row if present
-    if (generatedUnknownConc) {
-      csvRows.push([
-        tableRows.length + 1,
-        anodeConcentration.toFixed(2),
-        "Unknown",
-        unknownEmfFromBackend !== null ? Math.log10(anodeConcentration / generatedUnknownConc).toFixed(4) : "",
-        unknownEmfFromBackend !== null ? unknownEmfFromBackend.toFixed(4) : "",
-        unknownConcObserved || ""
-      ]);
-    }
 
     const csvContent = [
       headers.join(","),
@@ -623,155 +507,91 @@ const ElectrochemistrySimulator = () => {
             </div>
             <p className="text-sm text-muted-foreground">
               {anode.name} ({anode.symbol}) anode at <strong>{anodeConcentration.toFixed(2)} M</strong> — varying {cathode.name} ({cathode.symbol}) cathode concentration.
-              <br />Enter your <strong>observed EMF</strong> values from the voltmeter for each row.
+              <br />Enter all measured values manually in the table, including concentrations, log ratio, and EMF.
             </p>
           </CardHeader>
           <CardContent>
-            {tableLoading ? (
-              <div className="flex items-center justify-center py-12 gap-3 text-muted-foreground">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Loading table from server…
-              </div>
-            ) : (
-              <>
-                {tableError && (
-                  <div className="mb-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-                    ⚠ {tableError} — using local calculation as fallback.
-                  </div>
-                )}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b-2 border-primary/30 bg-muted/50">
+                    <th className="text-center py-3 px-3 font-semibold">S.No</th>
+                    <th className="text-center py-3 px-3 font-semibold">
+                      [{anode.solutionFormula}] (M)<br />
+                      <span className="text-xs font-normal text-muted-foreground">Anode concentration</span>
+                    </th>
+                    <th className="text-center py-3 px-3 font-semibold">
+                      [{cathode.solutionFormula}] (M)<br />
+                      <span className="text-xs font-normal text-muted-foreground">Cathode concentration</span>
+                    </th>
+                    <th className="text-center py-3 px-3 font-semibold">
+                      log([{anode.solutionFormula}]/[{cathode.solutionFormula}])
+                    </th>
+                    <th className="text-center py-3 px-3 font-semibold">
+                      EMF Observed (V)<br />
+                      <span className="text-xs font-normal text-muted-foreground">Measured from voltmeter</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableRows.map((row, index) => (
+                    <motion.tr
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.07 }}
+                      className="border-b border-border/50 hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="text-center py-3 px-3 font-medium">{row.sNo}</td>
+                      <td className="text-center py-3 px-3">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={row.anodeConc}
+                          onChange={e => handleTableCellChange(index, "anodeConc", e.target.value)}
+                          className="w-24 mx-auto text-center font-mono h-8 text-sm"
+                        />
+                      </td>
+                      <td className="text-center py-3 px-3">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={row.cathodeConc}
+                          onChange={e => handleTableCellChange(index, "cathodeConc", e.target.value)}
+                          className="w-24 mx-auto text-center font-mono h-8 text-sm"
+                        />
+                      </td>
+                      <td className="text-center py-3 px-3">
+                        <Input
+                          type="number"
+                          step="0.0001"
+                          value={row.logRatio}
+                          onChange={e => handleTableCellChange(index, "logRatio", e.target.value)}
+                          className="w-28 mx-auto text-center font-mono h-8 text-sm"
+                        />
+                      </td>
+                      <td className="text-center py-3 px-3">
+                        <Input
+                          type="number"
+                          step="0.0001"
+                          value={row.emfObserved}
+                          onChange={e => handleEmfObservedChange(index, e.target.value)}
+                          className="w-32 mx-auto text-center font-mono h-8 text-sm"
+                        />
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b-2 border-primary/30 bg-muted/50">
-                        <th className="text-center py-3 px-3 font-semibold">S.No</th>
-                        <th className="text-center py-3 px-3 font-semibold">
-                          [{anode.solutionFormula}] (M)<br />
-                          <span className="text-xs font-normal text-muted-foreground">Anode — Fixed</span>
-                        </th>
-                        <th className="text-center py-3 px-3 font-semibold">
-                          [{cathode.solutionFormula}] (M)<br />
-                          <span className="text-xs font-normal text-muted-foreground">Cathode</span>
-                        </th>
-                        <th className="text-center py-3 px-3 font-semibold">
-                          log([{anode.solutionFormula}]/[{cathode.solutionFormula}])
-                        </th>
-                        <th className="text-center py-3 px-3 font-semibold">
-                          EMF Observed (V)<br />
-                          <span className="text-xs font-normal text-muted-foreground">Enter from voltmeter</span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tableRows.map((row, index) => (
-                        <motion.tr
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.07 }}
-                          className="border-b border-border/50 hover:bg-muted/30 transition-colors"
-                        >
-                          <td className="text-center py-3 px-3 font-medium">{row.sNo}</td>
-                          <td className="text-center py-3 px-3 font-mono">{row.anodeConc.toFixed(2)}</td>
-                          <td className="text-center py-3 px-3 font-mono">{row.cathodeConc.toFixed(2)}</td>
-                          <td className="text-center py-3 px-3 font-mono text-muted-foreground">{row.logRatio.toFixed(4)}</td>
-                          <td className="text-center py-3 px-3">
-                            <Input
-                              type="number"
-                              step="0.0001"
-                              placeholder="e.g. 1.1000"
-                              value={row.emfObserved}
-                              onChange={e => handleEmfObservedChange(index, e.target.value)}
-                              className="w-32 mx-auto text-center font-mono h-8 text-sm"
-                            />
-                          </td>
-                        </motion.tr>
-                      ))}
-
-                      {/* Unknown concentration row */}
-                      <motion.tr
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="border-t-2 border-amber-400 bg-amber-50/60"
-                      >
-                        <td className="text-center py-3 px-3 font-medium text-amber-700">
-                          {tableRows.length + 1}
-                        </td>
-                        <td className="text-center py-3 px-3 font-mono">{anodeConcentration.toFixed(2)}</td>
-
-                        {/* Unknown cathode concentration — shown as "Unknown" */}
-                        <td className="text-center py-3 px-3">
-                          <div className="flex items-center justify-center gap-2">
-                            <span className="font-semibold text-amber-700 italic">Unknown</span>
-                            <Button
-                              size="sm"
-                              onClick={getUnknownEmf}
-                              disabled={unknownEmfLoading || unknownEmfFromBackend !== null}
-                              className="h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white text-xs"
-                            >
-                              {unknownEmfLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Get EMF"}
-                            </Button>
-                          </div>
-                        </td>
-
-                        {/* log ratio — show only after EMF is revealed */}
-                        <td className="text-center py-3 px-3 font-mono text-amber-700">
-                          {unknownEmfFromBackend !== null && generatedUnknownConc
-                            ? Math.log10(anodeConcentration / generatedUnknownConc).toFixed(4)
-                            : <span className="text-amber-400"><HelpCircle className="w-4 h-4 inline" /></span>}
-                        </td>
-
-                        {/* EMF column: show computed EMF, then let student enter concentration to verify */}
-                        <td className="text-center py-3 px-3">
-                          {unknownEmfFromBackend !== null ? (
-                            <div className="space-y-2">
-                              <div className="bg-blue-50 border border-blue-200 rounded px-2 py-1 text-center">
-                                <p className="text-xs text-blue-600 font-medium">EMF (from cell)</p>
-                                <p className="font-mono font-bold text-blue-700">{unknownEmfFromBackend.toFixed(4)} V</p>
-                              </div>
-                              <div className="flex items-center gap-2 justify-center">
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  placeholder="Your Conc (M)"
-                                  value={unknownConcObserved}
-                                  onChange={e => { setUnknownConcObserved(e.target.value); setUnknownConcVerified(null); }}
-                                  className="w-28 text-center font-mono h-8 text-sm"
-                                />
-                                <Button
-                                  size="sm"
-                                  onClick={verifyUnknownConc}
-                                  disabled={!unknownConcObserved}
-                                  className="h-8 px-3 lab-gradient-bg text-primary-foreground text-xs"
-                                >
-                                  Verify
-                                </Button>
-                              </div>
-                              {unknownConcVerified !== null && (
-                                <p className={`text-xs font-semibold ${unknownConcVerified ? "text-green-600" : "text-red-500"}`}>
-                                  {unknownConcVerified ? "✓ Correct! Well done." : `✗ Incorrect. Try again using the Nernst equation.`}
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-amber-500 italic">Click "Get EMF" to reveal the EMF</span>
-                          )}
-                        </td>
-                      </motion.tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Nernst equation reminder */}
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-blue-700 text-xs font-medium">
-                    📐 Nernst Equation: E<sub>cell</sub> = E°<sub>cell</sub> − (0.0591/n) × log([{anode.solutionFormula}]/[{cathode.solutionFormula}])
-                    &nbsp;|&nbsp; E°<sub>cell</sub> = <strong>{E0cell.toFixed(3)} V</strong>, n = 2
-                  </p>
-                </div>
-              </>
-            )}
+            {/* Nernst equation reminder */}
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-blue-700 text-xs font-medium">
+                📐 Nernst Equation: E<sub>cell</sub> = E°<sub>cell</sub> − (0.0591/n) × log([{anode.solutionFormula}]/[{cathode.solutionFormula}])
+                &nbsp;|&nbsp; E°<sub>cell</sub> = <strong>{E0cell.toFixed(3)} V</strong>, n = 2
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}

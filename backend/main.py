@@ -11,13 +11,14 @@ Supports:
   - File uploads
 """
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header, Depends
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import List, Optional
 #from supabase import create_client, Client
+import logging
 import os
 import shutil
 import uuid
@@ -53,8 +54,18 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 # Accept either GOOGLE_CLIENT_ID or the Vite-prefixed variant from the root .env
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") or os.getenv("VITE_GOOGLE_CLIENT_ID", "")
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("labfinity")
+
 # --------------- App ---------------
 app = FastAPI(title="Labfinity API")
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info("Incoming request: %s %s", request.method, request.url.path)
+    response = await call_next(request)
+    logger.info("Request complete: %s %s -> %s", request.method, request.url.path, response.status_code)
+    return response
 
 # Create tables on startup
 @app.on_event("startup")
@@ -181,15 +192,19 @@ class SignInRequest(BaseModel):
 @app.post("/api/signin")
 def sign_in(req: SignInRequest, db: Session = Depends(get_db)):
     """Authenticate a user and return a JWT token."""
+    logger.info("Signin attempt for email=%s", req.email)
 
     user = db.query(User).filter(User.email == req.email).first()
     if not user or not user.password:
+        logger.warning("Signin failed for email=%s: user not found or missing password", req.email)
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     if not bcrypt.checkpw(req.password.encode(), user.password.encode()):
+        logger.warning("Signin failed for email=%s: invalid password", req.email)
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     token = create_access_token({"user_id": user.id, "email": user.email, "role": user.role})
+    logger.info("Signin successful for user_id=%s email=%s role=%s", user.id, user.email, user.role)
     return {
         "access_token": token,
         "user_id": user.id,
@@ -301,8 +316,9 @@ def get_me(authorization: Optional[str] = Header(None), db: Session = Depends(ge
 
 # ---- Sign Out ----
 @app.post("/api/signout")
-def sign_out():
+def sign_out(authorization: Optional[str] = Header(None)):
     """Client should delete stored token; server just confirms."""
+    logger.info("Signout request received, authorization header present=%s", bool(authorization))
     return {"message": "Signed out successfully"}
 
 

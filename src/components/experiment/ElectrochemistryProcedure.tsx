@@ -3,29 +3,34 @@ import ProcedureCard from "./ProcedureCard";
 const ElectrochemistryProcedure = () => {
   const steps = [
     {
-      title: "Setting Up the Half-Cells",
+      title: "Prepare the Electrodes and Solutions",
       content:
-        "Take two clean beakers. Pour ZnSO₄ in one and CuSO₄ in the other. Immerse zinc and copper electrodes respectively.",
+        "Clean the zinc and copper electrodes with sandpaper to remove oxide. Pour ZnSO₄ solution into one beaker and CuSO₄ solution into the other.",
     },
     {
-      title: "Connecting the Salt Bridge",
+      title: "Assemble the Half-Cells",
       content:
-        "Connect the two half-cells using a salt bridge filled with KCl or KNO₃ solution.",
+        "Place the zinc electrode into the ZnSO₄ beaker and the copper electrode into the CuSO₄ beaker. Keep the two beakers close enough to connect them with the salt bridge.",
     },
     {
-      title: "Measuring EMF",
+      title: "Connect the Salt Bridge",
       content:
-        "Connect electrodes to voltmeter. Zinc to negative terminal and copper to positive terminal.",
+        "Insert the salt bridge soaked in KCl or KNO₃ solution between the two beakers. Ensure the bridge connects both solutions without mixing them directly.",
     },
     {
-      title: "Varying Concentration",
+      title: "Attach the Voltmeter",
       content:
-        "Change concentration and measure EMF. Record observations to verify Nernst equation.",
+        "Connect the zinc electrode to the negative terminal of the voltmeter and the copper electrode to the positive terminal. Allow the reading to stabilize before recording.",
     },
     {
-      title: "Data Analysis",
+      title: "Record Observation Table Values",
       content:
-        "Plot EMF vs log([Zn²⁺]/[Cu²⁺]). Compare slope with theoretical value.",
+        "For each trial, enter the measured concentrations, calculate log([Zn²⁺]/[Cu²⁺]), and record the observed EMF from the voltmeter.",
+    },
+    {
+      title: "Analyze the Results",
+      content:
+        "Compare the recorded EMF values against the Nernst equation. Plot EMF versus log([Zn²⁺]/[Cu²⁺]) to verify the expected trend.",
     },
   ];
 

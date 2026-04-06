@@ -41,7 +41,7 @@ export const experiments: ExperimentCatalogItem[] = [
     subjectName: "Chemistry",
     title: "Electrochemistry - EMF Measurement",
     topic: "Electrochemistry",
-    description: "Measure EMF of electrochemical cells using Daniell cell, verify Nernst equation",
+    description: "Measure EMF of electrochemical cells and verify the Nernst equation",
     path: "/subjects/chemistry/experiments/1",
     icon: Sparkles,
   },
