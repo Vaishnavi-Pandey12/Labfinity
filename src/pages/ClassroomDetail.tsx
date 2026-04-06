@@ -376,7 +376,9 @@ const ClassroomDetail = () => {
                                                 <div className="flex-shrink-0 flex flex-col items-end">
                                                     {a.experimentPath && (
                                                         <Button asChild variant="outline" size="sm" className="mb-2">
-                                                            <Link to={a.experimentPath}>
+                                                            <Link
+                                                                to={`${a.experimentPath}?fromClassroom=1&classroomId=${classroomId}`}
+                                                            >
                                                                 <ExternalLink className="w-4 h-4 mr-1" />
                                                                 Open Experiment
                                                             </Link>
