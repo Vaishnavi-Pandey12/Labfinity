@@ -1,8 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Play, RotateCcw, Zap, Lightbulb } from "lucide-react";
 import AbsorbanceGraph from "./AbsorbanceGraph";
 
@@ -13,6 +15,14 @@ interface DataPoint {
   sin2: number;
 }
 
+const mediumMap = {
+  Air: 1.0,
+  Water: 1.33,
+  Glass: 1.5,
+  Acrylic: 1.49,
+} as const;
+type Medium = keyof typeof mediumMap;
+
 const calculateRefraction = (n1: number, n2: number, theta1: number) => {
   const rad = (theta1 * Math.PI) / 180;
   const sinTheta2 = (n1 / n2) * Math.sin(rad);
@@ -20,10 +30,99 @@ const calculateRefraction = (n1: number, n2: number, theta1: number) => {
   return (Math.asin(sinTheta2) * 180) / Math.PI;
 };
 
+interface ProtractorProps {
+  incidenceX: number;
+  incidenceY: number;
+}
+
+const Protractor = ({ incidenceX, incidenceY }: ProtractorProps) => {
+  const [position, setPosition] = useState({ x: 290, y: 18 });
+  const [angle, setAngle] = useState(0);
+  const dragState = useRef<{ mode: "drag" | "rotate"; startX: number; startY: number; startAngle: number } | null>(null);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!dragState.current) return;
+      const active = dragState.current;
+      if (active.mode === "drag") {
+        setPosition((prev) => ({
+          x: prev.x + (e.clientX - active.startX),
+          y: prev.y + (e.clientY - active.startY),
+        }));
+        dragState.current = { ...active, startX: e.clientX, startY: e.clientY };
+      } else {
+        setAngle(active.startAngle + (e.clientX - active.startX) * 0.5);
+      }
+    };
+
+    const onUp = () => {
+      dragState.current = null;
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onSnap = () => {
+      setPosition({ x: incidenceX - 120, y: incidenceY - 120 });
+      setAngle(0);
+    };
+    window.addEventListener("snap-protractor", onSnap as EventListener);
+    return () => window.removeEventListener("snap-protractor", onSnap as EventListener);
+  }, [incidenceX, incidenceY]);
+
+  return (
+    <div
+      className="absolute z-20 cursor-grab active:cursor-grabbing"
+      style={{ left: position.x, top: position.y, transform: `rotate(${angle}deg)`, transformOrigin: "120px 120px" }}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        if (e.shiftKey) {
+          dragState.current = { mode: "rotate", startX: e.clientX, startY: e.clientY, startAngle: angle };
+        } else {
+          dragState.current = { mode: "drag", startX: e.clientX, startY: e.clientY, startAngle: angle };
+        }
+      }}
+    >
+      <svg width="240" height="132" viewBox="0 0 240 132">
+        <path d="M20,120 A100,100 0 0 1 220,120" fill="rgba(253,224,71,0.45)" stroke="#ca8a04" strokeWidth="3" />
+        <line x1="20" y1="120" x2="220" y2="120" stroke="#ca8a04" strokeWidth="2" />
+        {[...Array(181)].map((_, deg) => {
+          const rad = ((180 - deg) * Math.PI) / 180;
+          const outerX = 120 + 100 * Math.cos(rad);
+          const outerY = 120 - 100 * Math.sin(rad);
+          const tickLen = deg % 10 === 0 ? 10 : deg % 5 === 0 ? 6 : 3;
+          const innerX = 120 + (100 - tickLen) * Math.cos(rad);
+          const innerY = 120 - (100 - tickLen) * Math.sin(rad);
+          return <line key={deg} x1={outerX} y1={outerY} x2={innerX} y2={innerY} stroke="#854d0e" strokeWidth={deg % 10 === 0 ? 1.4 : 1} />;
+        })}
+        {[...Array(19)].map((_, i) => {
+          const deg = i * 10;
+          const rad = ((180 - deg) * Math.PI) / 180;
+          const tx = 120 + 82 * Math.cos(rad);
+          const ty = 120 - 82 * Math.sin(rad);
+          return <text key={deg} x={tx} y={ty} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill="#78350f">{deg}</text>;
+        })}
+        <circle cx="120" cy="120" r="4" fill="#78350f" />
+        <line x1="120" y1="120" x2={incidenceX} y2={incidenceY} stroke="#facc15" strokeWidth="1.5" strokeDasharray="4 3" />
+      </svg>
+    </div>
+  );
+};
+
 const RefractionSimulator = () => {
+  const [medium1, setMedium1] = useState<Medium>("Air");
+  const [medium2, setMedium2] = useState<Medium>("Glass");
   const [n1, setN1] = useState(1.0);
   const [n2, setN2] = useState(1.5);
   const [theta1, setTheta1] = useState(30);
+  const [showNormal, setShowNormal] = useState(true);
+  const [showAngles, setShowAngles] = useState(true);
   const [dataPoints, setDataPoints] = useState<DataPoint[]>([]);
 
   const theta2 = calculateRefraction(n1, n2, theta1);
@@ -52,7 +151,19 @@ const RefractionSimulator = () => {
     setTheta1(30);
     setN1(1.0);
     setN2(1.5);
+    setMedium1("Air");
+    setMedium2("Glass");
+    setShowNormal(true);
+    setShowAngles(true);
   }, []);
+
+  useEffect(() => {
+    setN1(mediumMap[medium1]);
+  }, [medium1]);
+
+  useEffect(() => {
+    setN2(mediumMap[medium2]);
+  }, [medium2]);
 
   return (
     <div className="space-y-6">
@@ -80,6 +191,28 @@ const RefractionSimulator = () => {
 
             {/* Sliders */}
             <div className="space-y-2">
+              <label className="text-sm font-medium">Medium 1</label>
+              <select
+                value={medium1}
+                onChange={(e) => setMedium1(e.target.value as Medium)}
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              >
+                {Object.keys(mediumMap).map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Medium 2</label>
+              <select
+                value={medium2}
+                onChange={(e) => setMedium2(e.target.value as Medium)}
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              >
+                {Object.keys(mediumMap).map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+
+            <div className="space-y-2">
               <label className="text-sm font-medium">Refractive Index n₁</label>
               <Slider value={[n1]} onValueChange={([v]) => setN1(v)} min={1} max={2.5} step={0.01}/>
             </div>
@@ -106,6 +239,17 @@ const RefractionSimulator = () => {
                   θ₂ = {theta2.toFixed(2)}°
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between rounded-md border p-2">
+                <Label htmlFor="normal-toggle">Show Normal</Label>
+                <Switch id="normal-toggle" checked={showNormal} onCheckedChange={setShowNormal} />
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-2">
+                <Label htmlFor="angle-toggle">Show Angles</Label>
+                <Switch id="angle-toggle" checked={showAngles} onCheckedChange={setShowAngles} />
+              </div>
             </div>
 
             {/* Buttons */}
@@ -137,29 +281,86 @@ const RefractionSimulator = () => {
           </CardHeader>
 
           <CardContent>
-            <svg width="100%" height="300">
-              <line x1="0" y1="150" x2="400" y2="150" stroke="gray" strokeWidth="2"/>
+            <div className="relative rounded-xl border bg-slate-50 overflow-hidden h-[320px]">
+              <div className="absolute inset-x-0 top-0 h-1/2 bg-sky-100/70" />
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-cyan-200/40" />
+              <svg width="100%" height="100%" viewBox="0 0 420 320">
+                <line x1="0" y1="160" x2="420" y2="160" stroke="#64748b" strokeWidth="2.5"/>
 
-              <line
-                x1="200"
-                y1="150"
-                x2={200 - 120 * Math.sin((theta1 * Math.PI)/180)}
-                y2={150 - 120 * Math.cos((theta1 * Math.PI)/180)}
-                stroke="orange"
-                strokeWidth="3"
-              />
+                {showNormal && (
+                  <line x1="210" y1="35" x2="210" y2="285" stroke="#334155" strokeDasharray="6 6" strokeWidth="1.5" />
+                )}
 
-              {theta2 !== null && (
                 <line
-                  x1="200"
-                  y1="150"
-                  x2={200 + 120 * Math.sin((theta2 * Math.PI)/180)}
-                  y2={150 + 120 * Math.cos((theta2 * Math.PI)/180)}
-                  stroke="blue"
-                  strokeWidth="3"
+                  x1="210"
+                  y1="160"
+                  x2={210 - 130 * Math.sin((theta1 * Math.PI)/180)}
+                  y2={160 - 130 * Math.cos((theta1 * Math.PI)/180)}
+                  stroke="#ef4444"
+                  strokeWidth="3.5"
                 />
-              )}
-            </svg>
+
+                {theta2 !== null ? (
+                  <line
+                    x1="210"
+                    y1="160"
+                    x2={210 + 130 * Math.sin((theta2 * Math.PI)/180)}
+                    y2={160 + 130 * Math.cos((theta2 * Math.PI)/180)}
+                    stroke="#ef4444"
+                    strokeWidth="3.5"
+                  />
+                ) : (
+                  <line
+                    x1="210"
+                    y1="160"
+                    x2={210 + 130 * Math.sin((theta1 * Math.PI)/180)}
+                    y2={160 - 130 * Math.cos((theta1 * Math.PI)/180)}
+                    stroke="#ef4444"
+                    strokeWidth="3.5"
+                    strokeDasharray="8 4"
+                  />
+                )}
+
+                {showAngles && (
+                  <>
+                    <path
+                      d={`M 210 120 A 40 40 0 0 0 ${210 - 40 * Math.sin((theta1 * Math.PI) / 180)} ${120 + 40 * (1 - Math.cos((theta1 * Math.PI) / 180))}`}
+                      fill="none"
+                      stroke="#f97316"
+                      strokeWidth="2"
+                    />
+                    <text x="156" y="126" fill="#ea580c" fontSize="12">θ₁ {theta1.toFixed(1)}°</text>
+
+                    {theta2 !== null && (
+                      <>
+                        <path
+                          d={`M 210 200 A 40 40 0 0 1 ${210 + 40 * Math.sin((theta2 * Math.PI) / 180)} ${200 - 40 * (1 - Math.cos((theta2 * Math.PI) / 180))}`}
+                          fill="none"
+                          stroke="#0284c7"
+                          strokeWidth="2"
+                        />
+                        <text x="226" y="223" fill="#0369a1" fontSize="12">θ₂ {theta2.toFixed(1)}°</text>
+                      </>
+                    )}
+                  </>
+                )}
+
+                <circle cx="210" cy="160" r="4.2" fill="#0f172a" />
+              </svg>
+
+              <Protractor incidenceX={210} incidenceY={160} />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="absolute right-3 bottom-3 z-30"
+                onClick={() => {
+                  const evt = new CustomEvent("snap-protractor");
+                  window.dispatchEvent(evt);
+                }}
+              >
+                Snap to Normal
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
