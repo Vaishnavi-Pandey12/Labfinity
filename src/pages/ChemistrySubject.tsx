@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FlaskConical, ChevronRight, ChevronLeft } from "lucide-react";
@@ -91,6 +92,17 @@ const ChemistrySubject = () => {
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-display font-bold mb-6">Select Experiment</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            <select className="rounded-md border bg-background px-3 py-2 text-sm" value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)}>
+              {topics.map((topic) => <option key={topic} value={topic}>{topic === "All" ? "All Topics" : topic}</option>)}
+            </select>
+            <select className="rounded-md border bg-background px-3 py-2 text-sm" value={selectedStandard} onChange={(e) => setSelectedStandard(e.target.value)}>
+              {standards.map((standard) => <option key={standard} value={standard}>{standard === "All" ? "All Standards" : standard}</option>)}
+            </select>
+            <select className="rounded-md border bg-background px-3 py-2 text-sm" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
+              {types.map((type) => <option key={type} value={type}>{type === "All" ? "All Experiment Types" : type}</option>)}
+            </select>
+          </div>
 
           <motion.div
             variants={containerVariants}

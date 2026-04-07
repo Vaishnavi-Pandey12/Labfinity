@@ -1,224 +1,336 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { RotateCcw, Zap, Play } from "lucide-react";
-import {
-  ResponsiveContainer,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Line,
-  LineChart,
-} from "recharts";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Pause, Play, RotateCcw, Rocket } from "lucide-react";
 
-const g = 9.8;
+type Point = { x: number; y: number };
 
-interface DataPoint {
-  angle: number;
-  range: number;
-}
+const ProjectileDiagram = () => {
+  return (
+    <div className="mt-8 p-4 md:p-6 bg-white rounded-xl border">
+      <h3 className="text-sm font-semibold text-slate-700 mb-3">Projectile Motion Reference Diagram</h3>
+      <svg width="100%" height="300" viewBox="0 0 600 300">
+        <defs>
+          <marker id="arrow-ref" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <polygon points="0 0, 6 3, 0 6" fill="black" />
+          </marker>
+        </defs>
+
+        <line x1="50" y1="250" x2="550" y2="250" stroke="black" />
+        <line x1="50" y1="250" x2="50" y2="50" stroke="black" />
+        <text x="560" y="254" fontSize="12">X</text>
+        <text x="44" y="44" fontSize="12">Y</text>
+
+        <path d="M50 250 Q300 50 550 250" stroke="green" fill="none" strokeWidth="2.5" />
+
+        <circle cx="50" cy="250" r="4" fill="black" />
+        <text x="40" y="270" fontSize="12">O</text>
+
+        <circle cx="300" cy="50" r="4" fill="green" />
+        <text x="290" y="40" fontSize="12">A</text>
+
+        <circle cx="550" cy="250" r="4" fill="black" />
+        <text x="540" y="270" fontSize="12">B</text>
+
+        <line x1="50" y1="250" x2="120" y2="180" stroke="green" markerEnd="url(#arrow-ref)" />
+        <text x="124" y="176" fill="green" fontSize="12">u</text>
+
+        <line x1="50" y1="250" x2="120" y2="250" stroke="blue" markerEnd="url(#arrow-ref)" />
+        <text x="87" y="266" fill="blue" fontSize="12">ux = u cosθ</text>
+
+        <line x1="50" y1="250" x2="50" y2="180" stroke="red" markerEnd="url(#arrow-ref)" />
+        <text x="56" y="202" fill="red" fontSize="12">uy = u sinθ</text>
+
+        <line x1="300" y1="50" x2="300" y2="250" stroke="black" strokeDasharray="4 4" />
+        <text x="306" y="154" fontSize="12">H</text>
+
+        <line x1="50" y1="260" x2="550" y2="260" stroke="black" />
+        <text x="272" y="282" fontSize="12">Range (R)</text>
+
+        <path d="M50 250 A30 30 0 0 1 80 230" stroke="black" fill="none" />
+        <text x="70" y="245" fontSize="12">θ</text>
+      </svg>
+    </div>
+  );
+};
 
 const ProjectileMotionSimulator = () => {
-  const [velocity, setVelocity] = useState(20);
-  const [angle, setAngle] = useState(45);
-  const [observations, setObservations] = useState<DataPoint[]>([]);
+  const [u, setU] = useState(28);
+  const [angle, setAngle] = useState(42);
+  const [gravity, setGravity] = useState(9.8);
+  const [height, setHeight] = useState(0);
 
-  const rad = (angle * Math.PI) / 180;
-  const timeOfFlight = (2 * velocity * Math.sin(rad)) / g;
-  const maxHeight = (velocity ** 2 * Math.sin(rad) ** 2) / (2 * g);
-  const range = (velocity ** 2 * Math.sin(2 * rad)) / g;
+  const [showTrajectory, setShowTrajectory] = useState(true);
+  const [showVelocityVector, setShowVelocityVector] = useState(true);
+  const [showComponents, setShowComponents] = useState(true);
+  const [slowMotion, setSlowMotion] = useState(false);
+  const [vectorScale, setVectorScale] = useState(1);
 
-  const addObservation = () => {
-    const newPoint = { angle, range };
-    setObservations((prev) =>
-      [...prev, newPoint].sort((a, b) => a.angle - b.angle)
-    );
-  };
+  const [running, setRunning] = useState(false);
+  const [time, setTime] = useState(0);
+  const [impactRange, setImpactRange] = useState<number | null>(null);
+  const [trajectory, setTrajectory] = useState<Point[]>([]);
 
-  const reset = () => {
-    setVelocity(20);
-    setAngle(45);
-    setObservations([]);
-  };
+  const rafRef = useRef<number | null>(null);
+  const lastRef = useRef<number | null>(null);
+
+  const theta = (angle * Math.PI) / 180;
+  const ux = u * Math.cos(theta);
+  const uy = u * Math.sin(theta);
+  const speedScale = slowMotion ? 0.35 : 1;
+
+  const x = ux * time;
+  const y = height + uy * time - 0.5 * gravity * time * time;
+  const vy = uy - gravity * time;
+  const speed = Math.sqrt(ux * ux + vy * vy);
+
+  const tPeak = uy / gravity;
+  const yPeak = height + uy * tPeak - 0.5 * gravity * tPeak * tPeak;
+  const xPeak = ux * tPeak;
+  const flightTime = (uy + Math.sqrt(uy * uy + 2 * gravity * height)) / gravity;
+  const estimatedRange = ux * flightTime;
+  const estimatedHMax = (uy * uy) / (2 * gravity) + height;
+
+  const reset = useCallback(() => {
+    setRunning(false);
+    setTime(0);
+    setTrajectory([]);
+    setImpactRange(null);
+    lastRef.current = null;
+  }, []);
+
+  const start = useCallback(() => {
+    if (impactRange !== null) reset();
+    setRunning(true);
+  }, [impactRange, reset]);
+
+  useEffect(() => {
+    if (!running) return;
+
+    const frame = (now: number) => {
+      if (!lastRef.current) lastRef.current = now;
+      const dt = Math.min((now - lastRef.current) / 1000, 1 / 30) * speedScale;
+      lastRef.current = now;
+
+      setTime((prevT) => {
+        const nextT = prevT + dt;
+        const nextX = ux * nextT;
+        const nextY = height + uy * nextT - 0.5 * gravity * nextT * nextT;
+
+        setTrajectory((prev) => [...prev, { x: nextX, y: Math.max(nextY, 0) }]);
+
+        if (nextY <= 0 && nextT > 0.01) {
+          setRunning(false);
+          setImpactRange(nextX);
+          lastRef.current = null;
+          return nextT;
+        }
+        return nextT;
+      });
+
+      rafRef.current = requestAnimationFrame(frame);
+    };
+
+    rafRef.current = requestAnimationFrame(frame);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      lastRef.current = null;
+    };
+  }, [running, ux, uy, gravity, height, speedScale]);
+
+  const sim = useMemo(() => {
+    const canvasWidth = 760;
+    const canvasHeight = 430;
+    const scaleX = (canvasWidth - 140) / (estimatedRange + 50);
+    const scaleY = (canvasHeight - 140) / (estimatedHMax + 50);
+    const scale = Math.max(2.5, Math.min(scaleX, scaleY));
+    const originX = 80;
+    const groundY = 360;
+    const ballX = originX + x * scale;
+    const ballY = groundY - Math.max(y, 0) * scale;
+
+    const points = trajectory
+      .map((p) => `${originX + p.x * scale},${groundY - p.y * scale}`)
+      .join(" ");
+
+    return { scale, originX, groundY, ballX, ballY, points };
+  }, [x, y, trajectory, estimatedRange, estimatedHMax]);
 
   return (
-    <div className="space-y-6">
+    <Card className="glass-card border-0">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Rocket className="w-5 h-5 text-primary" />
+          Projectile Motion Virtual Lab
+        </CardTitle>
+      </CardHeader>
 
-      {/* Controls + Results */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <CardContent>
+        <div className="flex w-full flex-col lg:flex-row gap-6">
+          <section className="w-full lg:w-[70%] border rounded-2xl bg-white/95 p-4 md:p-6">
+            <div className="relative h-[430px] rounded-xl overflow-hidden bg-gradient-to-b from-sky-100 via-sky-50 to-slate-100">
+              <div className="absolute top-5 right-6 flex gap-3 opacity-80">
+                <div className="w-12 h-6 bg-white rounded-full" />
+                <div className="w-16 h-7 bg-white rounded-full" />
+              </div>
+              <div className="absolute left-16 bottom-0 right-0 h-20 bg-gradient-to-t from-green-500 to-green-400" />
 
-        {/* Controls */}
-        <Card className="glass-card border-0">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 font-display">
-              <Zap className="w-5 h-5 text-primary" />
-              Controls
-            </CardTitle>
-          </CardHeader>
+              <svg viewBox="0 0 760 430" className="relative z-10 w-full h-full">
+                <defs>
+                  <marker id="arrow-projectile" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 z" fill="currentColor" />
+                  </marker>
+                </defs>
 
-          <CardContent className="space-y-6">
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Initial Velocity (m/s)
-              </label>
-              <span className="text-sm font-mono bg-muted px-2 py-1 rounded">
-                {velocity} m/s
-              </span>
-              <Slider
-                value={[velocity]}
-                onValueChange={([v]) => setVelocity(v)}
-                min={5}
-                max={50}
-                step={1}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Angle (°)</label>
-              <span className="text-sm font-mono bg-muted px-2 py-1 rounded">
-                {angle}°
-              </span>
-              <Slider
-                value={[angle]}
-                onValueChange={([v]) => setAngle(v)}
-                min={10}
-                max={80}
-                step={1}
-              />
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <Button
-                onClick={addObservation}
-                className="flex-1 gap-2 lab-gradient-bg text-primary-foreground"
-              >
-                <Play className="w-4 h-4" />
-                Add Observation
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={reset}
-                className="flex-1 gap-2"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Reset
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <Card className="glass-card border-0">
-          <CardHeader>
-            <CardTitle className="font-display">
-              Calculated Results
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-4 text-center">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <p className="text-sm text-muted-foreground">Time of Flight</p>
-              <p className="text-xl font-bold text-primary">
-                {timeOfFlight.toFixed(2)} s
-              </p>
-
-              <p className="text-sm text-muted-foreground mt-4">Maximum Height</p>
-              <p className="text-xl font-bold text-primary">
-                {maxHeight.toFixed(2)} m
-              </p>
-
-              <p className="text-sm text-muted-foreground mt-4">Range</p>
-              <p className="text-xl font-bold text-primary">
-                {range.toFixed(2)} m
-              </p>
-            </motion.div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Graph */}
-      {observations.length > 0 && (
-        <Card className="glass-card border-0">
-          <CardHeader>
-            <CardTitle className="font-display">
-              Range vs Angle Graph
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={observations}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="angle"
-                  label={{ value: "Angle (°)", position: "insideBottom", offset: -5 }}
+                <line x1="40" y1={sim.groundY} x2="740" y2={sim.groundY} stroke="#166534" strokeWidth="2" />
+                <rect
+                  x={sim.originX - 6}
+                  y={sim.groundY - height * sim.scale}
+                  width={12}
+                  height={height * sim.scale}
+                  fill="#475569"
+                  rx="3"
                 />
-                <YAxis
-                  label={{ value: "Range (m)", angle: -90, position: "insideLeft" }}
-                />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="range"
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
+                <circle cx={sim.originX} cy={sim.groundY - height * sim.scale} r="6" fill="#1e293b" />
 
-      {/* Observation Table */}
-      {observations.length > 0 && (
-        <Card className="glass-card border-0">
-          <CardHeader>
-            <CardTitle className="font-display">
-              Observation Table
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4">S.No</th>
-                    <th className="text-left py-3 px-4">Angle (°)</th>
-                    <th className="text-left py-3 px-4">Range (m)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {observations.map((obs, index) => (
-                    <motion.tr
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="border-b border-border/50 hover:bg-muted/50"
-                    >
-                      <td className="py-3 px-4">{index + 1}</td>
-                      <td className="py-3 px-4 font-mono">{obs.angle}</td>
-                      <td className="py-3 px-4 font-mono">
-                        {obs.range.toFixed(2)}
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
+                <line
+                  x1={sim.originX}
+                  y1={sim.groundY - height * sim.scale}
+                  x2={sim.originX + 52 * Math.cos(theta)}
+                  y2={sim.groundY - height * sim.scale - 52 * Math.sin(theta)}
+                  stroke="#0f172a"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                />
+
+                <path
+                  d={`M ${sim.originX + 26} ${sim.groundY - height * sim.scale} A 24 24 0 0 0 ${sim.originX + 26 * Math.cos(theta)} ${sim.groundY - height * sim.scale - 26 * Math.sin(theta)}`}
+                  fill="none"
+                  stroke="#2563eb"
+                  strokeWidth="2"
+                />
+                <text x={sim.originX + 24} y={sim.groundY - height * sim.scale - 30} fill="#2563eb" fontSize="12">
+                  θ={angle}°
+                </text>
+
+                {showTrajectory && trajectory.length > 1 && (
+                  <polyline points={sim.points} fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" />
+                )}
+
+                {tPeak > 0 && yPeak > 0 && (
+                  <>
+                    <circle cx={sim.originX + xPeak * sim.scale} cy={sim.groundY - yPeak * sim.scale} r="4" fill="#f59e0b" />
+                    <text x={sim.originX + xPeak * sim.scale + 8} y={sim.groundY - yPeak * sim.scale - 6} fill="#b45309" fontSize="12">
+                      Hmax
+                    </text>
+                  </>
+                )}
+
+                <circle cx={sim.ballX} cy={sim.ballY} r="9" fill="#ef4444" stroke="#7f1d1d" strokeWidth="2" />
+
+                {showVelocityVector && (
+                  <>
+                    <line
+                      x1={sim.ballX}
+                      y1={sim.ballY}
+                      x2={sim.ballX + ux * vectorScale}
+                      y2={sim.ballY - vy * vectorScale}
+                      stroke="#dc2626"
+                      strokeWidth="3"
+                      markerEnd="url(#arrow-projectile)"
+                    />
+                    <text x={sim.ballX + ux * vectorScale + 6} y={sim.ballY - vy * vectorScale} fill="#dc2626" fontSize="13" fontWeight="700">
+                      v
+                    </text>
+                  </>
+                )}
+
+                {showComponents && (
+                  <>
+                    <line x1={sim.ballX} y1={sim.ballY} x2={sim.ballX + ux * vectorScale} y2={sim.ballY} stroke="#2563eb" strokeWidth="3" markerEnd="url(#arrow-projectile)" />
+                    <line x1={sim.ballX} y1={sim.ballY} x2={sim.ballX} y2={sim.ballY - vy * vectorScale} stroke="#ef4444" strokeWidth="3" markerEnd="url(#arrow-projectile)" />
+                    <text x={sim.ballX + ux * vectorScale + 6} y={sim.ballY - 4} fill="#1d4ed8" fontSize="13" fontWeight="700">vx</text>
+                    <text x={sim.ballX + 4} y={sim.ballY - vy * vectorScale - 6} fill="#b91c1c" fontSize="13" fontWeight="700">vy</text>
+                  </>
+                )}
+
+                {impactRange !== null && (
+                  <>
+                    <circle cx={sim.originX + impactRange * sim.scale} cy={sim.groundY} r="6" fill="#f59e0b" />
+                    <text x={sim.originX + impactRange * sim.scale + 8} y={sim.groundY - 8} fill="#b45309" fontSize="12">
+                      B ({impactRange.toFixed(2)} m)
+                    </text>
+                  </>
+                )}
+              </svg>
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </section>
+
+          <aside className="w-full lg:w-[30%] space-y-4">
+            <Card className="border">
+              <CardContent className="pt-6 space-y-4">
+                <div className="grid grid-cols-3 gap-2">
+                  <Button onClick={start}><Play className="w-4 h-4 mr-2" />Start</Button>
+                  <Button variant="outline" onClick={() => setRunning(false)}><Pause className="w-4 h-4 mr-2" />Pause</Button>
+                  <Button variant="secondary" onClick={reset}><RotateCcw className="w-4 h-4 mr-2" />Reset</Button>
+                </div>
+
+                <div>
+                  <Label>Initial velocity (u): {u.toFixed(1)} m/s</Label>
+                  <Slider value={[u]} min={5} max={80} step={0.5} onValueChange={([v]) => setU(v)} />
+                </div>
+                <div>
+                  <Label>Angle (θ): {angle}°</Label>
+                  <Slider value={[angle]} min={5} max={85} step={1} onValueChange={([v]) => setAngle(v)} />
+                </div>
+                <div>
+                  <Label>Gravity (g): {gravity.toFixed(2)} m/s²</Label>
+                  <Slider value={[gravity]} min={1.6} max={24.8} step={0.1} onValueChange={([v]) => setGravity(v)} />
+                </div>
+                <div>
+                  <Label>Launch height: {height.toFixed(1)} m</Label>
+                  <Slider value={[height]} min={0} max={20} step={0.5} onValueChange={([v]) => setHeight(v)} />
+                </div>
+                <div>
+                  <Label>Vector scale: {vectorScale.toFixed(2)}</Label>
+                  <Slider value={[vectorScale]} min={0.3} max={1.6} step={0.05} onValueChange={([v]) => setVectorScale(v)} />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between border rounded-lg p-2">
+                    <Label htmlFor="trajectory-toggle">Show trajectory</Label>
+                    <Switch id="trajectory-toggle" checked={showTrajectory} onCheckedChange={setShowTrajectory} />
+                  </div>
+                  <div className="flex items-center justify-between border rounded-lg p-2">
+                    <Label htmlFor="velocity-toggle">Show velocity vector</Label>
+                    <Switch id="velocity-toggle" checked={showVelocityVector} onCheckedChange={setShowVelocityVector} />
+                  </div>
+                  <div className="flex items-center justify-between border rounded-lg p-2">
+                    <Label htmlFor="component-toggle">Show components (vx, vy)</Label>
+                    <Switch id="component-toggle" checked={showComponents} onCheckedChange={setShowComponents} />
+                  </div>
+                  <div className="flex items-center justify-between border rounded-lg p-2">
+                    <Label htmlFor="slow-toggle">Slow motion</Label>
+                    <Switch id="slow-toggle" checked={slowMotion} onCheckedChange={setSlowMotion} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 border rounded-lg p-3 text-sm bg-muted/20">
+                  <p>t: <span className="font-semibold">{time.toFixed(2)} s</span></p>
+                  <p>Range: <span className="font-semibold">{x.toFixed(2)} m</span></p>
+                  <p>Height: <span className="font-semibold">{Math.max(y, 0).toFixed(2)} m</span></p>
+                  <p>Speed: <span className="font-semibold">{speed.toFixed(2)} m/s</span></p>
+                </div>
+              </CardContent>
+            </Card>
+          </aside>
+        </div>
+        <ProjectileDiagram />
+      </CardContent>
+    </Card>
   );
 };
 
