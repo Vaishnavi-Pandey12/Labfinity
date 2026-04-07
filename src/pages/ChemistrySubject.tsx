@@ -3,84 +3,9 @@ import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  FlaskConical,
-  ChevronRight,
-  ChevronLeft,
-  Beaker,
-  Sparkles,
-  Lightbulb,
-  TestTube2,
-  Droplets
-} from "lucide-react";
+import { FlaskConical, ChevronRight, ChevronLeft } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
-
-const experiments = [
-  {
-    id: 1,
-    title: "Electrochemistry - EMF Measurement",
-    topic: "Electrochemistry",
-    description: "Measure EMF of electrochemical cells using Daniell cell, verify Nernst equation",
-    icon: Sparkles,
-    standard: "Class 12",
-    type: "Practical",
-
-  },
-  {
-    id: 2,
-    title: "Beer-Lambert Law - Colorimetry",
-    topic: "Colorimetry",
-    description: "Verify Beer-Lambert law by measuring absorbance at different concentrations",
-    icon: TestTube2,
-    standard: "Class 11",
-    type: "Analytical",
-
-  },
-  {
-    id: 3,
-    title: "Potentiometric Titration",
-    topic: "Potentiometry",
-    description: "Perform acid-base, redox, and precipitation titrations",
-    icon: Beaker,
-    standard: "Class 12",
-    type: "Titration",
-
-  },
-  {
-    id: 4,
-    title: "UV-Vis Spectroscopy",
-    topic: "Spectroscopy",
-    description: "Study electronic transitions and absorption spectra of compounds",
-    icon: Lightbulb,
-    standard: "Class 12",
-    type: "Instrumental",
-  },
-  {
-  id: 5,
-  title: "pH-Metry - Determination of Molarity of HCl",
-  topic: "pH-Metry",
-  description: "Determine the molarity of HCl by pH-metry using standard NaOH solution and plot the titration curve",
-  icon: FlaskConical,
-  standard: "Class 11",
-  type: "Practical",
-},
-{
-  id: 6,
-  title: "Acid-Base Titration - Phenolphthalein",
-  topic: "Volumetric Analysis",
-  description: "Determine the molarity of dilute HCl using standard NaOH with phenolphthalein indicator",
-  icon: FlaskConical,
-  standard: "Class 11",
-  type: "Titration",
-},
-{ id: 7, title: "Hardness of Water — EDTA & Ion Exchange", 
-  topic: "Water Analysis",
-  description: "Estimate total hardness by EDTA titration and purify using ion-exchange resin column",
-  icon: Droplets,
-  standard: "Class 12",
-  type: "Water Analysis",
-},
-];
+import { getExperimentsBySubjectName } from "@/lib/experiments";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -96,23 +21,10 @@ const itemVariants = {
 };
 
 const ChemistrySubject = () => {
-  const [selectedTopic, setSelectedTopic] = useState("All");
-  const [selectedStandard, setSelectedStandard] = useState("All");
-  const [selectedType, setSelectedType] = useState("All");
-
-  const topics = useMemo(() => ["All", ...new Set(experiments.map((e) => e.topic))], []);
-  const standards = useMemo(() => ["All", ...new Set(experiments.map((e) => e.standard))], []);
-  const types = useMemo(() => ["All", ...new Set(experiments.map((e) => e.type))], []);
-
-  const filteredExperiments = experiments.filter((exp) =>
-    (selectedTopic === "All" || exp.topic === selectedTopic) &&
-    (selectedStandard === "All" || exp.standard === selectedStandard) &&
-    (selectedType === "All" || exp.type === selectedType),
-  );
+  const experiments = getExperimentsBySubjectName("Chemistry");
 
   return (
     <div className="min-h-screen bg-background particles-bg">
-      {/* Header */}
       <header className="sticky top-0 z-50 glass-card border-b border-border/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/home" className="flex items-center gap-3">
@@ -136,7 +48,6 @@ const ChemistrySubject = () => {
         </div>
       </header>
 
-      {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center gap-2 text-sm">
           <Link to="/home" className="text-muted-foreground hover:text-primary transition-colors">
@@ -151,7 +62,6 @@ const ChemistrySubject = () => {
         </div>
       </div>
 
-      {/* Hero */}
       <section className="py-12">
         <div className="container mx-auto px-4">
           <motion.div
@@ -179,7 +89,6 @@ const ChemistrySubject = () => {
         </div>
       </section>
 
-      {/* Experiments Grid */}
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-display font-bold mb-6">Select Experiment</h2>
@@ -201,9 +110,9 @@ const ChemistrySubject = () => {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            {filteredExperiments.map((exp) => (
-              <motion.div key={exp.id} variants={itemVariants}>
-                <Link to={`/subjects/chemistry/experiments/${exp.id}`}>
+            {experiments.map((exp) => (
+              <motion.div key={exp.path} variants={itemVariants}>
+                <Link to={exp.path}>
                   <Card className="group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative">
                     <CardHeader className="pb-4">
                       <div className="flex items-start gap-4">
@@ -224,9 +133,7 @@ const ChemistrySubject = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        </div>
+                      <div className="flex items-center justify-end">
                         <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
                     </CardContent>

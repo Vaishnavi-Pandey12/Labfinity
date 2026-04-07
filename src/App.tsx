@@ -39,13 +39,15 @@ const queryClient = new QueryClient();
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+const App = () => {
+  const appContent = (
+    <TooltipProvider>
       <AuthProvider>
+        <Toaster />
+        <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* All routes are public — login is optional */}
+            {/* All routes are public - login is optional */}
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -82,8 +84,18 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </AuthProvider>
-    </GoogleOAuthProvider>
-  </QueryClientProvider>
-);
+    </TooltipProvider>
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {GOOGLE_CLIENT_ID ? (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{appContent}</GoogleOAuthProvider>
+      ) : (
+        appContent
+      )}
+    </QueryClientProvider>
+  );
+};
 
 export default App;
