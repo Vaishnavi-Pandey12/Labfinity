@@ -133,19 +133,17 @@ const itemVariants = {
 };
 
 const PhysicsSubject = () => {
+  const experiments = getExperimentsBySubjectName("Physics");
+
   return (
     <div className="min-h-screen bg-background particles-bg">
-
-      {/* Header */}
       <header className="sticky top-0 z-50 glass-card border-b border-border/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/home" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl lab-gradient-bg flex items-center justify-center">
               <Atom className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-display font-bold lab-gradient-text">
-              Labfinity
-            </span>
+            <span className="text-xl font-display font-bold lab-gradient-text">Labfinity</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
@@ -162,7 +160,6 @@ const PhysicsSubject = () => {
         </div>
       </header>
 
-      {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center gap-2 text-sm">
           <Link to="/home" className="text-muted-foreground hover:text-primary transition-colors">
@@ -177,7 +174,6 @@ const PhysicsSubject = () => {
         </div>
       </div>
 
-      {/* Hero */}
       <section className="py-12">
         <div className="container mx-auto px-4">
           <motion.div
@@ -205,7 +201,6 @@ const PhysicsSubject = () => {
         </div>
       </section>
 
-      {/* Experiments Grid */}
       <section className="py-8 pb-20">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-display font-bold mb-6">
@@ -219,10 +214,9 @@ const PhysicsSubject = () => {
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             {experiments.map((exp) => (
-              <motion.div key={exp.id} variants={itemVariants}>
-                <Link to={`/subjects/physics/experiments/${exp.id}`}>
-                  <Card className={`group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative ${exp.featured ? 'ring-2 ring-primary' : ''}`}>
-
+              <motion.div key={exp.path} variants={itemVariants}>
+                <Link to={exp.path}>
+                  <Card className={`group glass-card border-0 hover-lift cursor-pointer overflow-hidden relative ${exp.featured ? "ring-2 ring-primary" : ""}`}>
                     {exp.featured && (
                       <div className="absolute top-4 right-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
                         Featured
@@ -254,16 +248,17 @@ const PhysicsSubject = () => {
                     <CardContent className="pt-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span className="px-2 py-1 rounded-md bg-muted">
-                            {exp.difficulty}
-                          </span>
-                          <span>{exp.duration}</span>
+                          {exp.difficulty && (
+                            <span className="px-2 py-1 rounded-md bg-muted">
+                              {exp.difficulty}
+                            </span>
+                          )}
+                          {exp.duration && <span>{exp.duration}</span>}
                         </div>
 
                         <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
                     </CardContent>
-
                   </Card>
                 </Link>
               </motion.div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   BookOpen,
   CheckCircle,
@@ -64,6 +64,7 @@ const ExperimentLayout = ({
   observations,
   quiz,
 }: Props) => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<TabKey>("theory");
 
   const storageKey = useMemo(
@@ -91,8 +92,13 @@ const ExperimentLayout = ({
     }
   });
 
-  const hasObservations = Boolean(observations);
-  const hasQuiz = Boolean(quiz);
+  const searchParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
+  const showClassroomOnlyTabs = searchParams.get("fromClassroom") === "1";
+  const hasObservations = Boolean(observations) && showClassroomOnlyTabs;
+  const hasQuiz = Boolean(quiz) && showClassroomOnlyTabs;
 
  const availableTabs: TabKey[] = [
   "theory",

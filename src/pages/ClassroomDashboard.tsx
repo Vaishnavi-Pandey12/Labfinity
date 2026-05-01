@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -14,8 +21,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Users, Plus, Eye, UserPlus, CheckCircle2, XCircle, AlertCircle, Home } from "lucide-react";
+import { Users, Plus, UserPlus, CheckCircle2, XCircle, AlertCircle, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiUrl } from "@/lib/api";
+import { subjects } from "@/lib/subjects";
 
 interface Classroom {
   id: number;
@@ -80,7 +89,7 @@ const ClassroomDashboard = () => {
   const fetchClassrooms = async () => {
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch("/api/classrooms", {
+      const response = await fetch(apiUrl("/api/classrooms"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
@@ -104,7 +113,7 @@ const ClassroomDashboard = () => {
     setCreating(true);
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch("/api/classrooms", {
+      const response = await fetch(apiUrl("/api/classrooms"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ class_name: className, subject }),
@@ -134,7 +143,7 @@ const ClassroomDashboard = () => {
     setJoining(true);
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch("/api/classrooms/join", {
+      const response = await fetch(apiUrl("/api/classrooms/join"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ join_code: joinCode }),
@@ -181,7 +190,7 @@ const ClassroomDashboard = () => {
     setAddResults(null);
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch(`/api/classrooms/${addStudentsClassroomId}/add-students`, {
+      const response = await fetch(apiUrl(`/api/classrooms/${addStudentsClassroomId}/add-students`), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ emails }),
@@ -215,7 +224,7 @@ const ClassroomDashboard = () => {
     setLoadingStudents(true);
     try {
       const token = localStorage.getItem("labfinity_token");
-      const response = await fetch(`/api/classrooms/${classroomId}/students`, {
+      const response = await fetch(apiUrl(`/api/classrooms/${classroomId}/students`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
@@ -290,7 +299,18 @@ const ClassroomDashboard = () => {
                   </div>
                   <div>
                     <Label htmlFor="subject">Subject</Label>
-                    <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Enter subject" />
+                    <Select value={subject} onValueChange={setSubject}>
+                      <SelectTrigger id="subject" className="mt-2">
+                        <SelectValue placeholder="Select a subject" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subjects.map((subjectOption) => (
+                          <SelectItem key={subjectOption.id} value={subjectOption.name}>
+                            {subjectOption.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Button onClick={createClassroom} disabled={creating} className="w-full">
                     {creating ? "Creating..." : "Create Classroom"}
