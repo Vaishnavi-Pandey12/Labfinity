@@ -22,6 +22,16 @@ const itemVariants = {
 
 const ChemistrySubject = () => {
   const experiments = getExperimentsBySubjectName("Chemistry");
+  const [selectedTopic, setSelectedTopic] = useState<string>("All");
+  const [selectedStandard, setSelectedStandard] = useState<string>("All");
+  const [selectedType, setSelectedType] = useState<string>("All");
+
+  const topics = useMemo<string[]>(
+    () => ["All", ...new Set(experiments.map((experiment) => experiment.topic))],
+    [experiments],
+  );
+  const standards = useMemo<string[]>(() => ["All"], []);
+  const types = useMemo<string[]>(() => ["All"], []);
 
   return (
     <div className="min-h-screen bg-background particles-bg">
