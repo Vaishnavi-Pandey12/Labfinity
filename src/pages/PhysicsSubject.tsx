@@ -23,6 +23,7 @@ import {
   Clock
 } from "lucide-react";
 import vitapLogo from "@/assets/vitap-logo.png";
+import { getExperimentsBySubjectName } from "@/lib/experiments";
 
 const experiments = [
   {
